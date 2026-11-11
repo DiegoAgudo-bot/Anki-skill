@@ -1,0 +1,12 @@
+{
+  "name": "fuentes-anki-dev",
+  "private": true,
+  "description": "Solo para desarrollo: tests del JS del add-on (no se empaqueta).",
+  "scripts": {
+    "test": "node --test tests/js/*.test.js"
+  },
+  "devDependencies": {
+    "acorn": "8.15.0",
+    "jsdom": "26.1.0"
+  }
+}

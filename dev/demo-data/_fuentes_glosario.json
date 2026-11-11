@@ -1,0 +1,29 @@
+{
+ "version": 1,
+ "ajustes": {
+  "subrayado": true,
+  "fragmentos": 3,
+  "soloPrimera": true
+ },
+ "terminos": [
+  {
+   "t": "arteria femoral",
+   "s": [
+    "a. femoral"
+   ],
+   "f": "_fuentes_t_arteria-femoral.json"
+  },
+  {
+   "t": "nervio ciático",
+   "s": [
+    "ciático"
+   ],
+   "f": "_fuentes_t_nervio-ciatico.json"
+  },
+  {
+   "t": "aorta",
+   "s": [],
+   "f": "_fuentes_t_aorta.json"
+  }
+ ]
+}

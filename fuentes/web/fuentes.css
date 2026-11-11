@@ -1,0 +1,116 @@
+/* Fuentes — estilos del subrayado y del popup (escritorio y móvil). */
+
+.fuentes-term {
+  border-bottom: 1px dotted #3b82c4;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(59, 130, 196, 0.15);
+}
+.fuentes-term:hover { background: rgba(59, 130, 196, 0.10); }
+
+.fuentes-popup {
+  position: absolute;
+  z-index: 2147483000;
+  box-sizing: border-box;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 12px;
+  background: #ffffff;
+  color: #1f2328;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1.45;
+  text-align: left;
+  letter-spacing: normal;
+  text-transform: none;
+}
+.fuentes-cab {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.fuentes-fuente + .fuentes-fuente {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e6e8eb;
+}
+.fuentes-nombre {
+  font-size: 12px;
+  font-weight: 600;
+  color: #57606a;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+.fuentes-frag {
+  padding: 4px 6px;
+  margin: 0 -6px 2px;
+  border-radius: 6px;
+}
+.fuentes-abrible { cursor: pointer; }
+.fuentes-abrible:hover { background: #f3f6f9; }
+.fuentes-texto mark {
+  background: #fff1a8;
+  color: inherit;
+  padding: 0 1px;
+  border-radius: 2px;
+}
+.fuentes-donde {
+  font-size: 12px;
+  color: #57606a;
+  margin-top: 2px;
+}
+.fuentes-ir { color: #3b82c4; }
+.fuentes-vacio { color: #57606a; font-size: 13px; }
+.fuentes-acciones {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e6e8eb;
+}
+.fuentes-accion, .fuentes-buscar {
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 10px;
+  margin-right: 6px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  background: #f6f8fa;
+  color: #1f2328;
+  cursor: pointer;
+}
+.fuentes-buscar {
+  position: absolute;
+  z-index: 2147483000;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Modo noche: Anki escritorio (.nightMode), AnkiDroid (.night_mode). */
+.nightMode .fuentes-popup, .night_mode .fuentes-popup {
+  background: #24292f;
+  color: #e6edf3;
+  border-color: #444c56;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+.nightMode .fuentes-nombre, .night_mode .fuentes-nombre,
+.nightMode .fuentes-donde, .night_mode .fuentes-donde,
+.nightMode .fuentes-vacio, .night_mode .fuentes-vacio { color: #9da7b1; }
+.nightMode .fuentes-fuente + .fuentes-fuente, .night_mode .fuentes-fuente + .fuentes-fuente,
+.nightMode .fuentes-acciones, .night_mode .fuentes-acciones { border-color: #3a4048; }
+.nightMode .fuentes-abrible:hover, .night_mode .fuentes-abrible:hover { background: #2f353d; }
+.nightMode .fuentes-texto mark, .night_mode .fuentes-texto mark { background: #6b5a12; }
+.nightMode .fuentes-accion, .night_mode .fuentes-accion,
+.nightMode .fuentes-buscar, .night_mode .fuentes-buscar {
+  background: #2f353d; color: #e6edf3; border-color: #444c56;
+}
+.nightMode .fuentes-term, .night_mode .fuentes-term { border-bottom-color: #79b8ff; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .fuentes-popup { -webkit-animation: fuentes-entrar 0.12s ease-out; animation: fuentes-entrar 0.12s ease-out; }
+}
+@-webkit-keyframes fuentes-entrar { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fuentes-entrar { from { opacity: 0; } to { opacity: 1; } }

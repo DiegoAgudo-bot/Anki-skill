@@ -39,7 +39,7 @@ def es_palabra(c):
     Usamos la misma heurística que en JS (que no tiene \\p{L} en móviles
     antiguos): letra si tiene mayúscula/minúscula distinta, o dígito.
     """
-    return c.isdigit() or c.lower() != c.upper()
+    return c in "0123456789" or c.lower() != c.upper()
 
 
 def normalizar(texto):
