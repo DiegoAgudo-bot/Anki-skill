@@ -11,7 +11,7 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    QT_QPA_PLATFORM=offscreen python dev/e2e_anki.py [--plantillas]
+    python dev/e2e_anki.py [--plantillas] [--paquete=build/fuentes-1.0.0.ankiaddon] [-q]
 """
 import json
 import os
@@ -190,7 +190,13 @@ def main():
     base = tempfile.mkdtemp(prefix="anki-e2e-")
     addons = os.path.join(base, "addons21")
     os.makedirs(addons)
-    os.symlink(os.path.join(RAIZ, "fuentes"), os.path.join(addons, "fuentes"))
+    paquete = next((a.split("=", 1)[1] for a in sys.argv if a.startswith("--paquete=")), None)
+    if paquete:
+        # Instala el .ankiaddon tal y como lo haría el usuario.
+        import zipfile
+        zipfile.ZipFile(paquete).extractall(os.path.join(addons, "fuentes"))
+    else:
+        os.symlink(os.path.join(RAIZ, "fuentes"), os.path.join(addons, "fuentes"))
     os.makedirs(os.path.join(addons, "zz_piloto"))
     with open(os.path.join(addons, "zz_piloto", "__init__.py"), "w") as f:
         f.write(PILOTO)
