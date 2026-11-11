@@ -172,7 +172,9 @@ def main():
     # los apartamos para no mezclarlos con los del desarrollador.
     uf = os.path.join(RAIZ, "fuentes", "user_files")
     respaldo = uf + ".respaldo-e2e"
-    shutil.move(uf, respaldo)
+    if os.path.exists(respaldo):
+        sys.exit("Existe %s de una ejecución anterior: revísalo y restáuralo a mano." % respaldo)
+    os.rename(uf, respaldo)
     os.makedirs(uf)
     # Creamos antes las preferencias y el perfil para evitar el selector de
     # idioma del primer arranque (es modal y bloquea).
@@ -185,8 +187,8 @@ def main():
         subprocess.run([sys.executable, "-c", "import aqt; aqt.run()", "-b", base, "-p", "Prueba"], env=entorno, timeout=150,
                        stdout=subprocess.DEVNULL if "-q" in sys.argv else None)
     finally:
-        shutil.rmtree(uf)
-        shutil.move(respaldo, uf)
+        shutil.rmtree(uf, ignore_errors=True)
+        os.rename(respaldo, uf)  # rename (no move) para no anidar carpetas
         for p in ("meta.json",):
             ruta = os.path.join(RAIZ, "fuentes", p)
             if os.path.exists(ruta):
