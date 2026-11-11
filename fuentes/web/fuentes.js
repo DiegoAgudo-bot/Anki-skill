@@ -497,7 +497,8 @@
     var abajo = vh - anclaRect.bottom - margen;
     var arriba = anclaRect.top - margen;
     var ponerAbajo = abajo >= 160 || abajo >= arriba;
-    var disponible = Math.max(100, Math.min((ponerAbajo ? abajo : arriba) - 6, vh * 0.5));
+    // En táctil (pantalla pequeña) ocupa menos para no tapar la tarjeta.
+    var disponible = Math.max(100, Math.min((ponerAbajo ? abajo : arriba) - 6, vh * (esTactil() ? 0.4 : 0.5)));
     popup.style.maxHeight = Math.floor(disponible) + 'px';
     var izq = anclaRect.left + sx;
     if (izq + ancho > sx + vw - margen) izq = sx + vw - margen - ancho;

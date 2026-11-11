@@ -144,6 +144,11 @@ def reverso(r):
         paso("editor", [e.tabla.item(i, 1).text() for i in range(e.tabla.rowCount())])
         e.modificado = False
         e.close()
+        from fuentes.ui import tipos_nota
+        tn = tipos_nota.DialogoTiposNota(mw)
+        paso("tipos_nota", [tn.lista.item(i).text() + ":" + str(tn.lista.item(i).checkState() == 2 or
+              tn.lista.item(i).checkState().value == 2) for i in range(tn.lista.count())])
+        tn.close()
         js("Fuentes.py({cmd:'abrir', fuente:1, pagina:2}); 1", lambda _: QTimer.singleShot(5000, leer_visor))
     except Exception as e:
         fallo(e)

@@ -14,7 +14,7 @@ if mw is not None:
     from aqt.qt import QAction, QMenu
 
     from . import core, reviewer
-    from .ui import editor_glosario, gestor
+    from .ui import editor_glosario, gestor, tipos_nota
 
     def _accion(menu, texto, funcion):
         a = QAction(texto, mw)
@@ -26,6 +26,7 @@ if mw is not None:
         menu = QMenu("Fuentes", mw)
         _accion(menu, "Gestionar fuentes…", gestor.mostrar)
         _accion(menu, "Editar glosario…", editor_glosario.mostrar)
+        _accion(menu, "Activar en tipos de nota…", tipos_nota.mostrar)
         menu.addSeparator()
         _accion(menu, "Exportar datos para el móvil ahora", core.exportar)
         mw.form.menuTools.addMenu(menu)
