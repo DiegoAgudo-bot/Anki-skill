@@ -145,22 +145,3 @@ def reindexar(source_id, parent=None, al_terminar=None):
 
     _en_segundo_plano(trabajo, "Reindexando…", parent, terminado)
 
-
-def importar_glosario(parent=None, al_terminar=None):
-    ruta, _ = QFileDialog.getOpenFileName(
-        parent or mw, "Importar glosario", "", "Glosario (*.json *.txt *.csv *.tsv)")
-    if not ruta:
-        return
-    try:
-        nuevos = glossary.leer_archivo(ruta)
-    except Exception as e:
-        showWarning("No se pudo leer el glosario: %s" % e, parent=parent or mw)
-        return
-    actuales = core.terminos()
-    n = glossary.fusionar(actuales, nuevos)
-    core.guardar_terminos(actuales)
-    showInfo("Glosario importado: %d términos nuevos (%d en total)." % (n, len(actuales)),
-             parent=parent or mw, title="Fuentes")
-    core.exportar()
-    if al_terminar:
-        al_terminar()

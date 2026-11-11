@@ -14,7 +14,7 @@ if mw is not None:
     from aqt.qt import QAction, QMenu
 
     from . import core, reviewer
-    from .ui import importar
+    from .ui import editor_glosario, gestor
 
     def _accion(menu, texto, funcion):
         a = QAction(texto, mw)
@@ -24,8 +24,8 @@ if mw is not None:
 
     def _crear_menu():
         menu = QMenu("Fuentes", mw)
-        _accion(menu, "Añadir PDF…", importar.elegir_e_importar)
-        _accion(menu, "Importar glosario…", importar.importar_glosario)
+        _accion(menu, "Gestionar fuentes…", gestor.mostrar)
+        _accion(menu, "Editar glosario…", editor_glosario.mostrar)
         menu.addSeparator()
         _accion(menu, "Exportar datos para el móvil ahora", core.exportar)
         mw.form.menuTools.addMenu(menu)

@@ -134,6 +134,35 @@ def leer_reverso():
 def reverso(r):
     try:
         paso("reverso", json.loads(r))
+        # Diálogos de la fase d.
+        from fuentes.ui import gestor, editor_glosario, visor
+        g = gestor.GestorFuentes(mw)
+        paso("gestor", {"filas": g.tabla.rowCount(), "estado": g.estado.text(),
+                        "nombre": g.tabla.item(0, 1).text()})
+        g.close()
+        e = editor_glosario.EditorGlosario(mw)
+        paso("editor", [e.tabla.item(i, 1).text() for i in range(e.tabla.rowCount())])
+        e.modificado = False
+        e.close()
+        js("Fuentes.py({cmd:'abrir', fuente:1, pagina:2}); 1", lambda _: QTimer.singleShot(5000, leer_visor))
+    except Exception as e:
+        fallo(e)
+
+def leer_visor():
+    try:
+        from fuentes.ui import visor
+        d = visor._dialogo
+        paso("visor", {"abierto": d is not None and d.isVisible(), "cargado_ok": d and d.cargado_ok,
+                       "alternativa": d and d.alternativa_usada, "url": d and d.web.url().toString(),
+                       "titulo": d and d.titulo.text()})
+        d.grab().save(os.environ["FUENTES_E2E_SALIDA"] + ".visor.png")
+        d.reject()
+        terminar()
+    except Exception as e:
+        fallo(e)
+
+def terminar():
+    try:
         if PLANTILLAS:
             from fuentes import templates
             basico = mw.col.models.by_name("Basic") or mw.col.models.by_name("Básico")
@@ -195,6 +224,8 @@ def main():
                 os.remove(ruta)
     with open(salida) as f:
         res = json.load(f)
+    if os.path.exists(salida + ".visor.png"):
+        shutil.copy(salida + ".visor.png", os.path.join(tempfile.gettempdir(), "fuentes-e2e-visor.png"))
     print(json.dumps(res, ensure_ascii=False, indent=1))
     sys.exit(0 if res.get("ok") else 1)
 
