@@ -1,0 +1,9 @@
+{
+    "subrayado": true,
+    "fragmentos_por_fuente": 3,
+    "max_caracteres_fragmento": 300,
+    "solo_primera_aparicion": true,
+    "fuentes_inactivas": [],
+    "aviso_tamano_mb": 50,
+    "inyectar_en_escritorio": true
+}

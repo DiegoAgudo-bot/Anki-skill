@@ -156,9 +156,11 @@ class Indice:
         )
         self.db.commit()
 
-    def buscar(self, variantes, source_ids=None, limite=200):
+    def buscar(self, variantes, source_ids=None, limite=200, por_fuente=None):
         """Fragmentos que contienen alguna de las frases, del más al menos relevante.
 
+        Con `por_fuente`, como mucho esos resultados de cada fuente (así una
+        fuente muy grande no tapa a las demás).
         Devuelve [{source_id, pagina, etiqueta, texto}].
         """
         variantes = [v for v in variantes if v and v.strip()]
@@ -172,12 +174,22 @@ class Indice:
             params = list(source_ids)
         filtro += " AND s.estado='lista'"
         if self.fts:
-            sql = (
-                "SELECT c.source_id, c.pagina, c.etiqueta, c.texto FROM chunks_fts f"
-                " JOIN chunks c ON c.id = f.rowid JOIN sources s ON s.id = c.source_id"
-                " WHERE chunks_fts MATCH ?" + filtro + " ORDER BY bm25(chunks_fts) LIMIT ?"
+            interna = (
+                "SELECT c.source_id, c.pagina, c.etiqueta, c.texto, bm25(chunks_fts) AS rango"
+                " FROM chunks_fts f JOIN chunks c ON c.id = f.rowid"
+                " JOIN sources s ON s.id = c.source_id WHERE chunks_fts MATCH ?" + filtro
             )
-            filas = self.db.execute(sql, [consulta_fts(variantes)] + params + [limite])
+            if por_fuente and self._ventanas():
+                sql = (
+                    "SELECT source_id, pagina, etiqueta, texto FROM ("
+                    " SELECT x.*, ROW_NUMBER() OVER (PARTITION BY source_id ORDER BY rango) AS rn"
+                    " FROM (" + interna + ") x) WHERE rn <= ? ORDER BY rango LIMIT ?"
+                )
+                args = [consulta_fts(variantes)] + params + [por_fuente, limite]
+            else:
+                sql = interna + " ORDER BY rango LIMIT ?"
+                args = [consulta_fts(variantes)] + params + [limite]
+            filas = self.db.execute(sql, args)
         else:
             # Plan B sin FTS5: LIKE sobre el texto normalizado (lento pero funciona).
             condiciones = " OR ".join(["fuentes_norm(c.texto) LIKE ?"] * len(variantes))
@@ -189,6 +201,10 @@ class Indice:
             likes = ["%" + _norm_sql(v).strip() + "%" for v in variantes]
             filas = self.db.execute(sql, likes + params + [limite])
         return [dict(f) for f in filas]
+
+    def _ventanas(self):
+        """¿Admite este SQLite funciones de ventana (3.25+)?"""
+        return sqlite3.sqlite_version_info >= (3, 25, 0)
 
     def buscar_libre(self, texto, source_ids=None, limite=30):
         """Búsqueda de texto libre (todas las palabras, en cualquier orden)."""
