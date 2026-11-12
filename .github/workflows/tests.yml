@@ -33,7 +33,7 @@ jobs:
       - run: npm test
 
   movil:
-    name: Móvil simulado (Chromium con emulación de Android e iPhone)
+    name: Móvil simulado y landing (Chromium)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,6 +46,8 @@ jobs:
       - run: pip install reportlab
       - run: npm ci && npm install --no-save playwright && npx playwright install --with-deps chromium
       - run: node dev/prueba_movil.js
+      - run: python landing/build.py && git diff --exit-code landing/index.html   # index.html al día con sus fuentes
+      - run: node landing/prueba.js
 
   anki:
     name: Anki 2.1.66 real (extremo a extremo, sin pantalla)
