@@ -10,15 +10,16 @@ jobs:
     name: Python ${{ matrix.python }} (pytest)
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python: ["3.9", "3.13"]   # 3.9 es el Python que trae Anki
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python }}
-      - run: pip install pytest "reportlab<4.3; python_version < '3.10'" "reportlab; python_version >= '3.10'"
-      - run: python -m pytest --lentos
+      # uv instala cualquier versión de Python (setup-python ya no trae la 3.9).
+      - uses: astral-sh/setup-uv@v6
+      - run: uv venv --python ${{ matrix.python }} .venv
+      - run: uv pip install --python .venv pytest "reportlab<4.3; python_version < '3.10'" "reportlab; python_version >= '3.10'"
+      - run: .venv/bin/python -m pytest --lentos
 
   javascript:
     name: JavaScript (matcher, popup y sintaxis ES5)
@@ -53,13 +54,11 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.9"
+      - uses: astral-sh/setup-uv@v6
       - run: |
           sudo apt-get update -q
           sudo apt-get install -y -q libegl1 libgl1 libxkbcommon0 libxkbcommon-x11-0 libfontconfig1 \
             libdbus-1-3 libnss3 libxcomposite1 libxdamage1 libxrandr2 libxtst6 libasound2t64 libxshmfence1 libgbm1
-      - run: pip install "aqt[qt6]==2.1.66" "reportlab<4.3"
-      - run: python dev/e2e_anki.py -q --plantillas
-      - run: python dev/e2e_anki.py -q --ingles
+      - run: uv venv --python 3.9 .venv && uv pip install --python .venv "aqt[qt6]==2.1.66" "reportlab<4.3"
+      - run: .venv/bin/python dev/e2e_anki.py -q --plantillas
+      - run: .venv/bin/python dev/e2e_anki.py -q --ingles
