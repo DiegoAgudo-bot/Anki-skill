@@ -11,7 +11,7 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    python dev/e2e_anki.py [--plantillas] [--paquete=build/fuentes-1.0.0.ankiaddon] [-q]
+    python dev/e2e_anki.py [--plantillas] [--ingles] [--paquete=build/fuentes-1.1.0.ankiaddon] [-q]
 """
 import json
 import os
@@ -51,8 +51,14 @@ def js(codigo, cb):
 
 def empezar():
     try:
-        fuentes = sys.modules["fuentes"]
-        from fuentes import core, importer
+        from fuentes import core, importer, i18n
+        from fuentes.ui import asistente
+        # Primer arranque: el asistente se abre solo (sin bloquear) y nada está hecho.
+        a = asistente._abierto
+        paso("asistente_inicial", {"visible": bool(a and a.isVisible()), "marcas": [m.text() for m in a.marcas],
+                                   "titulo": a.windowTitle()})
+        menu = [x for x in mw.form.menuTools.actions() if x.menu() and x.text() == "Fuentes"][0].menu()
+        paso("idioma", {"idioma": i18n.idioma(), "menu": [x.text() for x in menu.actions() if x.text()]})
         r = importer.importar_pdf(core.indice(), PDF, core.PDFS_DIR, nombre="Apuntes de prueba")
         paso("importado", {"paginas": r.paginas, "fragmentos": r.fragmentos})
         core.guardar_terminos([
@@ -68,6 +74,13 @@ def exportado(inf):
     try:
         medios = mw.col.media.dir()
         paso("exportado", sorted(n for n in os.listdir(medios) if n.startswith("_fuentes")))
+        with open(os.path.join(medios, "_fuentes_glosario.json"), encoding="utf-8") as f:
+            paso("ajustes_exportados", json.load(f)["ajustes"])
+        from fuentes.ui import asistente
+        asistente._abierto.refrescar()
+        paso("asistente_despues", [m.text() for m in asistente._abierto.marcas])
+        asistente._abierto.grab().save(SALIDA + ".asistente.png")
+        asistente._abierto.close()
         col = mw.col
         basico = col.models.by_name("Basic") or col.models.by_name("Básico")
         n = col.new_note(basico)
@@ -221,7 +234,8 @@ def main():
     subprocess.run([sys.executable, "-c", (
         "import sys; from pathlib import Path; from aqt.profiles import ProfileManager;"
         "pm = ProfileManager(Path(sys.argv[1])); pm.setupMeta(); pm.create('Prueba'); pm.load('Prueba');"
-        "pm.meta['firstRun'] = False; pm.meta['defaultLang'] = 'es'; pm.save()"), base],
+        "pm.meta['firstRun'] = False; pm.meta['defaultLang'] = sys.argv[2]; pm.save()"), base,
+        "en_US" if "--ingles" in sys.argv else "es_ES"],
         env=entorno, check=True)
     try:
         subprocess.run([sys.executable, "-c", "import aqt; aqt.run()", "-b", base, "-p", "Prueba"], env=entorno, timeout=150,
@@ -235,8 +249,10 @@ def main():
                 os.remove(ruta)
     with open(salida) as f:
         res = json.load(f)
-    if os.path.exists(salida + ".visor.png"):
-        shutil.copy(salida + ".visor.png", os.path.join(tempfile.gettempdir(), "fuentes-e2e-visor.png"))
+    for captura in ("visor", "asistente"):  # capturas para revisar a ojo
+        if os.path.exists("%s.%s.png" % (salida, captura)):
+            shutil.copy("%s.%s.png" % (salida, captura),
+                        os.path.join(tempfile.gettempdir(), "fuentes-e2e-%s.png" % captura))
     print(json.dumps(res, ensure_ascii=False, indent=1))
     sys.exit(0 if res.get("ok") else 1)
 

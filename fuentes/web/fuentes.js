@@ -28,7 +28,7 @@
 
   var F = (W.Fuentes = W.Fuentes || {});
   F.__cargado = true;
-  F.version = '1.0.0';
+  F.version = '1.1.0';
 
   /* ------------------------------------------------------------------ *
    * Normalización (minúsculas, sin tildes, conserva la ñ)               *

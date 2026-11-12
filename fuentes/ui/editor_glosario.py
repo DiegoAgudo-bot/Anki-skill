@@ -9,6 +9,7 @@ from aqt.utils import askUser, restoreGeom, saveGeom, showInfo, showWarning, too
 
 from .. import core, glossary
 from ..textutil import clave
+from ..i18n import tr
 
 SEPARADOR = "; "
 
@@ -16,26 +17,26 @@ SEPARADOR = "; "
 class EditorGlosario(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent or mw)
-        self.setWindowTitle("Fuentes: editar glosario")
+        self.setWindowTitle(tr("Fuentes: editar glosario"))
         self.resize(720, 560)
         self.modificado = False
         capa = QVBoxLayout(self)
 
-        ayuda = QLabel("Cada término se subraya en tus tarjetas (sin distinguir mayúsculas ni tildes). "
-                       "Escribe los sinónimos separados por punto y coma.")
+        ayuda = QLabel(tr("Cada término se subraya en tus tarjetas (sin distinguir mayúsculas ni tildes). "
+                       "Escribe los sinónimos separados por punto y coma."))
         ayuda.setWordWrap(True)
         capa.addWidget(ayuda)
 
         fila = QHBoxLayout()
-        fila.addWidget(QLabel("Filtrar:"))
+        fila.addWidget(QLabel(tr("Filtrar:")))
         self.filtro = QLineEdit()
-        self.filtro.setPlaceholderText("p. ej. arteria")
+        self.filtro.setPlaceholderText(tr("p. ej. arteria"))
         self.filtro.textChanged.connect(self._filtrar)
         fila.addWidget(self.filtro, 1)
         capa.addLayout(fila)
 
         self.tabla = QTableWidget(0, 3)
-        self.tabla.setHorizontalHeaderLabels(["Activo", "Término", "Sinónimos"])
+        self.tabla.setHorizontalHeaderLabels([tr("Activo"), tr("Término"), tr("Sinónimos")])
         self.tabla.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.tabla.verticalHeader().setVisible(False)
         cab = self.tabla.horizontalHeader()
@@ -46,8 +47,8 @@ class EditorGlosario(QDialog):
         capa.addWidget(self.tabla)
 
         botones = QHBoxLayout()
-        for texto, funcion in (("Añadir término", self._anadir), ("Eliminar seleccionados", self._eliminar),
-                               ("Importar…", self._importar), ("Exportar…", self._exportar)):
+        for texto, funcion in ((tr("Añadir término"), self._anadir), (tr("Eliminar seleccionados"), self._eliminar),
+                               (tr("Importar…"), self._importar), (tr("Exportar…"), self._exportar)):
             b = QPushButton(texto)
             b.clicked.connect(lambda _=False, f=funcion: f())
             botones.addWidget(b)
@@ -57,9 +58,9 @@ class EditorGlosario(QDialog):
         pie = QHBoxLayout()
         self.contador = QLabel()
         pie.addWidget(self.contador, 1)
-        cancelar = QPushButton("Cancelar")
+        cancelar = QPushButton(tr("Cancelar"))
         cancelar.clicked.connect(self.reject)
-        guardar = QPushButton("Guardar")
+        guardar = QPushButton(tr("Guardar"))
         guardar.setDefault(True)
         guardar.clicked.connect(self._guardar)
         pie.addWidget(cancelar)
@@ -111,8 +112,8 @@ class EditorGlosario(QDialog):
             oculta = bool(k) and k not in clave(texto)
             self.tabla.setRowHidden(fila, oculta)
             visibles += not oculta
-        self.contador.setText("%d términos" % self.tabla.rowCount() +
-                              (" (%d visibles)" % visibles if k else ""))
+        self.contador.setText(tr("%d términos") % self.tabla.rowCount() +
+                              (tr(" (%d visibles)") % visibles if k else ""))
 
     # ------------------------------------------------------------ acciones
 
@@ -127,7 +128,7 @@ class EditorGlosario(QDialog):
     def _eliminar(self):
         filas = sorted({i.row() for i in self.tabla.selectedIndexes()}, reverse=True)
         if not filas:
-            tooltip("Selecciona primero los términos.", parent=self)
+            tooltip(tr("Selecciona primero los términos."), parent=self)
             return
         for fila in filas:
             self.tabla.removeRow(fila)
@@ -135,27 +136,27 @@ class EditorGlosario(QDialog):
         self._filtrar()
 
     def _importar(self):
-        ruta, _ = QFileDialog.getOpenFileName(self, "Importar glosario", "", "Glosario (*.json *.txt *.csv *.tsv)")
+        ruta, _ = QFileDialog.getOpenFileName(self, tr("Importar glosario"), "", tr("Glosario (*.json *.txt *.csv *.tsv)"))
         if not ruta:
             return
         try:
             nuevos = glossary.leer_archivo(ruta)
         except Exception as e:
-            showWarning("No se pudo leer el archivo: %s" % e, parent=self)
+            showWarning(tr("No se pudo leer el archivo: %s") % e, parent=self)
             return
         actuales = self._leer()
         n = glossary.fusionar(actuales, nuevos)
         self._cargar(actuales)
         self.modificado = True
-        tooltip("%d términos nuevos." % n, parent=self)
+        tooltip(tr("%d términos nuevos.") % n, parent=self)
 
     def _exportar(self):
-        ruta, _ = QFileDialog.getSaveFileName(self, "Exportar glosario", "glosario.json", "JSON (*.json)")
+        ruta, _ = QFileDialog.getSaveFileName(self, tr("Exportar glosario"), "glosario.json", tr("JSON (*.json)"))
         if ruta:
             with open(ruta, "w", encoding="utf-8") as f:
                 json.dump({"version": 1, "terminos": glossary.limpiar(self._leer())}, f,
                           ensure_ascii=False, indent=1)
-            tooltip("Glosario exportado.", parent=self)
+            tooltip(tr("Glosario exportado."), parent=self)
 
     def _guardar(self):
         terminos = core.guardar_terminos(self._leer())
@@ -165,10 +166,10 @@ class EditorGlosario(QDialog):
         def informe(inf):
             if inf is None:
                 return
-            msg = "Glosario guardado: %d términos con fragmentos en tus fuentes." % inf.terminos
+            msg = tr("Glosario guardado: %d términos con fragmentos en tus fuentes.") % inf.terminos
             if inf.sin_resultados:
                 muestra = ", ".join(inf.sin_resultados[:15]) + ("…" if len(inf.sin_resultados) > 15 else "")
-                msg += ("\n\n%d términos no aparecen en ninguna fuente activa y no se subrayarán:\n%s"
+                msg += (tr("\n\n%d términos no aparecen en ninguna fuente activa y no se subrayarán:\n%s")
                         % (len(inf.sin_resultados), muestra))
             showInfo(msg, parent=mw, title="Fuentes")
 
@@ -176,7 +177,7 @@ class EditorGlosario(QDialog):
             core.exportar(silencioso=True, al_terminar=informe)
 
     def reject(self):
-        if self.modificado and not askUser("¿Salir sin guardar los cambios del glosario?", parent=self):
+        if self.modificado and not askUser(tr("¿Salir sin guardar los cambios del glosario?"), parent=self):
             return
         saveGeom(self, "fuentes_glosario")
         super().reject()

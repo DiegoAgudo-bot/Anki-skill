@@ -6,19 +6,20 @@ from aqt.qt import (QDialog, QDialogButtonBox, QLabel, QListWidget, QListWidgetI
 from aqt.utils import showInfo
 
 from .. import core, templates
+from ..i18n import tr
 
 
 class DialogoTiposNota(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent or mw)
-        self.setWindowTitle("Fuentes: activar en tipos de nota")
+        self.setWindowTitle(tr("Fuentes: activar en tipos de nota"))
         self.resize(460, 480)
         capa = QVBoxLayout(self)
         texto = QLabel(
-            "Marca los tipos de nota en los que quieres el subrayado en el <b>móvil</b> "
+            tr("Marca los tipos de nota en los que quieres el subrayado en el <b>móvil</b> "
             "(AnkiDroid, AnkiMobile, AnkiWeb). Se añade al final de sus plantillas un pequeño "
             "bloque que carga <code>_fuentes.js</code>; al desmarcar se quita sin tocar nada más.<br><br>"
-            "En el escritorio no hace falta: allí el add-on lo carga solo.")
+            "En el escritorio no hace falta: allí el add-on lo carga solo."))
         texto.setWordWrap(True)
         capa.addWidget(texto)
         self.lista = QListWidget()
@@ -26,7 +27,7 @@ class DialogoTiposNota(QDialog):
         for item in sorted(mw.col.models.all_names_and_ids(), key=lambda x: x.name.lower()):
             nt = mw.col.models.get(item.id)
             est = templates.estado(nt)
-            w = QListWidgetItem(item.name + ("  (parcial)" if est == "parcial" else ""))
+            w = QListWidgetItem(item.name + (tr("  (parcial)") if est == "parcial" else ""))
             w.setFlags(w.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             w.setCheckState(Qt.CheckState.Checked if est == "activo" else Qt.CheckState.Unchecked)
             w.setData(Qt.ItemDataRole.UserRole, item.id)
@@ -34,8 +35,8 @@ class DialogoTiposNota(QDialog):
             self.lista.addItem(w)
         capa.addWidget(self.lista)
         botones = QDialogButtonBox()
-        botones.addButton("Aplicar", QDialogButtonBox.ButtonRole.AcceptRole)
-        botones.addButton("Cancelar", QDialogButtonBox.ButtonRole.RejectRole)
+        botones.addButton(tr("Aplicar"), QDialogButtonBox.ButtonRole.AcceptRole)
+        botones.addButton(tr("Cancelar"), QDialogButtonBox.ButtonRole.RejectRole)
         botones.accepted.connect(self._aplicar)
         botones.rejected.connect(self.reject)
         capa.addWidget(botones)
@@ -56,8 +57,8 @@ class DialogoTiposNota(QDialog):
             # Asegura que los archivos _fuentes_* están en los medios.
             core.exportar(silencioso=True)
         if n:
-            showInfo("Plantillas actualizadas en %d tipos de nota.\n\nPara usarlo en el móvil: "
-                     "sincroniza aquí y después en el móvil (los datos viajan como medios)." % n,
+            showInfo(tr("Plantillas actualizadas en %d tipos de nota.\n\nPara usarlo en el móvil: "
+                     "sincroniza aquí y después en el móvil (los datos viajan como medios).") % n,
                      parent=mw, title="Fuentes")
 
 

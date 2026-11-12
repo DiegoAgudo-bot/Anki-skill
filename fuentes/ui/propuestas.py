@@ -2,6 +2,7 @@
 """Revisión de los términos propuestos a partir de los marcadores del PDF."""
 from aqt.qt import (QDialog, QDialogButtonBox, QLabel, QListWidget, QListWidgetItem,
                     QPushButton, Qt, QHBoxLayout, QVBoxLayout)
+from ..i18n import tr
 
 
 class DialogoPropuestas(QDialog):
@@ -9,12 +10,12 @@ class DialogoPropuestas(QDialog):
 
     def __init__(self, propuestos, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Fuentes: términos propuestos")
+        self.setWindowTitle(tr("Fuentes: términos propuestos"))
         self.resize(420, 480)
         capa = QVBoxLayout(self)
         capa.addWidget(QLabel(
-            "Estos términos salen de los marcadores (índice) del PDF.\n"
-            "Marca los que quieras añadir al glosario. Podrás editarlos después."))
+            tr("Estos términos salen de los marcadores (índice) del PDF.\n"
+            "Marca los que quieras añadir al glosario. Podrás editarlos después.")))
         self.lista = QListWidget()
         for t in propuestos:
             item = QListWidgetItem(t)
@@ -23,15 +24,15 @@ class DialogoPropuestas(QDialog):
             self.lista.addItem(item)
         capa.addWidget(self.lista)
         fila = QHBoxLayout()
-        for texto, estado in (("Marcar todos", Qt.CheckState.Checked), ("Desmarcar todos", Qt.CheckState.Unchecked)):
+        for texto, estado in ((tr("Marcar todos"), Qt.CheckState.Checked), (tr("Desmarcar todos"), Qt.CheckState.Unchecked)):
             b = QPushButton(texto)
             b.clicked.connect(lambda _=False, e=estado: self._marcar(e))
             fila.addWidget(b)
         fila.addStretch()
         capa.addLayout(fila)
         botones = QDialogButtonBox()
-        botones.addButton("Añadir los marcados", QDialogButtonBox.ButtonRole.AcceptRole)
-        botones.addButton("No añadir ninguno", QDialogButtonBox.ButtonRole.RejectRole)
+        botones.addButton(tr("Añadir los marcados"), QDialogButtonBox.ButtonRole.AcceptRole)
+        botones.addButton(tr("No añadir ninguno"), QDialogButtonBox.ButtonRole.RejectRole)
         botones.accepted.connect(self.accept)
         botones.rejected.connect(self.reject)
         capa.addWidget(botones)

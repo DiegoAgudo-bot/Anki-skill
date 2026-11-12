@@ -33,6 +33,7 @@ AJUSTES_POR_DEFECTO = {
     "max_caracteres_fragmento": 300,
     "solo_primera_aparicion": True,
     "fuentes_inactivas": [],
+    "idioma": "es",
 }
 
 
@@ -164,6 +165,7 @@ def exportar(indice, terminos, carpeta_medios, carpeta_web, ajustes=None,
             "subrayado": bool(a["subrayado"]),
             "fragmentos": int(a["fragmentos_por_fuente"]),
             "soloPrimera": bool(a["solo_primera_aparicion"]),
+            "idioma": str(a["idioma"]),
         },
         "terminos": entradas,
     }

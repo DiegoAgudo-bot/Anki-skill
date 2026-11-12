@@ -13,6 +13,7 @@ from aqt.qt import (QDesktopServices, QDialog, QHBoxLayout, QLabel, QPushButton,
 from aqt.utils import restoreGeom, saveGeom, showWarning, tooltip
 
 from .. import core
+from ..i18n import tr
 
 _dialogo = None
 
@@ -40,7 +41,7 @@ class VisorPDF(QDialog):
         barra = QHBoxLayout()
         self.titulo = QLabel()
         barra.addWidget(self.titulo, 1)
-        externo = QPushButton("Abrir con el visor del sistema")
+        externo = QPushButton(tr("Abrir con el visor del sistema"))
         externo.clicked.connect(lambda: self.ruta and abrir_con_sistema(self.ruta))
         barra.addWidget(externo)
         capa.addLayout(barra)
@@ -61,8 +62,8 @@ class VisorPDF(QDialog):
         self.ruta = ruta
         self.cargado_ok = None
         self.alternativa_usada = False
-        self.titulo.setText("%s — página %d" % (nombre, pagina))
-        self.setWindowTitle("Fuentes: %s" % nombre)
+        self.titulo.setText(tr("%s — página %d") % (nombre, pagina))
+        self.setWindowTitle(tr("Fuentes: %s") % nombre)
         url = QUrl.fromLocalFile(ruta)
         url.setFragment("page=%d" % pagina)
         # Pasar por about:blank fuerza la recarga aunque sea el mismo archivo
@@ -93,7 +94,7 @@ class VisorPDF(QDialog):
     def _alternativa(self):
         if self.ruta and not self.alternativa_usada:
             self.alternativa_usada = True
-            tooltip("Este Anki no puede mostrar el PDF dentro; se abre con el visor del sistema.")
+            tooltip(tr("Este Anki no puede mostrar el PDF dentro; se abre con el visor del sistema."))
             abrir_con_sistema(self.ruta)
             self.hide()
 
@@ -107,12 +108,12 @@ def abrir(source_id, pagina=1):
     global _dialogo
     ruta, nombre = ruta_pdf(source_id)
     if not ruta or not os.path.exists(ruta):
-        showWarning("No se encuentra el PDF de esta fuente. Elimínala y vuelve a importarla.")
+        showWarning(tr("No se encuentra el PDF de esta fuente. Elimínala y vuelve a importarla."))
         return
     try:
         if _dialogo is None:
             _dialogo = VisorPDF(mw)
         _dialogo.mostrar(ruta, max(1, pagina), nombre)
     except Exception as e:
-        print("Fuentes: visor integrado no disponible (%s); uso el del sistema." % e)
+        print(tr("Fuentes: visor integrado no disponible (%s); uso el del sistema.") % e)
         abrir_con_sistema(ruta)

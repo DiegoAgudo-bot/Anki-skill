@@ -3,6 +3,7 @@
 Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón (escritorio) o tocarlos (móvil), muestra los fragmentos más relevantes de **tus propias fuentes** (los PDFs que importas tú) con su número de página. En el escritorio, un clic abre el PDF en esa página sin salir de Anki.
 
 - Funciona en **Anki escritorio 2.1.66 o posterior** (Qt6). Probado en 2.1.66 y 25.09.
+- Interfaz en **español e inglés**: sigue el idioma de tu Anki (español, o inglés para el resto). *English summary [below](#english).*
 - Funciona en **AnkiDroid, AnkiMobile y AnkiWeb** sin conexión, gracias a datos precalculados que viajan con tu sincronización de medios.
 - **Todo es local.** Los PDFs se procesan en tu ordenador. No hay servidores ni se comparte nada entre usuarios. Los datos solo llegan a tu móvil a través de tu propia sincronización con AnkiWeb.
 
@@ -12,7 +13,7 @@ Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón
 
 1. Descarga o genera `fuentes-<versión>.ankiaddon` (ver [Desarrollo](#desarrollo)).
 2. En Anki: **Herramientas → Complementos → Instalar desde archivo…** y elige el `.ankiaddon`.
-3. Reinicia Anki. Aparecerá el menú **Herramientas → Fuentes**.
+3. Reinicia Anki. Aparecerá el menú **Herramientas → Fuentes** y, la primera vez, el asistente de **primeros pasos**, que te guía por lo básico y marca lo que ya has hecho. Puedes volver a abrirlo desde el menú.
 
 ## Uso en el escritorio
 
@@ -68,7 +69,7 @@ Se cambia en **Herramientas → Complementos → Fuentes → Configuración** (v
 ## Limitaciones conocidas
 
 - Sin OCR: los PDFs escaneados no se pueden indexar todavía.
-- Un término partido por etiquetas HTML (`arteria <b>femoral</b>`) no se detecta. Sí se detecta si está entero dentro de la etiqueta (`<b>arteria femoral</b>`).
+- Un término repartido entre etiquetas de formato (`arteria <b>femoral</b>`) sí se detecta. No se detecta si lo corta un salto de línea, un párrafo, un enlace o una celda de tabla.
 - En el anverso no se subraya dentro del hueco del cloze, para no revelar nada. En el reverso sí.
 - No se subraya dentro de enlaces, botones de audio, código ni fórmulas MathJax.
 - El índice (`user_files/`) es común a todos los perfiles de Anki del ordenador. Los datos del móvil se exportan a la colección del perfil abierto.
@@ -94,7 +95,8 @@ fuentes/              ← el add-on (lo que va dentro del .ankiaddon)
   templates.py        insertar/quitar el bloque en las plantillas
   reviewer.py         card_will_show + mensajes pycmd
   core.py             rutas, configuración, exportación en segundo plano
-  ui/                 gestor, editor de glosario, tipos de nota, visor de PDF, importación
+  i18n.py, i18n_en.py textos de la interfaz: español en el código, inglés en el diccionario
+  ui/                 asistente, gestor, editor de glosario, tipos de nota, visor de PDF, importación
   web/fuentes.js/.css un único JS (ES5) para escritorio y móvil
   vendor/             pypdf 6.21 (BSD-3) y typing_extensions (PSF), Python puro
 tests/                pytest (fuera de Anki) + tests/js (node:test + jsdom)
@@ -152,7 +154,7 @@ node dev/prueba_movil.js
 La prueba de extremo a extremo con un Anki real sin pantalla (necesita `pip install "aqt[qt6]==2.1.66" "reportlab<4.3"` en un Python 3.9):
 
 ```bash
-python dev/e2e_anki.py --plantillas --paquete=build/fuentes-1.0.0.ankiaddon
+python dev/e2e_anki.py --plantillas --paquete=build/fuentes-1.1.0.ankiaddon
 ```
 
 Para generar el paquete:
@@ -161,4 +163,20 @@ Para generar el paquete:
 ./build.sh
 ```
 
+Añade `--ingles` para probar la interfaz en inglés. Estos mismos tests se ejecutan solos en GitHub con cada cambio (`.github/workflows/tests.yml`).
+
+**Traducciones.** Los textos van en español dentro de `tr("…")` y su traducción en `fuentes/i18n_en.py`; un test falla si falta alguna. Los textos del popup están en `TEXTOS`, en `web/fuentes.js`.
+
 Todos los PDFs de prueba se generan con `dev/generar_pdfs.py` y contienen **texto inventado** escrito para este proyecto.
+
+## English
+
+**Fuentes** is an Anki add-on that underlines the terms on your cards and, on hover (desktop) or tap (mobile), shows the most relevant excerpts from **your own sources** (PDFs you import yourself) with their page number. On desktop, one click opens the PDF at that page inside Anki.
+
+- Works on Anki desktop 2.1.66+ and, offline, on AnkiDroid, AnkiMobile and AnkiWeb (precomputed data travels with your own media sync).
+- Everything is processed locally. No servers, nothing shared between users.
+- The interface is in English whenever Anki is not set to Spanish.
+
+**Install:** Tools → Add-ons → Install from file… → pick the `.ankiaddon`, then restart Anki. A *Getting started* window walks you through adding a PDF, building your glossary and enabling mobile.
+
+**Legal note.** The add-on ships empty. Only import material you have the right to use; you are responsible for the content you load.

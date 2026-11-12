@@ -21,6 +21,14 @@ mkdir -p build
 SALIDA="build/fuentes-${VERSION}.ankiaddon"
 rm -f "$SALIDA"
 
+# Si hay archivos nuevos sin añadir a git se quedarían fuera sin avisar.
+SIN_SEGUIR=$(git status --porcelain -- fuentes | grep '^??' || true)
+if [[ -n "$SIN_SEGUIR" ]]; then
+  echo "Hay archivos en fuentes/ sin añadir a git (git add) y no entrarían en el paquete:"
+  echo "$SIN_SEGUIR"
+  exit 1
+fi
+
 # Solo se empaqueta lo que está bajo control de versiones (así nunca se
 # cuelan user_files/, meta.json ni cachés). user_files/ va con su README.
 (cd fuentes && git ls-files -z . | xargs -0 zip -q -X "../$SALIDA")
@@ -34,7 +42,8 @@ prohibido = [n for n in nombres if n.endswith((".pdf", ".sqlite3", ".pyc")) or n
              or (n.startswith("user_files/") and n != "user_files/README.txt")
              or n.endswith("glosario.json")]
 assert not prohibido, "datos de usuario dentro del paquete: %s" % prohibido
-for necesario in ("__init__.py", "manifest.json", "config.json", "web/fuentes.js",
+for necesario in ("__init__.py", "manifest.json", "config.json", "web/fuentes.js", "i18n_en.py",
+                  "ui/asistente.py",
                   "web/fuentes.css", "vendor/pypdf/__init__.py", "user_files/README.txt"):
     assert necesario in nombres, "falta " + necesario
 assert not any(n.startswith("fuentes/") for n in nombres), "el zip no debe llevar la carpeta raíz"

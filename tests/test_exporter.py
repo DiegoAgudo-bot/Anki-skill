@@ -39,7 +39,7 @@ def test_exporta_glosario_terminos_y_web(cargado):
     inf = exporter.exportar(indice, GLOSARIO, medios, WEB)
     g = _leer(medios, "_fuentes_glosario.json")
     assert [t["t"] for t in g["terminos"]] == ["arteria femoral", "nervio ciático", "aorta", "año"]
-    assert g["ajustes"] == {"subrayado": True, "fragmentos": 3, "soloPrimera": True}
+    assert g["ajustes"] == {"subrayado": True, "fragmentos": 3, "soloPrimera": True, "idioma": "es"}
     assert inf.sin_resultados == ["término inexistente"]
     assert os.path.exists(os.path.join(medios, "_fuentes.js"))
     assert os.path.exists(os.path.join(medios, "_fuentes.css"))

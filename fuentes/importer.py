@@ -18,6 +18,7 @@ if _VENDOR not in sys.path:
     sys.path.append(_VENDOR)
 
 from pypdf import PdfReader  # noqa: E402
+from .i18n import tr
 
 # Una página con menos caracteres útiles que esto se considera "sin texto".
 MIN_CARACTERES_PAGINA = 25
@@ -56,19 +57,19 @@ def abrir_pdf(ruta):
             # Muchos PDFs "protegidos" solo tienen contraseña de propietario.
             try:
                 if not lector.decrypt(""):
-                    raise PdfNoLegible("El PDF está protegido con contraseña.")
+                    raise PdfNoLegible(tr("El PDF está protegido con contraseña."))
             except PdfNoLegible:
                 raise
             except Exception:
                 raise PdfNoLegible(
-                    "El PDF está cifrado y no se puede leer sin librerías extra."
+                    tr("El PDF está cifrado y no se puede leer sin librerías extra.")
                 )
         len(lector.pages)  # fuerza la lectura de la estructura de páginas
         return lector
     except PdfNoLegible:
         raise
     except Exception as e:
-        raise PdfNoLegible("No se puede leer el PDF: %s" % e)
+        raise PdfNoLegible(tr("No se puede leer el PDF: %s") % e)
 
 
 def _etiqueta(lector, i):
@@ -278,7 +279,7 @@ def importar_pdf(indice, ruta, carpeta_pdfs, nombre=None, progreso=None, cancela
     sha1 = sha1_archivo(ruta)
     existente = indice.fuente_por_sha1(sha1)
     if existente:
-        raise ValueError('Este PDF ya está importado como "%s".' % existente["nombre"])
+        raise ValueError(tr('Este PDF ya está importado como "%s".') % existente["nombre"])
 
     paginas = extraer_paginas(lector, prog("extraer"), cancelado)
     total = len(paginas)

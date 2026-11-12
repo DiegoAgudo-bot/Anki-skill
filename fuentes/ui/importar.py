@@ -10,12 +10,13 @@ from aqt.utils import showInfo, showWarning
 from .. import core, glossary, importer
 from ..index import Indice
 from .propuestas import DialogoPropuestas
+from ..i18n import tr
 
-FASES = {"extraer": "leyendo texto", "indexar": "indexando"}
+FASES = {"extraer": tr("leyendo texto"), "indexar": tr("indexando texto")}
 
 
 def elegir_e_importar(parent=None, al_terminar=None):
-    rutas, _ = QFileDialog.getOpenFileNames(parent or mw, "Añadir PDFs a Fuentes", "", "PDF (*.pdf)")
+    rutas, _ = QFileDialog.getOpenFileNames(parent or mw, tr("Añadir PDFs a Fuentes"), "", tr("PDF (*.pdf)"))
     if rutas:
         importar(list(rutas), parent, al_terminar)
 
@@ -53,17 +54,17 @@ def importar(rutas, parent=None, al_terminar=None):
         try:
             for n, ruta in enumerate(rutas):
                 nombre = os.path.basename(ruta)
-                pre = "Importando %d de %d: %s\n" % (n + 1, len(rutas), nombre) if len(rutas) > 1 else "%s\n" % nombre
+                pre = tr("Importando %d de %d: %s\n") % (n + 1, len(rutas), nombre) if len(rutas) > 1 else "%s\n" % nombre
 
                 def prog(fase, hechas, total, pre=pre):
-                    progreso("%s%s página %d de %d" % (pre, FASES[fase], hechas, total), hechas, total)
+                    progreso(tr("%s%s página %d de %d") % (pre, FASES[fase], hechas, total), hechas, total)
 
                 try:
                     r = importer.importar_pdf(ind, ruta, core.PDFS_DIR, progreso=prog, cancelado=cancelado)
                     propuestos = importer.proponer_terminos(ruta) if r.source_id else []
                     resultados.append((ruta, r, propuestos, None))
                 except importer.ImportacionCancelada:
-                    resultados.append((ruta, None, [], "Cancelado."))
+                    resultados.append((ruta, None, [], tr("Cancelado.")))
                     break
                 except Exception as e:
                     resultados.append((ruta, None, [], str(e)))
@@ -75,13 +76,13 @@ def importar(rutas, parent=None, al_terminar=None):
         try:
             resultados = fut.result()
         except Exception as e:
-            showWarning("Fuentes: error al importar: %s" % e)
+            showWarning(tr("Fuentes: error al importar: %s") % e)
             return
         _resumen(resultados, parent)
         if al_terminar:
             al_terminar()
 
-    _en_segundo_plano(trabajo, "Importando PDF…", parent, terminado)
+    _en_segundo_plano(trabajo, tr("Importando PDF…"), parent, terminado)
 
 
 def _resumen(resultados, parent):
@@ -94,14 +95,14 @@ def _resumen(resultados, parent):
             lineas.append("✗ %s: %s" % (nombre, error))
         elif r.escaneado:
             lineas.append(
-                "✗ %s: parece un PDF escaneado (sin texto que se pueda extraer). "
+                tr("✗ %s: parece un PDF escaneado (sin texto que se pueda extraer). "
                 "Necesitaría OCR, que esta versión todavía no incluye. Si tienes una versión "
-                "del PDF con texto, impórtala en su lugar." % nombre)
+                "del PDF con texto, impórtala en su lugar.") % nombre)
         else:
             alguno = True
-            linea = "✓ %s: %d páginas, %d fragmentos." % (nombre, r.paginas, r.fragmentos)
+            linea = tr("✓ %s: %d páginas, %d fragmentos.") % (nombre, r.paginas, r.fragmentos)
             if r.paginas_sin_texto:
-                linea += " Aviso: %d páginas sin texto (¿imágenes o escaneadas?)." % r.paginas_sin_texto
+                linea += tr(" Aviso: %d páginas sin texto (¿imágenes o escaneadas?).") % r.paginas_sin_texto
             lineas.append(linea)
             propuestos.extend(prop)
     showInfo("\n\n".join(lineas), parent=parent or mw, title="Fuentes")
@@ -124,7 +125,7 @@ def reindexar(source_id, parent=None, al_terminar=None):
         ind = Indice(core.INDEX_PATH)
         try:
             def prog(fase, hechas, total):
-                progreso("Reindexando: %s página %d de %d" % (FASES[fase], hechas, total), hechas, total)
+                progreso(tr("Reindexando: %s página %d de %d") % (FASES[fase], hechas, total), hechas, total)
             return importer.reindexar(ind, source_id, core.PDFS_DIR, progreso=prog, cancelado=cancelado)
         finally:
             ind.cerrar()
@@ -132,16 +133,16 @@ def reindexar(source_id, parent=None, al_terminar=None):
     def terminado(fut):
         try:
             r = fut.result()
-            showInfo("Reindexado: %d páginas, %d fragmentos." % (r.paginas, r.fragmentos),
+            showInfo(tr("Reindexado: %d páginas, %d fragmentos.") % (r.paginas, r.fragmentos),
                      parent=parent or mw, title="Fuentes")
         except importer.ImportacionCancelada:
-            showWarning("Reindexado cancelado. La fuente queda incompleta: vuelve a reindexarla.",
+            showWarning(tr("Reindexado cancelado. La fuente queda incompleta: vuelve a reindexarla."),
                         parent=parent or mw)
         except Exception as e:
-            showWarning("Fuentes: error al reindexar: %s" % e, parent=parent or mw)
+            showWarning(tr("Fuentes: error al reindexar: %s") % e, parent=parent or mw)
         core.exportar()
         if al_terminar:
             al_terminar()
 
-    _en_segundo_plano(trabajo, "Reindexando…", parent, terminado)
+    _en_segundo_plano(trabajo, tr("Reindexando…"), parent, terminado)
 

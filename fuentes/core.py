@@ -10,6 +10,8 @@ from aqt.utils import tooltip
 
 from . import exporter, glossary
 from .index import Indice
+from . import i18n
+from .i18n import tr
 
 ADDON_DIR = os.path.dirname(os.path.abspath(__file__))
 MODULO = __name__.split(".")[0]
@@ -28,7 +30,16 @@ DEFECTO = {
     "fuentes_inactivas": [],
     "aviso_tamano_mb": 50,
     "inyectar_en_escritorio": True,
+    "asistente_visto": False,
 }
+
+# La interfaz sigue el idioma de Anki: español, o inglés para el resto.
+try:
+    import anki.lang
+
+    i18n.fijar_idioma(anki.lang.current_lang)
+except Exception:
+    pass
 
 _indice = None
 
@@ -117,6 +128,7 @@ def exportar(silencioso=False, al_terminar=None):
         return
     _exportando = True
     ajustes = config()
+    ajustes["idioma"] = i18n.idioma()  # el popup del móvil usa el mismo idioma
     ts = terminos()
 
     def tarea():
@@ -137,13 +149,13 @@ def exportar(silencioso=False, al_terminar=None):
         try:
             inf = fut.result()
         except Exception as e:  # no tumbar Anki por un fallo al exportar
-            tooltip("Fuentes: error al exportar los datos para el móvil: %s" % e)
+            tooltip(tr("Fuentes: error al exportar los datos para el móvil: %s") % e)
             inf = None
         if inf is not None and not silencioso:
-            tooltip("Fuentes: %d términos exportados (%s)" % (inf.terminos, exporter.formato_tamano(inf.bytes)))
+            tooltip(tr("Fuentes: %d términos exportados (%s)") % (inf.terminos, exporter.formato_tamano(inf.bytes)))
         if inf is not None and inf.bytes > ajustes["aviso_tamano_mb"] * 1024 * 1024:
-            tooltip("Fuentes: los datos para el móvil ocupan %s. Considera reducir el glosario "
-                    "o los fragmentos por fuente." % exporter.formato_tamano(inf.bytes), period=6000)
+            tooltip(tr("Fuentes: los datos para el móvil ocupan %s. Considera reducir el glosario "
+                    "o los fragmentos por fuente.") % exporter.formato_tamano(inf.bytes), period=6000)
         if _repetir:
             _repetir = False
             exportar(silencioso, al_terminar)

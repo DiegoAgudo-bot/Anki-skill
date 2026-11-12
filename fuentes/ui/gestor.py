@@ -9,20 +9,21 @@ from aqt.utils import askUser, restoreGeom, saveGeom, tooltip
 
 from .. import core, exporter
 from . import importar, visor
+from ..i18n import tr
 
-COLUMNAS = ["Activa", "Nombre", "Páginas", "Fragmentos", "Importada", "Estado"]
+COLUMNAS = [tr("Activa"), tr("Nombre"), tr("Páginas"), tr("Fragmentos"), tr("Importada"), tr("Estado")]
 
 
 class GestorFuentes(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent or mw)
-        self.setWindowTitle("Fuentes: gestionar fuentes")
+        self.setWindowTitle(tr("Fuentes: gestionar fuentes"))
         self.resize(760, 420)
         capa = QVBoxLayout(self)
 
         aviso = QLabel(
-            "Importa solo material que tengas derecho a usar. Todo se procesa y se guarda en "
-            "este ordenador; al móvil solo llega a través de tu propia sincronización con AnkiWeb.")
+            tr("Importa solo material que tengas derecho a usar. Todo se procesa y se guarda en "
+            "este ordenador; al móvil solo llega a través de tu propia sincronización con AnkiWeb."))
         aviso.setWordWrap(True)
         capa.addWidget(aviso)
 
@@ -38,9 +39,9 @@ class GestorFuentes(QDialog):
         capa.addWidget(self.tabla)
 
         botones = QHBoxLayout()
-        for texto, funcion in (("Añadir PDF…", self._anadir), ("Renombrar…", self._renombrar),
-                               ("Abrir PDF", self._abrir), ("Reindexar", self._reindexar),
-                               ("Eliminar…", self._eliminar)):
+        for texto, funcion in ((tr("Añadir PDF…"), self._anadir), (tr("Renombrar…"), self._renombrar),
+                               (tr("Abrir PDF"), self._abrir), (tr("Reindexar"), self._reindexar),
+                               (tr("Eliminar…"), self._eliminar)):
             b = QPushButton(texto)
             b.clicked.connect(lambda _=False, f=funcion: f())
             botones.addWidget(b)
@@ -51,10 +52,10 @@ class GestorFuentes(QDialog):
         self.estado = QLabel()
         self.estado.setWordWrap(True)
         pie.addWidget(self.estado, 1)
-        exportar = QPushButton("Exportar para el móvil")
+        exportar = QPushButton(tr("Exportar para el móvil"))
         exportar.clicked.connect(lambda: core.exportar(al_terminar=lambda _i: self.refrescar()))
         pie.addWidget(exportar)
-        cerrar = QPushButton("Cerrar")
+        cerrar = QPushButton(tr("Cerrar"))
         cerrar.clicked.connect(self.reject)
         pie.addWidget(cerrar)
         capa.addLayout(pie)
@@ -75,7 +76,7 @@ class GestorFuentes(QDialog):
             activa.setCheckState(Qt.CheckState.Unchecked if f["id"] in inactivas else Qt.CheckState.Checked)
             activa.setData(Qt.ItemDataRole.UserRole, f["id"])
             self.tabla.setItem(fila, 0, activa)
-            estado = "Lista" if f["estado"] == "lista" else "Incompleta: reindexa"
+            estado = tr("Lista") if f["estado"] == "lista" else tr("Incompleta: reindexa")
             for col, valor in enumerate([f["nombre"], f["paginas"], f["fragmentos"], f["fecha"], estado], 1):
                 self.tabla.setItem(fila, col, QTableWidgetItem(str(valor)))
         self.tabla.resizeColumnsToContents()
@@ -85,18 +86,18 @@ class GestorFuentes(QDialog):
         c = core.config()
         n_terminos = len([t for t in core.terminos() if t["activo"]])
         tam = core.tamano_exportado()
-        texto = "%d fuentes · %d términos en el glosario · Datos para el móvil: %s" % (
+        texto = tr("%d fuentes · %d términos en el glosario · Datos para el móvil: %s") % (
             len(fuentes), n_terminos, exporter.formato_tamano(tam))
         if tam > c["aviso_tamano_mb"] * 1024 * 1024:
-            texto += "  ⚠ más de %d MB: la sincronización con el móvil será lenta" % c["aviso_tamano_mb"]
+            texto += tr("  ⚠ más de %d MB: la sincronización con el móvil será lenta") % c["aviso_tamano_mb"]
         if not fuentes:
-            texto = "Aún no hay fuentes. Pulsa «Añadir PDF…» para importar la primera."
+            texto = tr("Aún no hay fuentes. Pulsa «Añadir PDF…» para importar la primera.")
         self.estado.setText(texto)
 
     def _seleccionada(self):
         filas = self.tabla.selectionModel().selectedRows()
         if not filas:
-            tooltip("Selecciona primero una fuente.", parent=self)
+            tooltip(tr("Selecciona primero una fuente."), parent=self)
             return None
         item = self.tabla.item(filas[0].row(), 0)
         return core.indice().fuente(item.data(Qt.ItemDataRole.UserRole))
@@ -122,7 +123,7 @@ class GestorFuentes(QDialog):
         f = self._seleccionada()
         if not f:
             return
-        nombre, ok = QInputDialog.getText(self, "Renombrar fuente", "Nombre que verás en el popup:", text=f["nombre"])
+        nombre, ok = QInputDialog.getText(self, tr("Renombrar fuente"), tr("Nombre que verás en el popup:"), text=f["nombre"])
         nombre = " ".join(nombre.split())
         if ok and nombre and nombre != f["nombre"]:
             core.indice().renombrar(f["id"], nombre)
@@ -143,9 +144,9 @@ class GestorFuentes(QDialog):
         f = self._seleccionada()
         if not f:
             return
-        if not askUser("¿Eliminar la fuente «%s»?\n\nSe borrarán su índice y la copia del PDF guardada "
-                       "por el add-on (tu archivo original no se toca)." % f["nombre"], parent=self,
-                       defaultno=True, title="Eliminar fuente"):
+        if not askUser(tr("¿Eliminar la fuente «%s»?\n\nSe borrarán su índice y la copia del PDF guardada "
+                       "por el add-on (tu archivo original no se toca).") % f["nombre"], parent=self,
+                       defaultno=True, title=tr("Eliminar fuente")):
             return
         core.indice().eliminar_fuente(f["id"])
         try:
@@ -157,7 +158,7 @@ class GestorFuentes(QDialog):
         core.guardar_config(c)
         self.refrescar()
         core.exportar(silencioso=True, al_terminar=lambda _i: self.refrescar())
-        tooltip("Fuente eliminada.", parent=self)
+        tooltip(tr("Fuente eliminada."), parent=self)
 
     def reject(self):
         saveGeom(self, "fuentes_gestor")

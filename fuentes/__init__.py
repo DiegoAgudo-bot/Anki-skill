@@ -14,7 +14,8 @@ if mw is not None:
     from aqt.qt import QAction, QMenu
 
     from . import core, reviewer
-    from .ui import editor_glosario, gestor, tipos_nota
+    from .i18n import tr
+    from .ui import asistente, editor_glosario, gestor, tipos_nota
 
     def _accion(menu, texto, funcion):
         a = QAction(texto, mw)
@@ -24,11 +25,13 @@ if mw is not None:
 
     def _crear_menu():
         menu = QMenu("Fuentes", mw)
-        _accion(menu, "Gestionar fuentes…", gestor.mostrar)
-        _accion(menu, "Editar glosario…", editor_glosario.mostrar)
-        _accion(menu, "Activar en tipos de nota…", tipos_nota.mostrar)
+        _accion(menu, tr("Primeros pasos…"), asistente.mostrar)
         menu.addSeparator()
-        _accion(menu, "Exportar datos para el móvil ahora", core.exportar)
+        _accion(menu, tr("Gestionar fuentes…"), gestor.mostrar)
+        _accion(menu, tr("Editar glosario…"), editor_glosario.mostrar)
+        _accion(menu, tr("Activar en tipos de nota…"), tipos_nota.mostrar)
+        menu.addSeparator()
+        _accion(menu, tr("Exportar datos para el móvil ahora"), core.exportar)
         mw.form.menuTools.addMenu(menu)
 
     # El JS y el CSS se sirven desde la carpeta del add-on en escritorio.
@@ -36,6 +39,7 @@ if mw is not None:
     gui_hooks.card_will_show.append(reviewer.al_mostrar_tarjeta)
     gui_hooks.webview_did_receive_js_message.append(reviewer.al_recibir_mensaje)
     gui_hooks.profile_did_open.append(core.al_abrir_perfil)
+    gui_hooks.profile_did_open.append(asistente.mostrar_si_es_la_primera_vez)
     gui_hooks.profile_will_close.append(core.al_cerrar_perfil)
     mw.addonManager.setConfigUpdatedAction(__name__, core.al_cambiar_config)
     _crear_menu()
