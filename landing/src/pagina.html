@@ -31,6 +31,10 @@ nav ul a { color: var(--tinta); text-decoration: none; font-weight: 700; font-si
 nav ul a:hover { border-bottom-color: var(--margen); }
 .boton { display: inline-block; font: 700 15.5px var(--texto); padding: 9px 16px; border: 1.5px solid var(--tinta); border-radius: 4px; background: var(--fluor); color: var(--tinta); cursor: pointer; text-decoration: none; box-shadow: 3px 3px 0 var(--tinta); }
 .boton:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--tinta); }
+.boton.sec { background: var(--blanco); }
+.boton svg { width: 16px; height: 16px; vertical-align: -2px; margin-right: 8px; }
+.descarga { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 4px 0 0; }
+.descarga .mano { font-size: 20px; }
 @media (max-width: 640px) { nav ul { order: 3; flex-basis: 100%; gap: 4px 16px; } nav ul a { font-size: 14.5px; } }
 
 h1 { font: 800 clamp(2.4rem, 5.3vw, 4.1rem)/1 var(--titulo); letter-spacing: -.035em; margin: 0 0 18px; text-wrap: balance; }
@@ -204,7 +208,7 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
       <p class="fx-estado" role="status"></p>
     </form>
     <p class="legal">Solo usaremos tu correo para avisarte del lanzamiento. Puedes pedir que lo borremos cuando quieras.</p>
-    <p style="margin:2px 0 0"><a href="{{DESCARGA}}">O descarga ya la versión gratuita</a></p>
+    <p class="descarga"><a class="boton sec" href="{{DESCARGA}}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5v8.2M4.4 6.6L8 10.2l3.6-3.6M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Descargar la versión gratuita</a><span class="mano">gratis y sin registro</span></p>
     <ul class="garantias"><li>Gratis hoy</li><li>Sin cuenta</li><li>Sin conexión</li><li>Español e inglés</li></ul>
   </div>
   <div style="position:relative">
