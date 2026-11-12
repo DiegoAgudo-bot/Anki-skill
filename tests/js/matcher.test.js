@@ -112,3 +112,29 @@ test('subrayado desactivado en los ajustes', async () => {
   const w = await montar('<div id="qa">aorta</div>', { datos: { '_fuentes_glosario.json': g } });
   assert.deepEqual(subrayados(w), []);
 });
+
+test('términos repartidos entre etiquetas de formato', async () => {
+  const html = '<div id="qa">La arteria <b>femoral</b> y el <i>nervio</i> <u>ciático</u>; ' +
+    'la vena<sup>1</sup> cava no.</div>';
+  const w = await montar(html);
+  // Cada trozo lleva su subrayado y apunta al mismo término.
+  assert.deepEqual(subrayados(w), ['arteria ', 'femoral', 'nervio', ' ', 'ciático']);
+  const ids = Array.from(w.document.querySelectorAll('.fuentes-term')).map((e) => e.getAttribute('data-fuentes-t'));
+  assert.deepEqual(ids, ['0', '0', '2', '2', '2']);
+  assert.equal(w.document.querySelector('b').textContent, 'femoral');
+  assert.equal(w.document.getElementById('qa').textContent,
+    'La arteria femoral y el nervio ciático; la vena1 cava no.');
+});
+
+test('los bloques, saltos de línea y elementos saltados cortan el término', async () => {
+  const html = '<div id="qa"><p>arteria</p><p>femoral</p> nervio<br>ciático ' +
+    'arteria <a href="#">femoral</a> vena <div>cava</div></div>';
+  const w = await montar(html);
+  assert.deepEqual(subrayados(w), ['ciático']); // "ciático" solo es sinónimo de "nervio ciático"
+});
+
+test('término que cruza el cloze revelado en el reverso', async () => {
+  const w = await montar('<div id="qa">x<hr id="answer">La arteria <span class="cloze">femoral</span> profunda.</div>');
+  assert.equal(subrayados(w).join(''), 'arteria femoral profunda');
+  assert.equal(w.document.querySelector('.cloze').textContent, 'femoral');
+});

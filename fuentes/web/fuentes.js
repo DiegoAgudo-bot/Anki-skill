@@ -231,7 +231,45 @@
    * Glosario y ajustes                                                  *
    * ------------------------------------------------------------------ */
 
-  var AJUSTES_DEF = { subrayado: true, fragmentos: 3, soloPrimera: true };
+  var AJUSTES_DEF = { subrayado: true, fragmentos: 3, soloPrimera: true, idioma: '' };
+
+  // Textos de la interfaz. El idioma llega en los ajustes exportados desde
+  // el escritorio (el de tu Anki); si no, se usa el del navegador.
+  var TEXTOS = {
+    es: {
+      vacio: 'No hay fragmentos para este término.',
+      cargando: 'Cargando…',
+      errorCarga: 'No se pudieron cargar los fragmentos. Sincroniza los medios con AnkiWeb y vuelve a intentarlo.',
+      abrirPdf: 'Abrir el PDF en esta página',
+      mas: 'Más en mis fuentes',
+      buscando: 'Buscando…',
+      errorBuscar: 'No se pudo buscar en las fuentes.',
+      buscar: 'Buscar en fuentes',
+      pagina: 'p. '
+    },
+    en: {
+      vacio: 'No excerpts for this term.',
+      cargando: 'Loading…',
+      errorCarga: 'Could not load the excerpts. Sync your media with AnkiWeb and try again.',
+      abrirPdf: 'Open the PDF at this page',
+      mas: 'More from my sources',
+      buscando: 'Searching…',
+      errorBuscar: 'Could not search your sources.',
+      buscar: 'Search sources',
+      pagina: 'p. '
+    }
+  };
+
+  function idioma() {
+    var i = (glosario && glosario.ajustes.idioma) || (W.FUENTES_CONFIG && W.FUENTES_CONFIG.idioma) ||
+      (W.navigator && (W.navigator.language || W.navigator.userLanguage)) || 'es';
+    return String(i).toLowerCase().indexOf('es') === 0 ? 'es' : 'en';
+  }
+
+  function T(k) {
+    return TEXTOS[idioma()][k] || TEXTOS.es[k] || k;
+  }
+  F.idioma = idioma;
   var glosario = null; // {terminos: [...], matcher, ajustes}
   var esperandoGlosario = [];
 
@@ -311,15 +349,38 @@
     return false;
   }
 
-  function nodosDeTexto(raiz, esReverso) {
+  // Etiquetas de formato "en línea": un término puede estar repartido entre
+  // ellas (p. ej. arteria <b>femoral</b>). Cualquier otra etiqueta corta.
+  var EN_LINEA = {
+    B: 1, I: 1, U: 1, EM: 1, STRONG: 1, SPAN: 1, FONT: 1, MARK: 1, SMALL: 1, BIG: 1,
+    S: 1, SUB: 1, SUP: 1, INS: 1, DEL: 1, ABBR: 1, CITE: 1, Q: 1
+  };
+
+  /**
+   * Agrupa los nodos de texto en "tramos": listas de nodos consecutivos
+   * separados solo por etiquetas de formato en línea. El matching se hace
+   * sobre el texto unido de cada tramo.
+   */
+  function tramos(raiz, esReverso) {
     var res = [];
+    var actual = [];
+    function cortar() {
+      if (actual.length) { res.push(actual); actual = []; }
+    }
     (function recorrer(n) {
       for (var c = n.firstChild; c; c = c.nextSibling) {
         if (c.nodeType === 3) {
-          if (/\S/.test(c.nodeValue)) res.push(c);
-        } else if (c.nodeType === 1 && !debeSaltar(c, esReverso)) recorrer(c);
+          actual.push(c);
+        } else if (c.nodeType === 1) {
+          if (debeSaltar(c, esReverso)) { cortar(); continue; }
+          var enLinea = EN_LINEA[c.nodeName.toUpperCase()] === 1;
+          if (!enLinea) cortar();
+          recorrer(c);
+          if (!enLinea) cortar();
+        }
       }
     })(raiz);
+    cortar();
     return res;
   }
 
@@ -327,9 +388,28 @@
     return D.getElementById('qa') || D.body;
   }
 
+  /** Envuelve en <span class="fuentes-term"> los trozos [a, b, id] de un nodo de texto. */
+  function envolver(nodo, trozos) {
+    var texto = nodo.nodeValue;
+    var frag = D.createDocumentFragment();
+    var pos = 0;
+    for (var j = 0; j < trozos.length; j++) {
+      if (trozos[j][0] > pos) frag.appendChild(D.createTextNode(texto.slice(pos, trozos[j][0])));
+      var span = D.createElement('span');
+      span.className = 'fuentes-term';
+      span.setAttribute('data-fuentes-t', String(trozos[j][2]));
+      span.setAttribute('role', 'button');
+      span.appendChild(D.createTextNode(texto.slice(trozos[j][0], trozos[j][1])));
+      frag.appendChild(span);
+      pos = trozos[j][1];
+    }
+    if (pos < texto.length) frag.appendChild(D.createTextNode(texto.slice(pos)));
+    nodo.parentNode.replaceChild(frag, nodo);
+  }
+
   /** Subraya los términos dentro de `raiz`. Devuelve los índices encontrados. */
   function subrayar(raiz, g, esReverso) {
-    var nodos = nodosDeTexto(raiz, esReverso);
+    var ts = tramos(raiz, esReverso);
     var vistos = {};
     var encontrados = [];
     // Si ya hay subrayados (segunda pasada sobre la misma tarjeta), cuentan.
@@ -337,33 +417,30 @@
     for (var p = 0; p < previos.length; p++) {
       if (tieneClase(previos[p], 'fuentes-term')) vistos[previos[p].getAttribute('data-fuentes-t')] = 1;
     }
-    for (var i = 0; i < nodos.length; i++) {
-      var nodo = nodos[i];
-      var texto = nodo.nodeValue;
+    for (var i = 0; i < ts.length; i++) {
+      var nodos = ts[i];
+      var texto = '';
+      var inicios = [];
+      var k;
+      for (k = 0; k < nodos.length; k++) { inicios.push(texto.length); texto += nodos[k].nodeValue; }
+      if (!/\S/.test(texto)) continue;
       var ms = g.matcher.buscar(texto);
       if (!ms.length) continue;
-      var frag = D.createDocumentFragment();
-      var pos = 0;
-      var cambiado = false;
+      var porNodo = [];
       for (var j = 0; j < ms.length; j++) {
         var id = ms[j][2];
         if (g.ajustes.soloPrimera && vistos[id]) continue;
         if (!g.terminos[id] || !g.terminos[id].f) continue;
         vistos[id] = 1;
         encontrados.push(id);
-        if (ms[j][0] > pos) frag.appendChild(D.createTextNode(texto.slice(pos, ms[j][0])));
-        var span = D.createElement('span');
-        span.className = 'fuentes-term';
-        span.setAttribute('data-fuentes-t', String(id));
-        span.setAttribute('role', 'button');
-        span.appendChild(D.createTextNode(texto.slice(ms[j][0], ms[j][1])));
-        frag.appendChild(span);
-        pos = ms[j][1];
-        cambiado = true;
+        // Un término puede caer en varios nodos: un trozo subrayado en cada uno.
+        for (k = 0; k < nodos.length; k++) {
+          var a = Math.max(ms[j][0], inicios[k]);
+          var b = Math.min(ms[j][1], inicios[k] + nodos[k].nodeValue.length);
+          if (a < b) (porNodo[k] = porNodo[k] || []).push([a - inicios[k], b - inicios[k], id]);
+        }
       }
-      if (!cambiado) continue;
-      if (pos < texto.length) frag.appendChild(D.createTextNode(texto.slice(pos)));
-      nodo.parentNode.replaceChild(frag, nodo);
+      for (k = 0; k < nodos.length; k++) if (porNodo[k]) envolver(nodos[k], porNodo[k]);
     }
     return encontrados;
   }
@@ -395,7 +472,7 @@
   /** Escapa el fragmento y resalta las variantes del término con <mark>. */
   function resaltar(texto, termino) {
     var m = termino.__matcher;
-    if (!m) {
+    if (!m || typeof m.buscar !== 'function') {
       var vs = [[termino.t, 0]];
       var sin = termino.s || [];
       for (var i = 0; i < sin.length; i++) vs.push([sin[i], 0]);
@@ -413,13 +490,13 @@
   F.resaltar = resaltar;
 
   function etiquetaPagina(fr) {
-    return 'p. ' + (fr.e || fr.p);
+    return T('pagina') + (fr.e || fr.p);
   }
 
   /** HTML del popup a partir de los datos de un término. */
   function htmlFragmentos(datos, termino, max) {
     var fuentes = (datos && datos.fuentes) || [];
-    if (!fuentes.length) return '<div class="fuentes-vacio">No hay fragmentos para este término.</div>';
+    if (!fuentes.length) return '<div class="fuentes-vacio">' + escapar(T('vacio')) + '</div>';
     var py = tienePy();
     var h = '';
     for (var i = 0; i < fuentes.length; i++) {
@@ -431,7 +508,7 @@
         var fr = frs[j];
         var donde = escapar(f.nombre) + ', ' + escapar(etiquetaPagina(fr));
         h += '<div class="fuentes-frag' + (py ? ' fuentes-abrible' : '') + '" data-s="' + escapar(f.id) +
-          '" data-p="' + escapar(fr.p) + '"' + (py ? ' title="Abrir el PDF en esta página"' : '') + '>' +
+          '" data-p="' + escapar(fr.p) + '"' + (py ? ' title="' + escapar(T('abrirPdf')) + '"' : '') + '>' +
           '<div class="fuentes-texto">' + resaltar(fr.x, termino) + '</div>' +
           '<div class="fuentes-donde">' + donde + (py ? ' <span class="fuentes-ir">↗</span>' : '') +
           '</div></div>';
@@ -455,7 +532,7 @@
   /**
    * Registro de acciones del popup (p. ej. un futuro botón "Explicar" con
    * búsqueda semántica o LLM). Una acción es:
-   *   {id, etiqueta, disponible: function(ctx) -> bool,
+   *   {id, etiqueta (texto o función que lo devuelve), disponible: function(ctx) -> bool,
    *    ejecutar: function(ctx, mostrar(html))}
    */
   F.registrarAccion = function (accion) {
@@ -471,7 +548,7 @@
       var a = acciones[i];
       if (a.disponible && !a.disponible(ctx)) continue;
       h += '<button type="button" class="fuentes-accion" data-accion="' + escapar(a.id) + '">' +
-        escapar(a.etiqueta) + '</button>';
+        escapar(typeof a.etiqueta === 'function' ? a.etiqueta() : a.etiqueta) + '</button>';
     }
     return h ? '<div class="fuentes-acciones">' + h + '</div>' : '';
   }
@@ -539,11 +616,10 @@
       pintar(htmlFragmentos(cacheDatos[t.f], t, max));
       return;
     }
-    pintar('<div class="fuentes-vacio">Cargando…</div>');
+    pintar('<div class="fuentes-vacio">' + escapar(T('cargando')) + '</div>');
     cargar(t.f, function (err, datos) {
       pintar(err
-        ? '<div class="fuentes-vacio">No se pudieron cargar los fragmentos. ' +
-          'Sincroniza los medios con AnkiWeb y vuelve a intentarlo.</div>'
+        ? '<div class="fuentes-vacio">' + escapar(T('errorCarga')) + '</div>'
         : htmlFragmentos(datos, t, max));
     });
   }
@@ -577,7 +653,7 @@
     var max = 10;
     var tFalso = { t: titulo, s: (res && res.resaltar) || [] };
     var cuerpo = res && res.ok ? htmlFragmentos(res, tFalso, max)
-      : '<div class="fuentes-vacio">No se pudo buscar en las fuentes.</div>';
+      : '<div class="fuentes-vacio">' + escapar(T('errorBuscar')) + '</div>';
     popupTermino = null;
     mostrarEn(rect, '<div class="fuentes-cab">' + escapar(titulo) + '</div>' +
       '<div class="fuentes-cuerpo">' + cuerpo + '</div>');
@@ -599,9 +675,10 @@
       botonBuscar = D.createElement('button');
       botonBuscar.type = 'button';
       botonBuscar.className = 'fuentes-buscar';
-      botonBuscar.appendChild(D.createTextNode('Buscar en fuentes'));
       D.body.appendChild(botonBuscar);
     }
+    botonBuscar.innerHTML = '';
+    botonBuscar.appendChild(D.createTextNode(T('buscar')));
     var sx = W.pageXOffset || 0;
     var sy = W.pageYOffset || 0;
     botonBuscar.style.display = 'block';
@@ -622,6 +699,9 @@
     if (el) {
       if (temporCerrar) { clearTimeout(temporCerrar); temporCerrar = null; }
       if (popupTermino === el && abierto()) return;
+      // Otro trozo del mismo término (partido por etiquetas): no reabrir.
+      if (abierto() && popupTermino &&
+          popupTermino.getAttribute('data-fuentes-t') === el.getAttribute('data-fuentes-t')) return;
       if (temporAbrir) clearTimeout(temporAbrir);
       temporAbrir = setTimeout(function () { temporAbrir = null; abrir(el); }, 120);
     } else if (cercano(e.target, esPopup)) {
@@ -696,13 +776,13 @@
   // Acción incluida: "Más en mis fuentes" (escritorio, consulta el índice SQLite).
   F.registrarAccion({
     id: 'mas',
-    etiqueta: 'Más en mis fuentes',
+    etiqueta: function () { return T('mas'); },
     disponible: function (ctx) { return ctx.tienePy && !!ctx.termino; },
     ejecutar: function (ctx, mostrar) {
-      mostrar('<div class="fuentes-vacio">Buscando…</div>');
+      mostrar('<div class="fuentes-vacio">' + escapar(T('buscando')) + '</div>');
       F.py({ cmd: 'mas', variantes: ctx.variantes }, function (res) {
         mostrar(res && res.ok ? htmlFragmentos(res, ctx.termino, 10)
-          : '<div class="fuentes-vacio">No se pudo buscar en las fuentes.</div>');
+          : '<div class="fuentes-vacio">' + escapar(T('errorBuscar')) + '</div>');
       });
     }
   });

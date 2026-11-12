@@ -129,3 +129,16 @@ test('Escape cierra y una tarjeta nueva cierra el popup', async () => {
   w.Fuentes.run();
   assert.ok(!visible(w));
 });
+
+test('interfaz en inglés cuando el glosario exportado lo indica', async () => {
+  const g = JSON.parse(JSON.stringify(require('./helpers').GLOSARIO));
+  g.ajustes.idioma = 'en';
+  const w = await montar(HTML, { datos: { '_fuentes_glosario.json': g, '_fuentes_t_aorta.json': null },
+    pycmd: (m, cb) => cb && cb({ ok: false }) });
+  assert.equal(w.Fuentes.idioma(), 'en');
+  w.Fuentes.forceTouch(true);
+  click(w, w.document.querySelector('.fuentes-term'));
+  await esperar(10);
+  assert.equal(popup(w).querySelector('.fuentes-accion').textContent, 'More from my sources');
+  assert.equal(popup(w).querySelector('.fuentes-abrible').getAttribute('title'), 'Open the PDF at this page');
+});

@@ -11,7 +11,7 @@ const CASOS = JSON.parse(fs.readFileSync(path.join(RAIZ, 'tests', 'casos_matchin
 // Glosario y datos de ejemplo (texto inventado).
 const GLOSARIO = {
   version: 1,
-  ajustes: { subrayado: true, fragmentos: 3, soloPrimera: true },
+  ajustes: { subrayado: true, fragmentos: 3, soloPrimera: true, idioma: 'es' },
   terminos: [
     { t: 'arteria femoral', s: ['a. femoral'], f: '_fuentes_t_arteria-femoral.json' },
     { t: 'arteria femoral profunda', s: [], f: '_fuentes_t_arteria-femoral-profunda.json' },
