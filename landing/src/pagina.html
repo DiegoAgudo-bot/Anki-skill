@@ -1,0 +1,367 @@
+<style>
+/* Concepto: el escritorio de alguien que estudia. Papel de cuaderno con su
+   margen rojo, notas adhesivas, fichas y anotaciones a mano; el gesto fuerte
+   sigue siendo el trazo de subrayador amarillo, solo sobre términos reales.
+   Bandas a todo el ancho (tinta, papel rayado, amarillo) para dar ritmo. */
+:root {
+  color-scheme: light;
+  --papel: #fafbfd; --tinta: #121a3a; --tinta-2: #4a5273; --raya: #dfe4f0; --blanco: #ffffff;
+  --fluor: #ffe83d; --boli: #2747d8; --margen: #e5484d;
+  --nota-a: #fff3a3; --nota-r: #ffd6de; --nota-z: #d2e4ff;
+  --titulo: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
+  --texto: "Atkinson Hyperlegible", Verdana, sans-serif;
+  --mano: "Caveat", "Segoe Print", cursive;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+body { background: var(--papel); color: var(--tinta); font: 17px/1.55 var(--texto); }
+.in { max-width: 1180px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--boli); }
+:is(a, button, input, summary):focus-visible { outline: 3px solid var(--boli); outline-offset: 2px; }
+
+/* Menú fijo */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 40; background: var(--papel); }
+nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; background: var(--papel); border-bottom: 2px solid var(--tinta); }
+nav .in { display: flex; align-items: center; gap: 8px 26px; padding-block: 12px; flex-wrap: wrap; }
+.marca { font: 800 25px/1 var(--titulo); letter-spacing: -.02em; color: var(--tinta); text-decoration: none; margin-right: auto;
+  background: linear-gradient(var(--fluor), var(--fluor)) no-repeat 0 85% / 100% 42%; padding: 0 3px; }
+nav ul { display: flex; gap: 4px 22px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+nav ul a { color: var(--tinta); text-decoration: none; font-weight: 700; font-size: 15.5px; padding-block: 4px; border-bottom: 2px solid transparent; }
+nav ul a:hover { border-bottom-color: var(--margen); }
+.boton { display: inline-block; font: 700 15.5px var(--texto); padding: 9px 16px; border: 1.5px solid var(--tinta); border-radius: 4px; background: var(--fluor); color: var(--tinta); cursor: pointer; text-decoration: none; box-shadow: 3px 3px 0 var(--tinta); }
+.boton:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--tinta); }
+.boton.sec { background: var(--blanco); }
+.boton svg { width: 16px; height: 16px; vertical-align: -2px; margin-right: 8px; }
+.descarga { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 4px 0 0; }
+.descarga .mano { font-size: 20px; }
+@media (max-width: 640px) { nav ul { order: 3; flex-basis: 100%; gap: 4px 16px; } nav ul a { font-size: 14.5px; } }
+
+h1 { font: 800 clamp(2.4rem, 5.3vw, 4.1rem)/1 var(--titulo); letter-spacing: -.035em; margin: 0 0 18px; text-wrap: balance; }
+h2 { font: 800 clamp(1.8rem, 3.6vw, 2.7rem)/1.05 var(--titulo); letter-spacing: -.028em; margin: 0 0 12px; text-wrap: balance; }
+h3 { font: 800 1.25rem/1.15 var(--titulo); letter-spacing: -.01em; margin: 0 0 6px; }
+p { margin: 0 0 12px; }
+.lead { font-size: 1.14rem; color: var(--tinta-2); max-width: 54ch; }
+.mano { font: 500 22px/1.15 var(--mano); color: var(--margen); }
+.banda { padding-block: 68px; }
+.cab { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 8px 40px; margin-bottom: 30px; }
+.cab p { max-width: 46ch; color: var(--tinta-2); margin: 0; }
+.rayado { background: repeating-linear-gradient(var(--blanco) 0 31px, var(--raya) 31px 32px); border-block: 2px solid var(--tinta); }
+.tinta { background: var(--tinta); color: var(--papel); }
+
+/* Portada */
+.portada { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 44px 56px; align-items: start; padding-block: 52px 64px; position: relative; }
+.portada > * { min-width: 0; }
+.garantias { display: flex; flex-wrap: wrap; gap: 6px 18px; list-style: none; padding: 0; margin: 18px 0 0; font-size: 15px; color: var(--tinta-2); }
+.garantias li::before { content: "✓ "; color: var(--margen); font-weight: 700; }
+.ventana { background: var(--blanco); border: 1.5px solid var(--tinta); border-radius: 8px; box-shadow: 7px 7px 0 var(--tinta); overflow: hidden; }
+.barra { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 1.5px solid var(--tinta); background: var(--papel); font-size: 13.5px; font-weight: 700; }
+.barra i { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid var(--tinta); }
+.barra i:first-child { background: var(--margen); } .barra i:nth-child(2) { background: var(--fluor); } .barra span { margin-left: 8px; }
+.escena { position: relative; padding: 30px 26px 0; min-height: 468px; }
+.frase { font: 500 clamp(1.35rem, 2.5vw, 1.8rem)/1.34 var(--titulo); letter-spacing: -.01em; margin: 0; text-align: center; }
+.respuestas { display: flex; gap: 8px; justify-content: center; padding: 12px; border-top: 1.5px solid var(--raya); background: var(--papel); }
+.respuestas span { font-size: 13.5px; font-weight: 700; padding: 6px 14px; border: 1.5px solid var(--tinta); border-radius: 4px; background: var(--blanco); }
+.cursor { position: absolute; left: 0; top: 0; width: 20px; height: 20px; pointer-events: none; transition: transform .6s cubic-bezier(.4,0,.2,1); z-index: 3; }
+.pista { position: absolute; right: 8px; top: -34px; transform: rotate(3deg); }
+@media (max-width: 720px) { .pista { position: static; transform: none; display: block; margin-bottom: 6px; } }
+
+/* Términos y popup */
+.t { cursor: pointer; border-radius: 3px 8px 4px 9px; padding: 0 .12em; margin: 0 -.12em;
+  background: linear-gradient(var(--fluor), var(--fluor)) no-repeat 0 78% / 100% 46%; outline-offset: 2px; }
+.t.on, .t:hover { background-size: 100% 100%; background-position: 0 50%; }
+@media (prefers-reduced-motion: no-preference) {
+  .escena .t { animation: trazo .7s cubic-bezier(.3,.7,.2,1) both; }
+  .escena .t:nth-of-type(2) { animation-delay: .35s; } .escena .t:nth-of-type(3) { animation-delay: .7s; }
+  @keyframes trazo { from { background-size: 0 46%; } }
+  .t { transition: background-size .18s, background-position .18s; }
+  .fx-pop.in { animation: sale .16s ease-out; } @keyframes sale { from { opacity: 0; transform: translateY(-4px); } }
+  .adhesiva { transition: transform .2s; } .adhesiva:hover { transform: rotate(0) translateY(-4px); }
+}
+.fx-pop { position: absolute; z-index: 20; background: var(--blanco); border: 1.5px solid var(--tinta); border-radius: 4px; padding: 13px 15px;
+  box-shadow: 5px 5px 0 var(--tinta); font: 15px/1.5 var(--texto); color: var(--tinta); text-align: left; }
+.fx-pop p { margin: 0; }
+.fx-term { font: 800 18px/1.2 var(--titulo); margin-bottom: 6px !important; }
+.fx-src { font-size: 12.5px; font-weight: 700; color: var(--tinta-2); margin-top: 8px !important; }
+.fx-frag { padding-block: 4px; }
+.fx-where { font: 500 19px/1.1 var(--mano); color: var(--margen); }
+.fx-pop mark, mark { background: var(--fluor); color: inherit; padding: 0 2px; }
+
+/* Formularios */
+.lista { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; max-width: 520px; }
+.lista label { flex-basis: 100%; font-weight: 700; font-size: 15px; }
+.lista input { flex: 1 1 210px; min-width: 0; font: inherit; padding: 11px 13px; border: 1.5px solid var(--tinta); border-radius: 4px; background: var(--blanco); color: var(--tinta); }
+.lista button { font-size: 16px; padding: 11px 18px; }
+.fx-estado { flex-basis: 100%; font-size: 14.5px; min-height: 1.4em; margin: 0; }
+.fx-estado.mal { color: #b3261e; font-weight: 700; } .fx-estado.bien { color: #17603a; font-weight: 700; }
+.hecho input, .hecho button { opacity: .5; pointer-events: none; }
+.legal { font-size: 13.5px; color: var(--tinta-2); max-width: 46ch; margin: 0 0 10px; }
+
+/* Cinta de garantías */
+.cinta .in { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px 30px; padding-block: 18px; font: 500 1.08rem/1.3 var(--titulo); }
+.cinta b { color: var(--fluor); font-weight: 800; }
+
+/* Mural de notas adhesivas */
+.mural { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px 28px; }
+.adhesiva { padding: 20px 18px 18px; box-shadow: 3px 5px 0 rgba(18, 26, 58, .18); position: relative; font-size: 16px; }
+.adhesiva::before { content: ""; position: absolute; top: -9px; left: 50%; width: 74px; height: 20px; margin-left: -37px; background: rgba(255,255,255,.75); border: 1px solid var(--raya); transform: rotate(-2deg); }
+.adhesiva:nth-child(3n+1) { background: var(--nota-a); transform: rotate(-1.4deg); }
+.adhesiva:nth-child(3n+2) { background: var(--nota-z); transform: rotate(1deg); }
+.adhesiva:nth-child(3n) { background: var(--nota-r); transform: rotate(-.6deg); }
+.adhesiva .ej { display: block; margin-top: 10px; font: 500 21px/1.2 var(--mano); color: var(--tinta); }
+.adhesiva s { text-decoration-color: var(--margen); }
+
+/* Zona de pruebas */
+.prueba { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px 48px; align-items: start; }
+.prueba > * { min-width: 0; }
+.ejemplos { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.ejemplos button { font: 400 14.5px var(--texto); padding: 7px 12px; border: 1.5px solid var(--tinta); border-radius: 999px; background: var(--blanco); color: var(--tinta); cursor: pointer; text-align: left; }
+.ejemplos button:hover { background: var(--nota-a); }
+.ficha { background: var(--blanco); border: 1.5px solid var(--tinta); border-radius: 6px; box-shadow: 6px 6px 0 var(--tinta); padding: 18px; }
+.ficha input { width: 100%; font: inherit; padding: 11px 12px; border: 1.5px solid var(--tinta); border-radius: 4px; background: var(--papel); color: var(--tinta); }
+.ficha output { display: block; font: 500 clamp(1.25rem, 2.4vw, 1.6rem)/1.42 var(--titulo); margin-top: 16px; min-height: 4.4em; }
+.ficha label { font-weight: 700; font-size: 14.5px; display: block; margin-bottom: 6px; }
+
+/* Pasos con mini-capturas */
+.pasos { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 30px 28px; counter-reset: p; }
+.pasos li { counter-increment: p; display: flex; flex-direction: column; gap: 12px; }
+.pasos h3::before { content: counter(p) ". "; color: var(--margen); }
+.pasos p { color: var(--tinta-2); margin: 0; }
+.mini { background: var(--blanco); border: 1.5px solid var(--tinta); border-radius: 6px; padding: 14px; font-size: 14px; min-height: 172px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.prog { height: 12px; border: 1.5px solid var(--tinta); border-radius: 99px; overflow: hidden; }
+.prog i { display: block; height: 100%; width: 41%; background: var(--fluor); border-right: 1.5px solid var(--tinta); }
+@media (prefers-reduced-motion: no-preference) { .prog i { animation: carga 5s ease-in-out infinite alternate; } @keyframes carga { from { width: 12%; } to { width: 88%; } } }
+.mini table { width: 100%; border-collapse: collapse; }
+.mini td, .mini th { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--raya); }
+.mini th { font-size: 12.5px; color: var(--tinta-2); }
+.pdf { position: relative; padding: 12px 14px; border: 1px solid var(--raya); background: var(--papel); font-size: 13px; line-height: 1.5; }
+.pdf b { position: absolute; right: -1.5px; top: -13px; background: var(--margen); color: var(--blanco); font-size: 12px; padding: 1px 8px; border-radius: 3px 3px 0 0; }
+.pdf u { text-decoration: none; display: block; height: 7px; margin: 6px 0; background: var(--raya); border-radius: 3px; }
+
+/* Móvil y vídeo */
+.tres { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 34px 40px; align-items: center; }
+.tres > * { min-width: 0; }
+.movil { width: 262px; max-width: 100%; border: 9px solid var(--tinta); border-radius: 34px; background: var(--blanco); padding: 32px 14px 148px; font-size: 18px; line-height: 1.45; text-align: center; margin-inline: auto; box-shadow: 7px 7px 0 var(--fluor); }
+.movil hr { border: 0; border-top: 1px solid var(--raya); margin: 14px 0; }
+.apps { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 14px 0 0; }
+.apps li { border: 1.5px solid var(--tinta); border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 14.5px; background: var(--blanco); }
+.video { aspect-ratio: 16/10; max-width: 100%; border: 1.5px solid var(--tinta); border-radius: 6px; display: grid; place-content: center; text-align: center; padding: 16px; color: var(--tinta-2); background: var(--blanco); box-shadow: 6px 6px 0 var(--tinta); }
+.video svg { width: 54px; height: 54px; margin: 0 auto 6px; display: block; }
+
+/* Privacidad */
+.privado { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 30px 60px; align-items: center; }
+.privado h2 { font-size: clamp(2rem, 4.6vw, 3.4rem); }
+.privado ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+.privado li { padding-left: 30px; position: relative; color: #d9def2; }
+.privado li::before { content: "✓"; position: absolute; left: 0; color: var(--fluor); font-weight: 700; font-size: 1.2em; line-height: 1.2; }
+.privado li b { color: var(--papel); display: block; }
+
+/* Precios */
+.planes { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 28px; align-items: stretch; }
+.plan { background: var(--blanco); border: 1.5px solid var(--tinta); border-radius: 6px; padding: 24px 22px; display: flex; flex-direction: column; gap: 10px; position: relative; }
+.plan.pro { box-shadow: 7px 7px 0 var(--fluor), 7px 7px 0 1.5px var(--tinta); }
+.precio { font: 800 2.6rem/1 var(--titulo); letter-spacing: -.03em; }
+.precio small { font: 400 15px var(--texto); color: var(--tinta-2); letter-spacing: 0; }
+.plan ul { margin: 4px 0 8px; padding: 0; list-style: none; display: grid; gap: 7px; flex: 1; }
+.plan li { padding-left: 24px; position: relative; }
+.plan li::before { content: "✓"; position: absolute; left: 0; color: var(--margen); font-weight: 700; }
+.sello { position: absolute; right: 14px; top: -16px; transform: rotate(4deg); background: var(--blanco); padding: 0 6px; }
+
+/* Preguntas */
+.faq { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 48px; }
+details { border-bottom: 1.5px solid var(--raya); padding-block: 13px; }
+summary { font-weight: 700; cursor: pointer; }
+details p { margin: 8px 0 0; color: var(--tinta-2); }
+
+/* Cierre y pie */
+.cierre { background: var(--fluor); border-block: 2px solid var(--tinta); }
+.cierre .in { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px 60px; align-items: center; padding-block: 52px; }
+.cierre .lista { margin-top: 0; } .cierre .boton { background: var(--tinta); color: var(--papel); box-shadow: 3px 3px 0 var(--blanco); }
+footer { background: var(--tinta); color: #c5cbe6; font-size: 15px; }
+footer .in { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 26px 40px; padding-block: 44px 34px; }
+footer b { color: var(--papel); display: block; margin-bottom: 8px; font: 800 1.05rem var(--titulo); }
+footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+footer a { color: #c5cbe6; }
+footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px; background: var(--fluor); padding: 4px 8px; border-radius: 3px 8px 4px 9px; }
+</style>
+
+<nav aria-label="Principal"><div class="in">
+  <a class="marca" href="#inicio">Fuentes</a>
+  <ul>
+    <li><a href="#que-hace">Qué hace</a></li>
+    <li><a href="#como">Cómo funciona</a></li>
+    <li><a href="#movil">Móvil</a></li>
+    <li><a href="#precios">Precios</a></li>
+    <li><a href="#preguntas">Preguntas</a></li>
+  </ul>
+  <a class="boton" href="#lista-final">Apuntarme a la lista</a>
+</div></nav>
+
+<div class="in portada" id="inicio">
+  <div>
+    <h1>Tus apuntes responden dentro de cada tarjeta</h1>
+    <p class="lead">Fuentes es un add-on para Anki. Subraya los términos de tus tarjetas y te enseña qué dicen sobre ellos tus propios PDFs, con la página exacta.</p>
+    <form class="lista" id="lista-a" novalidate>
+      <label for="correo-a">Te avisamos cuando salga la versión Pro</label>
+      <input id="correo-a" type="email" placeholder="tu@correo.es" autocomplete="email">
+      <button type="submit" class="boton">Apuntarme a la lista</button>
+      <p class="fx-estado" role="status"></p>
+    </form>
+    <p class="legal">Solo usaremos tu correo para avisarte del lanzamiento. Puedes pedir que lo borremos cuando quieras.</p>
+    <p class="descarga"><a class="boton sec" href="{{DESCARGA}}"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5v8.2M4.4 6.6L8 10.2l3.6-3.6M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Descargar la versión gratuita</a><span class="mano">gratis y sin registro</span></p>
+    <ul class="garantias"><li>Gratis hoy</li><li>Sin cuenta</li><li>Sin conexión</li><li>Español e inglés</li></ul>
+  </div>
+  <div style="position:relative">
+    <span class="mano pista">pasa el ratón por lo amarillo ↓</span>
+    <div class="ventana">
+      <div class="barra"><i></i><i></i><i></i><span>Anki: repaso de Anatomía</span></div>
+      <div class="escena" id="escena">
+        <svg class="cursor" id="cursor" viewBox="0 0 20 20" hidden><path d="M3 2l13 7-6 1.6L8 17z" fill="#121a3a" stroke="#fff" stroke-width="1.2"/></svg>
+        <p class="frase">La arteria femoral pasa bajo el ligamento inguinal; el nervio ciatico va por detrás del muslo.</p>
+      </div>
+      <div class="respuestas"><span>Otra vez</span><span>Difícil</span><span>Bien</span><span>Fácil</span></div>
+    </div>
+    <p class="mano" style="margin:14px 0 0;font-size:20px">«ciatico» va sin tilde a propósito: lo encuentra igual</p>
+  </div>
+</div>
+
+<div class="tinta cinta"><div class="in">
+  <span><b>0</b> servidores: todo en tu ordenador</span>
+  <span>Popup en menos de <b>100 ms</b></span>
+  <span>Hasta <b>3</b> fragmentos por fuente</span>
+  <span>Escritorio, <b>AnkiDroid</b> y <b>AnkiMobile</b></span>
+</div></div>
+
+<div class="banda" id="que-hace"><div class="in">
+  <div class="cab"><h2>Lee tus tarjetas como las escribiste tú</h2><p>Nadie escribe sus tarjetas con cuidado a las dos de la mañana. Fuentes reconoce los términos igualmente.</p></div>
+  <div class="mural">
+    <div class="adhesiva"><h3>Sin tildes, sin mayúsculas</h3>Da igual cómo lo teclees.<span class="ej">CIATICO = ciático</span></div>
+    <div class="adhesiva"><h3>Gana la frase más larga</h3>Si un término contiene a otro, subraya el completo.<span class="ej">arteria femoral profunda</span></div>
+    <div class="adhesiva"><h3>Sinónimos y abreviaturas</h3>Tú decides cuáles cuentan.<span class="ej">a. femoral → arteria femoral</span></div>
+    <div class="adhesiva"><h3>No te chiva la respuesta</h3>En el anverso no toca el hueco de tus tarjetas de huecos.<span class="ej">La [...] nace del ventrículo</span></div>
+    <div class="adhesiva"><h3>El PDF, en su página</h3>Un clic en el fragmento abre tu libro justo ahí, dentro de Anki.<span class="ej">Apuntes, p. 12</span></div>
+    <div class="adhesiva"><h3>Búsqueda libre</h3>Selecciona cualquier texto de la tarjeta y búscalo en tus fuentes.<span class="ej">«triángulo femoral»</span></div>
+  </div>
+</div></div>
+
+<div class="banda rayado"><div class="in">
+  <div class="prueba">
+    <div>
+      <h2>Escribe una frase y mira qué subraya</h2>
+      <p style="color:var(--tinta-2)">El glosario de esta demo tiene seis términos: arteria femoral, nervio ciático, ligamento inguinal, ventrículo izquierdo, aorta y vena safena mayor.</p>
+      <p class="mano" style="margin:16px 0 0">o prueba con una de estas:</p>
+      <div class="ejemplos" id="ejemplos">
+        <button type="button">La AORTA sale del ventriculo izquierdo</button>
+        <button type="button">La a. femoral se palpa en la ingle</button>
+        <button type="button">El ciatico no acompaña a la arteria femoral</button>
+        <button type="button">La safena mayor sube por la pierna</button>
+      </div>
+    </div>
+    <div class="ficha">
+      <label for="prueba-a">Tu frase</label>
+      <input id="prueba-a" type="text" value="La AORTA sale del ventriculo izquierdo y la safena mayor sube por la pierna" autocomplete="off">
+      <output id="salida-a" for="prueba-a"></output>
+    </div>
+  </div>
+</div></div>
+
+<div class="banda" id="como"><div class="in">
+  <div class="cab"><h2>Tres pasos, una sola vez</h2><p>Después repasas como siempre. No tienes que tocar tus tarjetas.</p></div>
+  <ol class="pasos">
+    <li><div class="mini"><b>anatomia-apuntes.pdf</b><div class="prog"><i></i></div><span style="color:var(--tinta-2)">Leyendo texto, página 412 de 1 030</span></div>
+      <div><h3>Importa tus PDFs</h3><p>Apuntes o manuales. Se indexan en tu ordenador, en segundo plano; mil páginas tardan unos minutos.</p></div></li>
+    <li><div class="mini"><table><tr><th>Término</th><th>Sinónimos</th></tr><tr><td>arteria femoral</td><td>a. femoral</td></tr><tr><td>nervio ciático</td><td>ciático</td></tr><tr><td>vena safena mayor</td><td>safena mayor</td></tr></table></div>
+      <div><h3>Haz tu glosario</h3><p>Los términos que quieres ver subrayados. Si el PDF trae índice, Fuentes te propone candidatos y tú eliges.</p></div></li>
+    <li><div class="mini"><div class="pdf"><b>p. 12</b><u style="width:92%"></u>La <mark>arteria femoral</mark> continúa a la arteria ilíaca externa por debajo del ligamento inguinal.<u style="width:80%"></u><u style="width:64%"></u></div></div>
+      <div><h3>Repasa como siempre</h3><p>Pasa el ratón por un término y lee el fragmento. Un clic abre el PDF en esa página, sin salir de Anki.</p></div></li>
+  </ol>
+</div></div>
+
+<div class="banda rayado" id="movil"><div class="in tres">
+  <div>
+    <h2>También en el móvil, sin conexión</h2>
+    <p style="color:var(--tinta-2)">Los fragmentos viajan con tu propia sincronización de Anki, así que en el metro también los tienes. Toca un término de la tarjeta para probarlo.</p>
+    <ul class="apps"><li>AnkiDroid</li><li>AnkiMobile</li><li>AnkiWeb</li></ul>
+  </div>
+  <div><div class="movil" data-touch id="movil-a">¿Qué vaso nace del ventrículo izquierdo?<hr>La aorta.</div></div>
+  <div>
+    <div class="video"><div><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="25" fill="var(--fluor)" stroke="var(--tinta)" stroke-width="2"/><path d="M22 17l15 10-15 10z" fill="var(--tinta)"/></svg><b style="color:var(--tinta)">Vídeo de 30 segundos</b><br>De PDF a popup. Pendiente de grabar.</div></div>
+  </div>
+</div></div>
+
+<div class="banda tinta"><div class="in privado">
+  <h2>Nada sale de tu ordenador</h2>
+  <ul>
+    <li><b>Sin servidores ni cuentas</b>Los PDFs se leen y se indexan en local.</li>
+    <li><b>Llega vacío</b>Sin libros, sin índices y sin glosarios de nadie. Lo que cargas es tuyo.</li>
+    <li><b>Al móvil, por tu sincronización</b>Solo viajan los fragmentos de tus términos, con tu cuenta de AnkiWeb.</li>
+  </ul>
+</div></div>
+
+<div class="banda" id="precios"><div class="in">
+  <div class="cab"><h2>Gratis hoy, Pro en camino</h2><p>La versión gratuita no caduca. La Pro se está construyendo; apúntate y te avisamos al salir.</p></div>
+  <div class="planes">
+    <div class="plan">
+      <h3>Gratis</h3><div class="precio">0 € <small>para siempre</small></div>
+      <ul><li>Subrayado y popup en escritorio y móvil</li><li>PDF abierto en la página exacta</li><li>Búsqueda libre en tus fuentes</li><li>Glosario con sinónimos</li></ul>
+      <a class="boton" href="{{DESCARGA}}" style="text-align:center;background:var(--blanco)">Descargar la versión gratuita</a>
+    </div>
+    <div class="plan pro">
+      <span class="mano sello">en desarrollo</span>
+      <h3>Pro</h3><div class="precio"><small>Precio por anunciar</small></div>
+      <ul><li>Todo lo de la versión gratuita</li><li>PDFs escaneados, con OCR</li><li>Botón «Explicar», con tus fuentes como contexto</li><li>Búsqueda por significado, no solo por palabras</li></ul>
+      <a class="boton" href="#lista-final" style="text-align:center">Apuntarme a la lista</a>
+    </div>
+  </div>
+</div></div>
+
+<div class="banda rayado" id="preguntas"><div class="in">
+  <div class="cab"><h2>Preguntas que nos hacen</h2></div>
+  <div class="faq">
+    <details><summary>¿Qué PDFs puedo usar?</summary><p>Cualquiera que tenga texto: apuntes, manuales, guías. Usa solo material que tengas derecho a usar.</p></details>
+    <details><summary>¿Y si mi PDF es escaneado?</summary><p>Fuentes te avisa al importarlo. Las fotos de páginas necesitan OCR, que llegará con la versión Pro.</p></details>
+    <details><summary>¿Se suben mis libros a algún sitio?</summary><p>No. Todo el procesado es local. Al móvil solo llegan los fragmentos de tus términos, por tu sincronización de AnkiWeb.</p></details>
+    <details><summary>¿Tengo que cambiar mis tarjetas?</summary><p>No. En el escritorio funciona con las que ya tienes. Para el móvil eliges los tipos de nota y el add-on añade un bloque pequeño a la plantilla, que se quita con un clic.</p></details>
+    <details><summary>¿Con qué versiones de Anki funciona?</summary><p>Anki 2.1.66 o posterior en escritorio, y las versiones actuales de AnkiDroid y AnkiMobile.</p></details>
+    <details><summary>¿Cuánto ocupa en el móvil?</summary><p>Poco: entre 1 y 4 KB por término y fuente. El add-on te enseña el total y te avisa si crece demasiado.</p></details>
+  </div>
+</div></div>
+
+<div class="cierre"><div class="in">
+  <h2 style="margin:0">Entérate el primero cuando salga la versión Pro</h2>
+  <form class="lista" id="lista-final" novalidate>
+    <label for="correo-final">Tu correo</label>
+    <input id="correo-final" type="email" placeholder="tu@correo.es" autocomplete="email">
+    <button type="submit" class="boton">Apuntarme a la lista</button>
+    <p class="fx-estado" role="status"></p>
+  </form>
+</div></div>
+
+<footer><div class="in">
+  <div><span class="marca">Fuentes</span><p>Tus PDFs dentro de tus tarjetas de Anki.</p></div>
+  <div><b>Producto</b><ul><li><a href="#que-hace">Qué hace</a></li><li><a href="#como">Cómo funciona</a></li><li><a href="#movil">Móvil</a></li><li><a href="#precios">Precios</a></li></ul></div>
+  <div><b>Recursos</b><ul><li><a href="{{DESCARGA}}">Descarga y guía de instalación</a></li><li><a href="#preguntas">Preguntas frecuentes</a></li></ul></div>
+  <div><b>Nota legal</b><p>Fuentes no incluye ni distribuye contenido de terceros. Los ejemplos de esta página son apuntes inventados.</p></div>
+</div></footer>
+
+<script>
+/*__DEMO_JS__*/
+// El popup de la portada se abre dentro de la ventana, bajo la frase, sin taparla.
+Fx.colocar = function (el, r, ancho, vw) {
+  var e = el.closest('#escena'); if (!e) return null;
+  var b = e.getBoundingClientRect(), f = e.querySelector('.frase').getBoundingClientRect();
+  return [Math.max(12, b.left + (b.width - ancho) / 2), f.bottom + 14];
+};
+Fx.subrayar(document.getElementById('escena'));
+Fx.subrayar(document.getElementById('movil-a'));
+var entrada = document.getElementById('prueba-a');
+Fx.probar(entrada, document.getElementById('salida-a'));
+document.getElementById('ejemplos').addEventListener('click', function (e) {
+  if (e.target.tagName !== 'BUTTON') return;
+  entrada.value = e.target.textContent;
+  entrada.dispatchEvent(new Event('input'));
+});
+Fx.lista(document.getElementById('lista-a'), {{LISTA}});
+Fx.lista(document.getElementById('lista-final'), {{LISTA}});
+Fx.autoplay(document.getElementById('escena'), document.getElementById('cursor'));
+</script>
