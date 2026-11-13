@@ -1,6 +1,6 @@
 # Landing de Fuentes
 
-Una sola página (`index.html`) con la demo en vivo y la lista de espera.
+Una página (`index.html`, más la carpeta `video/`) con la demo en vivo y la lista de espera.
 No necesita servidor propio: vale cualquier alojamiento de páginas estáticas.
 
 - `src/pagina.html`: contenido y estilos.
@@ -8,6 +8,7 @@ No necesita servidor propio: vale cualquier alojamiento de páginas estáticas.
 - `config.json`: ajustes.
 - `build.py`: genera `index.html`.
 - `prueba.js`: comprobaciones con Chromium.
+- `video/`: el vídeo de 30 segundos (MP4 y WebM) y su carátula. Hay que publicarla junto a `index.html`.
 
 Los textos de ejemplo de la demo son apuntes inventados.
 
@@ -38,3 +39,13 @@ Al recoger correos tratas datos personales: necesitas una política de privacida
 Con GitHub Pages: en el repositorio, *Settings → Pages*, elige publicar desde una rama y la carpeta de la landing, o sube `index.html` a cualquier alojamiento estático. Después pon la dirección final en `url_publica` y regenera.
 
 Antes de publicar revisa en `config.json` que `descarga_url` apunta a un sitio que los visitantes puedan abrir (un repositorio privado no sirve).
+
+## Regenerar el vídeo
+
+El vídeo se monta con capturas reales del add-on en Anki (PDFs de prueba con texto inventado):
+
+1. `python dev/capturas_anki.py carpeta/cap` (con un Python que tenga `aqt`) saca las capturas y las posiciones del cursor.
+2. Copia `dev/video/player.html` y `dev/video/render.js` a `carpeta/` y ejecuta `node render.js 30`: dibuja los 900 fotogramas.
+3. Únelos con ffmpeg: `ffmpeg -framerate 30 -i frames/%04d.png -c:v libx264 -pix_fmt yuv420p -crf 20 -movflags +faststart fuentes-30s.mp4`.
+
+El guion (textos y tiempos) está en `dev/video/player.html`.
