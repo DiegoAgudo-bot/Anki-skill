@@ -112,6 +112,7 @@ def generar_apuntes(ruta, titulo="Apuntes de Anatomía (ejemplo)", repeticiones=
 def generar_otra_fuente(ruta):
     """Segunda fuente, más breve, para probar el popup con varias fuentes."""
     c = canvas.Canvas(ruta, pagesize=A4)
+    c.setTitle("Resumen de repaso (ejemplo)")
     _, alto = A4
     textos = [
         "Resumen de repaso. La arteria femoral profunda irriga los músculos del muslo. "

@@ -162,8 +162,7 @@ p { margin: 0 0 12px; }
 .movil hr { border: 0; border-top: 1px solid var(--raya); margin: 14px 0; }
 .apps { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; padding: 0; margin: 14px 0 0; }
 .apps li { border: 1.5px solid var(--tinta); border-radius: 4px; padding: 4px 10px; font-weight: 700; font-size: 14.5px; background: var(--blanco); }
-.video { aspect-ratio: 16/10; max-width: 100%; border: 1.5px solid var(--tinta); border-radius: 6px; display: grid; place-content: center; text-align: center; padding: 16px; color: var(--tinta-2); background: var(--blanco); box-shadow: 6px 6px 0 var(--tinta); }
-.video svg { width: 54px; height: 54px; margin: 0 auto 6px; display: block; }
+.video { display: block; width: 100%; aspect-ratio: 16/9; border: 1.5px solid var(--tinta); border-radius: 6px; background: var(--tinta); box-shadow: 6px 6px 0 var(--tinta); }
 
 /* Privacidad */
 .privado { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 30px 60px; align-items: center; }
@@ -302,7 +301,11 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
   </div>
   <div><div class="movil" data-touch id="movil-a">¿Qué vaso nace del ventrículo izquierdo?<hr>La aorta.</div></div>
   <div>
-    <div class="video"><div><svg viewBox="0 0 54 54"><circle cx="27" cy="27" r="25" fill="var(--fluor)" stroke="var(--tinta)" stroke-width="2"/><path d="M22 17l15 10-15 10z" fill="var(--tinta)"/></svg><b style="color:var(--tinta)">Vídeo de 30 segundos</b><br>De PDF a popup. Pendiente de grabar.</div></div>
+    <video class="video" controls preload="none" playsinline poster="video/poster.jpg" aria-label="Vídeo de 30 segundos: de PDF a popup">
+      <source src="video/fuentes-30s.mp4" type="video/mp4">
+      <source src="video/fuentes-30s.webm" type="video/webm">
+    </video>
+    <p class="mano" style="margin:12px 0 0;font-size:20px">30 segundos, grabado con el add-on real</p>
   </div>
 </div></div>
 
