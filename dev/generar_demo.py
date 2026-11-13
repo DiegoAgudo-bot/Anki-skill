@@ -4,7 +4,7 @@
     python dev/generar_demo.py
 
 dev/demo-data/ imita la carpeta de medios de Anki tras exportar: glosario,
-un JSON por término, _fuentes.js y _fuentes.css. Todo el texto es inventado.
+un JSON por término, _pagewise.js y _pagewise.css. Todo el texto es inventado.
 """
 import os
 import shutil
@@ -14,12 +14,12 @@ import tempfile
 DEV = os.path.dirname(os.path.abspath(__file__))
 RAIZ = os.path.dirname(DEV)
 sys.path.insert(0, RAIZ)
-sys.path.insert(0, os.path.join(RAIZ, "fuentes", "vendor"))
+sys.path.insert(0, os.path.join(RAIZ, "pagewise", "vendor"))
 sys.path.insert(0, DEV)
 
 import generar_pdfs  # noqa: E402
-from fuentes import exporter, importer  # noqa: E402
-from fuentes.index import Indice  # noqa: E402
+from pagewise import exporter, importer  # noqa: E402
+from pagewise.index import Indice  # noqa: E402
 
 # Glosario de ejemplo escrito para las pruebas (no sale de ningún libro).
 GLOSARIO = [
@@ -36,7 +36,7 @@ GLOSARIO = [
 
 
 def main(destino=os.path.join(DEV, "demo-data"), con_web=False):
-    """con_web=False quita _fuentes.js/.css (la demo carga los de fuentes/web)."""
+    """con_web=False quita _pagewise.js/.css (la demo carga los de pagewise/web)."""
     tmp = tempfile.mkdtemp()
     try:
         ind = Indice(os.path.join(tmp, "index.sqlite3"))
@@ -47,10 +47,10 @@ def main(destino=os.path.join(DEV, "demo-data"), con_web=False):
         if os.path.isdir(destino):
             shutil.rmtree(destino)
         os.makedirs(destino)
-        inf = exporter.exportar(ind, GLOSARIO, destino, os.path.join(RAIZ, "fuentes", "web"))
+        inf = exporter.exportar(ind, GLOSARIO, destino, os.path.join(RAIZ, "pagewise", "web"))
         ind.cerrar()
         if not con_web:
-            for n in ("_fuentes.js", "_fuentes.css"):
+            for n in ("_pagewise.js", "_pagewise.css"):
                 os.remove(os.path.join(destino, n))
         print("%s: %d términos, %s" % (destino, inf.terminos, exporter.formato_tamano(inf.bytes)))
     finally:

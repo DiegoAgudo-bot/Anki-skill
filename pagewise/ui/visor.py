@@ -30,7 +30,7 @@ def abrir_con_sistema(ruta):
 class VisorPDF(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Fuentes")
+        self.setWindowTitle("Pagewise")
         self.ruta = None
         # Nota: el visor de PDF de Chromium no siempre emite loadFinished para
         # el PDF; solo lo usamos para detectar fallos explícitos.
@@ -56,14 +56,14 @@ class VisorPDF(QDialog):
         self.web.loadFinished.connect(self._cargado)
         capa.addWidget(self.web)
         self.resize(900, 1000)
-        restoreGeom(self, "fuentes_visor")
+        restoreGeom(self, "pagewise_visor")
 
     def mostrar(self, ruta, pagina, nombre):
         self.ruta = ruta
         self.cargado_ok = None
         self.alternativa_usada = False
         self.titulo.setText(tr("%s — página %d") % (nombre, pagina))
-        self.setWindowTitle(tr("Fuentes: %s") % nombre)
+        self.setWindowTitle(tr("Pagewise: %s") % nombre)
         url = QUrl.fromLocalFile(ruta)
         url.setFragment("page=%d" % pagina)
         # Pasar por about:blank fuerza la recarga aunque sea el mismo archivo
@@ -99,7 +99,7 @@ class VisorPDF(QDialog):
             self.hide()
 
     def reject(self):
-        saveGeom(self, "fuentes_visor")
+        saveGeom(self, "pagewise_visor")
         self.web.setUrl(QUrl("about:blank"))  # libera memoria del PDF
         super().reject()
 
@@ -115,5 +115,5 @@ def abrir(source_id, pagina=1):
             _dialogo = VisorPDF(mw)
         _dialogo.mostrar(ruta, max(1, pagina), nombre)
     except Exception as e:
-        print(tr("Fuentes: visor integrado no disponible (%s); uso el del sistema.") % e)
+        print(tr("Pagewise: visor integrado no disponible (%s); uso el del sistema.") % e)
         abrir_con_sistema(ruta)

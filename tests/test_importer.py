@@ -4,7 +4,7 @@ import time
 
 import pytest
 
-from fuentes import importer
+from pagewise import importer
 
 
 def test_limpieza_guiones_y_espacios():

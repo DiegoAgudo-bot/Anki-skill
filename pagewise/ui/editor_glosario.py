@@ -17,7 +17,7 @@ SEPARADOR = "; "
 class EditorGlosario(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent or mw)
-        self.setWindowTitle(tr("Fuentes: editar glosario"))
+        self.setWindowTitle(tr("Pagewise: editar glosario"))
         self.resize(720, 560)
         self.modificado = False
         capa = QVBoxLayout(self)
@@ -67,7 +67,7 @@ class EditorGlosario(QDialog):
         pie.addWidget(guardar)
         capa.addLayout(pie)
 
-        restoreGeom(self, "fuentes_glosario")
+        restoreGeom(self, "pagewise_glosario")
         self._cargar(core.terminos())
         self.modificado = False
 
@@ -160,7 +160,7 @@ class EditorGlosario(QDialog):
 
     def _guardar(self):
         terminos = core.guardar_terminos(self._leer())
-        saveGeom(self, "fuentes_glosario")
+        saveGeom(self, "pagewise_glosario")
         self.accept()
 
         def informe(inf):
@@ -171,7 +171,7 @@ class EditorGlosario(QDialog):
                 muestra = ", ".join(inf.sin_resultados[:15]) + ("…" if len(inf.sin_resultados) > 15 else "")
                 msg += (tr("\n\n%d términos no aparecen en ninguna fuente activa y no se subrayarán:\n%s")
                         % (len(inf.sin_resultados), muestra))
-            showInfo(msg, parent=mw, title="Fuentes")
+            showInfo(msg, parent=mw, title="Pagewise")
 
         if terminos is not None:
             core.exportar(silencioso=True, al_terminar=informe)
@@ -179,7 +179,7 @@ class EditorGlosario(QDialog):
     def reject(self):
         if self.modificado and not askUser(tr("¿Salir sin guardar los cambios del glosario?"), parent=self):
             return
-        saveGeom(self, "fuentes_glosario")
+        saveGeom(self, "pagewise_glosario")
         super().reject()
 
 

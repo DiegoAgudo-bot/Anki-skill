@@ -5,13 +5,13 @@ Así el popup funciona sin conexión en AnkiDroid, AnkiMobile y AnkiWeb: los
 archivos viajan con la sincronización de medios del propio usuario.
 
 IMPORTANTE: la carpeta de medios de Anki es PLANA (no se sincronizan
-subcarpetas), así que todo va en la raíz con el prefijo "_fuentes_".
+subcarpetas), así que todo va en la raíz con el prefijo "_pagewise_".
 Anki no borra los medios que empiezan por "_" al "Comprobar medios".
 
 Archivos generados:
-    _fuentes_glosario.json          términos, sinónimos, archivo de cada uno y ajustes
-    _fuentes_t_<slug>_<hash>.json   mejores fragmentos de cada término
-    _fuentes.js / _fuentes.css      el script y el estilo del popup
+    _pagewise_glosario.json          términos, sinónimos, archivo de cada uno y ajustes
+    _pagewise_t_<slug>_<hash>.json   mejores fragmentos de cada término
+    _pagewise.js / _pagewise.css      el script y el estilo del popup
 
 No depende de Anki (se prueba con pytest).
 """
@@ -22,9 +22,9 @@ import os
 from . import glossary
 from .providers import ProveedorFTS
 
-PREFIJO = "_fuentes"
-PREFIJO_TERMINO = "_fuentes_t_"
-GLOSARIO = "_fuentes_glosario.json"
+PREFIJO = "_pagewise"
+PREFIJO_TERMINO = "_pagewise_t_"
+GLOSARIO = "_pagewise_glosario.json"
 VERSION_FORMATO = 1
 
 AJUSTES_POR_DEFECTO = {
@@ -93,9 +93,9 @@ def formato_tamano(n):
 
 
 def copiar_web(carpeta_web, carpeta_medios):
-    """Copia fuentes.js y fuentes.css como _fuentes.js y _fuentes.css. Devuelve nº escritos."""
+    """Copia pagewise.js y pagewise.css como _pagewise.js y _pagewise.css. Devuelve nº escritos."""
     escritos = 0
-    for origen, destino in (("fuentes.js", "_fuentes.js"), ("fuentes.css", "_fuentes.css")):
+    for origen, destino in (("pagewise.js", "_pagewise.js"), ("pagewise.css", "_pagewise.css")):
         with open(os.path.join(carpeta_web, origen), "rb") as f:
             escritos += _escribir_si_cambia(os.path.join(carpeta_medios, destino), f.read())
     return escritos

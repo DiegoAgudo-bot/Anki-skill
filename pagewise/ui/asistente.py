@@ -28,11 +28,11 @@ def estado():
 class Asistente(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent or mw)
-        self.setWindowTitle(tr("Fuentes: primeros pasos"))
+        self.setWindowTitle(tr("Pagewise: primeros pasos"))
         self.setMinimumWidth(560)
         capa = QVBoxLayout(self)
         intro = QLabel(tr(
-            "<b>Fuentes</b> subraya los términos de tus tarjetas y te muestra qué dicen sobre ellos "
+            "<b>Pagewise</b> subraya los términos de tus tarjetas y te muestra qué dicen sobre ellos "
             "<b>tus propios PDFs</b>, con su página. Todo se procesa en este ordenador.<br><br>"
             "Importa solo material que tengas derecho a usar."))
         intro.setWordWrap(True)
@@ -81,7 +81,7 @@ class Asistente(QDialog):
         if hechos[0] and hechos[1]:
             self.resumen.setText(tr(
                 "¡Listo! Repasa una tarjeta que contenga alguno de tus términos y pasa el ratón por encima. "
-                "Encontrarás todo en Herramientas → Fuentes."))
+                "Encontrarás todo en Herramientas → Pagewise."))
         elif hechos[0]:
             self.resumen.setText(tr("Ya tienes fuentes. Ahora añade los términos que quieres subrayar."))
         else:

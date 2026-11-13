@@ -10,7 +10,7 @@ class DialogoPropuestas(QDialog):
 
     def __init__(self, propuestos, parent=None):
         super().__init__(parent)
-        self.setWindowTitle(tr("Fuentes: términos propuestos"))
+        self.setWindowTitle(tr("Pagewise: términos propuestos"))
         self.resize(420, 480)
         capa = QVBoxLayout(self)
         capa.addWidget(QLabel(

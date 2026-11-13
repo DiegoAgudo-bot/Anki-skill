@@ -1,5 +1,5 @@
 {
-  "name": "fuentes-anki-dev",
+  "name": "pagewise-anki-dev",
   "private": true,
   "description": "Solo para desarrollo: tests del JS del add-on (no se empaqueta).",
   "scripts": {

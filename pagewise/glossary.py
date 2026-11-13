@@ -87,12 +87,12 @@ def nombre_archivo(termino):
 
     Solo a-z, 0-9 y guiones (válido en Windows, macOS, Android e iOS, y sin
     problemas de mayúsculas), con un hash corto para evitar colisiones:
-        "Nervio ciático" -> "_fuentes_t_nervio-ciatico_3f2a9c1b.json"
+        "Nervio ciático" -> "_pagewise_t_nervio-ciatico_3f2a9c1b.json"
     """
     k = clave(termino)
     legible = re.sub(r"[^a-z0-9]+", "-", k.replace("ñ", "n")).strip("-")[:40].strip("-")
     resumen = hashlib.sha1(k.encode("utf-8")).hexdigest()[:8]
-    return "_fuentes_t_%s_%s.json" % (legible or "t", resumen)
+    return "_pagewise_t_%s_%s.json" % (legible or "t", resumen)
 
 
 def leer_archivo(ruta):

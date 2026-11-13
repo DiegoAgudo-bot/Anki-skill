@@ -7,9 +7,9 @@ const { CODIGO, CASOS, montar, subrayados, esperar, JSDOM } = require('./helpers
 
 function fuentesSinDom() {
   const dom = new JSDOM('<!doctype html><body></body>', { runScripts: 'outside-only' });
-  dom.window.eval('window.Fuentes = {}; window.Fuentes.dataProvider = function(n, cb){ cb(new Error("x")); };');
+  dom.window.eval('window.Pagewise = {}; window.Pagewise.dataProvider = function(n, cb){ cb(new Error("x")); };');
   dom.window.eval(CODIGO);
-  return dom.window.Fuentes;
+  return dom.window.Pagewise;
 }
 
 test('el script es ES5 válido (compatibilidad con WebViews antiguos)', () => {
@@ -68,12 +68,12 @@ test('no toca el cloze en el anverso pero sí en el reverso', async () => {
   const reverso = '<div id="qa">pregunta<hr id="answer">La <span class="cloze">aorta</span> sale.</div>';
   w = await montar(reverso);
   assert.deepEqual(subrayados(w), ['aorta']);
-  assert.equal(w.document.querySelector('.cloze .fuentes-term').textContent, 'aorta');
+  assert.equal(w.document.querySelector('.cloze .pagewise-term').textContent, 'aorta');
 });
 
 test('no rompe audio, MathJax ni scripts', async () => {
   const html = '<div id="qa">[sound:aorta.mp3] <a class="replay-button">aorta</a> ' +
-    '\\(aorta\\) <script>var aorta = 1;</script><span data-fuentes-skip>aorta</span> ' +
+    '\\(aorta\\) <script>var aorta = 1;</script><span data-pagewise-skip>aorta</span> ' +
     '<code>aorta</code> fin</div>';
   const w = await montar(html);
   assert.deepEqual(subrayados(w), []);
@@ -84,24 +84,24 @@ test('no rompe audio, MathJax ni scripts', async () => {
 test('ejecutar dos veces no duplica (plantilla + add-on o AnkiMobile)', async () => {
   const w = await montar('<div id="qa">La aorta y la arteria femoral</div>');
   w.eval(CODIGO); // segunda carga del script = vuelve a aplicar
-  w.Fuentes.run();
+  w.Pagewise.run();
   await esperar(20);
   assert.deepEqual(subrayados(w), ['aorta', 'arteria femoral']);
-  assert.equal(w.document.querySelectorAll('.fuentes-term .fuentes-term').length, 0);
+  assert.equal(w.document.querySelectorAll('.pagewise-term .pagewise-term').length, 0);
 });
 
 test('términos sin archivo de datos no se subrayan', async () => {
-  const datos = { '_fuentes_glosario.json': { terminos: [{ t: 'aorta', s: [] }] } };
+  const datos = { '_pagewise_glosario.json': { terminos: [{ t: 'aorta', s: [] }] } };
   const w = await montar('<div id="qa">aorta</div>', { datos });
   assert.deepEqual(subrayados(w), []);
 });
 
 test('sin glosario (móvil sin sincronizar) la tarjeta queda igual y reintenta', async () => {
-  const w = await montar('<div id="qa">aorta</div>', { datos: { '_fuentes_glosario.json': null } });
+  const w = await montar('<div id="qa">aorta</div>', { datos: { '_pagewise_glosario.json': null } });
   assert.equal(w.document.getElementById('qa').innerHTML, 'aorta');
   // Llega el glosario (tras sincronizar) y la siguiente tarjeta ya subraya.
-  w.__datos['_fuentes_glosario.json'] = require('./helpers').GLOSARIO;
-  w.Fuentes.run();
+  w.__datos['_pagewise_glosario.json'] = require('./helpers').GLOSARIO;
+  w.Pagewise.run();
   await esperar(20);
   assert.deepEqual(subrayados(w), ['aorta']);
 });
@@ -109,7 +109,7 @@ test('sin glosario (móvil sin sincronizar) la tarjeta queda igual y reintenta',
 test('subrayado desactivado en los ajustes', async () => {
   const g = JSON.parse(JSON.stringify(require('./helpers').GLOSARIO));
   g.ajustes.subrayado = false;
-  const w = await montar('<div id="qa">aorta</div>', { datos: { '_fuentes_glosario.json': g } });
+  const w = await montar('<div id="qa">aorta</div>', { datos: { '_pagewise_glosario.json': g } });
   assert.deepEqual(subrayados(w), []);
 });
 
@@ -119,7 +119,7 @@ test('términos repartidos entre etiquetas de formato', async () => {
   const w = await montar(html);
   // Cada trozo lleva su subrayado y apunta al mismo término.
   assert.deepEqual(subrayados(w), ['arteria ', 'femoral', 'nervio', ' ', 'ciático']);
-  const ids = Array.from(w.document.querySelectorAll('.fuentes-term')).map((e) => e.getAttribute('data-fuentes-t'));
+  const ids = Array.from(w.document.querySelectorAll('.pagewise-term')).map((e) => e.getAttribute('data-pagewise-t'));
   assert.deepEqual(ids, ['0', '0', '2', '2', '2']);
   assert.equal(w.document.querySelector('b').textContent, 'femoral');
   assert.equal(w.document.getElementById('qa').textContent,

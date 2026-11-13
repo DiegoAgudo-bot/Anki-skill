@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from fuentes import templates
+from pagewise import templates
 
 PLANTILLAS = [
     "",
@@ -17,13 +17,13 @@ def test_ida_y_vuelta_exacta(p):
     con = templates.insertar(p)
     assert templates.tiene(con)
     assert con.startswith(p)                    # no toca lo que había
-    assert '<script src="_fuentes.js"></script>' in con
+    assert '<script src="_pagewise.js"></script>' in con
     assert templates.quitar(con) == p           # se quita sin dejar rastro
 
 
 def test_insertar_dos_veces_no_duplica():
     p = templates.insertar(templates.insertar("{{Front}}"))
-    assert p.count("FUENTES:INICIO") == 1
+    assert p.count("PAGEWISE:INICIO") == 1
     assert templates.quitar(p) == "{{Front}}"
 
 
@@ -59,3 +59,28 @@ def test_activar_y_desactivar():
     assert templates.desactivar(col, [1, 2]) == 2
     assert col.tipos[1]["tmpls"][0] == {"qfmt": "{{Front}}", "afmt": "{{FrontSide}}<hr id=answer>{{Back}}"}
     assert col.actualizados == [1, 1, 2]
+
+
+BLOQUE_ANTIGUO = ('\n<!-- FUENTES:INICIO (lo gestiona el add-on Fuentes; no edites entre estas marcas) -->\n'
+                  '<link rel="stylesheet" href="_fuentes.css">\n<script src="_fuentes.js"></script>\n<!-- FUENTES:FIN -->')
+
+
+def test_bloque_del_nombre_anterior():
+    vieja = "{{Front}}" + BLOQUE_ANTIGUO
+    assert templates.tiene_antiguo(vieja) and not templates.tiene(vieja)
+    assert templates.quitar(vieja) == "{{Front}}"
+    nueva = templates.insertar(vieja)                 # se sustituye, no se duplica
+    assert "_fuentes" not in nueva and nueva.count("_pagewise.js") == 1
+    assert templates.quitar(nueva) == "{{Front}}"
+
+
+def test_renovar_solo_las_que_ya_lo_llevaban():
+    col = ColeccionFalsa({
+        1: {"id": 1, "tmpls": [{"qfmt": "{{Front}}" + BLOQUE_ANTIGUO, "afmt": "{{Back}}"}]},
+        2: {"id": 2, "tmpls": [{"qfmt": "{{Front}}", "afmt": "{{Back}}"}]},
+    })
+    assert templates.estado(col.tipos[1]) == "parcial"
+    assert templates.activar(col, [1, 2], solo_con_bloque=True) == 1
+    assert "_pagewise.js" in col.tipos[1]["tmpls"][0]["qfmt"]
+    assert col.tipos[1]["tmpls"][0]["afmt"] == "{{Back}}"       # la que no lo tenía sigue igual
+    assert col.tipos[2]["tmpls"][0] == {"qfmt": "{{Front}}", "afmt": "{{Back}}"}

@@ -17,7 +17,7 @@ COLUMNAS = [tr("Activa"), tr("Nombre"), tr("Páginas"), tr("Fragmentos"), tr("Im
 class GestorFuentes(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent or mw)
-        self.setWindowTitle(tr("Fuentes: gestionar fuentes"))
+        self.setWindowTitle(tr("Pagewise: gestionar fuentes"))
         self.resize(760, 420)
         capa = QVBoxLayout(self)
 
@@ -60,7 +60,7 @@ class GestorFuentes(QDialog):
         pie.addWidget(cerrar)
         capa.addLayout(pie)
 
-        restoreGeom(self, "fuentes_gestor")
+        restoreGeom(self, "pagewise_gestor")
         self.refrescar()
 
     # ------------------------------------------------------------ datos
@@ -161,7 +161,7 @@ class GestorFuentes(QDialog):
         tooltip(tr("Fuente eliminada."), parent=self)
 
     def reject(self):
-        saveGeom(self, "fuentes_gestor")
+        saveGeom(self, "pagewise_gestor")
         super().reject()
 
 

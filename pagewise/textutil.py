@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Utilidades de texto puras (sin Anki): normalización y búsqueda de términos.
 
-IMPORTANTE: el algoritmo de este módulo está duplicado en web/fuentes.js
+IMPORTANTE: el algoritmo de este módulo está duplicado en web/pagewise.js
 (el JS es el que subraya en las tarjetas, también en móvil). Ambos se prueban
 con los mismos casos: tests/casos_matching.json. Si cambias algo aquí,
 cámbialo también allí.

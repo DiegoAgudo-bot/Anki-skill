@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 
-from fuentes import glossary
+from pagewise import glossary
 
 
 def test_limpiar_fusiona_y_quita_vacios():
@@ -30,7 +30,7 @@ def test_nombres_de_archivo_seguros():
     nombres = [glossary.nombre_archivo(t) for t in
                ["Nervio ciático", "nervio ciatico", "año", "ano", "../../etc/passwd", "C:\\x", "  ", "Ω" * 80, "a" * 300]]
     for n in nombres:
-        assert re.match(r"^_fuentes_t_[a-z0-9-]+_[0-9a-f]{8}\.json$", n), n
+        assert re.match(r"^_pagewise_t_[a-z0-9-]+_[0-9a-f]{8}\.json$", n), n
         assert len(n) < 80
     assert nombres[0] == nombres[1]          # mismas claves -> mismo archivo
     assert nombres[2] != nombres[3]          # la ñ distingue

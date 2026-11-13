@@ -64,3 +64,4 @@ jobs:
       - run: uv venv --python 3.9 .venv && uv pip install --python .venv "aqt[qt6]==2.1.66" "reportlab<4.3"
       - run: .venv/bin/python dev/e2e_anki.py -q --plantillas
       - run: .venv/bin/python dev/e2e_anki.py -q --ingles
+      - run: .venv/bin/python dev/e2e_anki.py -q --migracion

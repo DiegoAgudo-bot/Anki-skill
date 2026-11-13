@@ -149,12 +149,12 @@ def exportar(silencioso=False, al_terminar=None):
         try:
             inf = fut.result()
         except Exception as e:  # no tumbar Anki por un fallo al exportar
-            tooltip(tr("Fuentes: error al exportar los datos para el móvil: %s") % e)
+            tooltip(tr("Pagewise: error al exportar los datos para el móvil: %s") % e)
             inf = None
         if inf is not None and not silencioso:
-            tooltip(tr("Fuentes: %d términos exportados (%s)") % (inf.terminos, exporter.formato_tamano(inf.bytes)))
+            tooltip(tr("Pagewise: %d términos exportados (%s)") % (inf.terminos, exporter.formato_tamano(inf.bytes)))
         if inf is not None and inf.bytes > ajustes["aviso_tamano_mb"] * 1024 * 1024:
-            tooltip(tr("Fuentes: los datos para el móvil ocupan %s. Considera reducir el glosario "
+            tooltip(tr("Pagewise: los datos para el móvil ocupan %s. Considera reducir el glosario "
                     "o los fragmentos por fuente.") % exporter.formato_tamano(inf.bytes), period=6000)
         if _repetir:
             _repetir = False

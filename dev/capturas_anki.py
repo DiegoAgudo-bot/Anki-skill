@@ -26,8 +26,8 @@ import json, os, traceback
 from aqt import mw, gui_hooks
 from aqt.qt import QTimer, QPoint
 
-SALIDA = os.environ["FUENTES_CAPTURAS"]
-PDFS = json.loads(os.environ["FUENTES_PDFS"])
+SALIDA = os.environ["PAGEWISE_CAPTURAS"]
+PDFS = json.loads(os.environ["PAGEWISE_PDFS"])
 pos = {}
 
 def guardar(widget, nombre):
@@ -65,8 +65,8 @@ def a_ventana(rect):
 
 @seguro
 def empezar():
-    from fuentes import core, importer
-    from fuentes.ui import asistente
+    from pagewise import core, importer
+    from pagewise.ui import asistente
     mw.resize(1120, 720)
     for nombre, ruta in PDFS:
         importer.importar_pdf(core.indice(), ruta, core.PDFS_DIR, nombre=nombre)
@@ -80,7 +80,7 @@ def empezar():
     core.exportar(silencioso=True, al_terminar=seguro(dialogos))
 
 def dialogos(_inf):
-    from fuentes.ui import asistente, gestor, editor_glosario
+    from pagewise.ui import asistente, gestor, editor_glosario
     a = asistente.mostrar()
     pos["dialogos"] = {}
     def uno():
@@ -106,42 +106,42 @@ def repasar():
     mw.col.decks.select(col.decks.id("Default"))
     mw.moveToState("review")
     mw.reviewer.web.setZoomFactor(1.6)  # tarjeta grande: se lee bien en un vídeo
-    luego(3500, lambda: js(RECT + "('.fuentes-term', 0)", anverso))
+    luego(3500, lambda: js(RECT + "('.pagewise-term', 0)", anverso))
 
 def anverso(rect):
     guardar(mw, "3-tarjeta.png")
     pos["termino1"] = a_ventana(rect)
-    js("Fuentes.abrir(document.querySelector('.fuentes-term')); 1",
-       lambda _: luego(700, lambda: js(RECT + "('.fuentes-abrible', 0)", popup1)))
+    js("Pagewise.abrir(document.querySelector('.pagewise-term')); 1",
+       lambda _: luego(700, lambda: js(RECT + "('.pagewise-abrible', 0)", popup1)))
 
 def popup1(rect):
     guardar(mw, "4-popup.png")
     pos["fragmento1"] = a_ventana(rect)
     # Qué fuente y página abre ese fragmento (lo usamos luego para el visor).
-    js("(function(){ var f = document.querySelector('.fuentes-abrible');"
+    js("(function(){ var f = document.querySelector('.pagewise-abrible');"
        "return JSON.stringify([+f.getAttribute('data-s'), +f.getAttribute('data-p')]); })()", popup1b)
 
 def popup1b(destino):
     pos["abre"] = json.loads(destino)
-    js("Fuentes.cerrar(); 1", lambda _: (mw.reviewer._showAnswer(),
-       luego(2500, lambda: js("(function(){ var ts = document.querySelectorAll('.fuentes-term');"
+    js("Pagewise.cerrar(); 1", lambda _: (mw.reviewer._showAnswer(),
+       luego(2500, lambda: js("(function(){ var ts = document.querySelectorAll('.pagewise-term');"
                               "var t = ts[ts.length - 1]; window.__t = t; var r = t.getBoundingClientRect();"
                               "return JSON.stringify([r.left, r.top, r.width, r.height]); })()", reverso))))
 
 def reverso(rect):
     guardar(mw, "5-respuesta.png")
     pos["termino2"] = a_ventana(rect)
-    js("Fuentes.abrir(window.__t); 1", lambda _: luego(700, popup2))
+    js("Pagewise.abrir(window.__t); 1", lambda _: luego(700, popup2))
 
 def popup2():
     guardar(mw, "6-popup2.png")
-    from fuentes.ui import visor
+    from pagewise.ui import visor
     visor.abrir(*pos["abre"])  # lo mismo que hace el clic en el fragmento
     visor._dialogo.resize(1120, 720)
     luego(6000, visor_listo)
 
 def visor_listo():
-    from fuentes.ui import visor
+    from pagewise.ui import visor
     guardar(visor._dialogo, "7-visor.png")
     visor._dialogo.reject()
     pos["ventana"] = [mw.width(), mw.height()]
@@ -158,14 +158,14 @@ def main():
     base = tempfile.mkdtemp(prefix="anki-capturas-")
     addons = os.path.join(base, "addons21")
     os.makedirs(os.path.join(addons, "zz_piloto"))
-    os.symlink(os.path.join(RAIZ, "fuentes"), os.path.join(addons, "fuentes"))
+    os.symlink(os.path.join(RAIZ, "pagewise"), os.path.join(addons, "pagewise"))
     with open(os.path.join(addons, "zz_piloto", "__init__.py"), "w") as f:
         f.write(PILOTO)
     sys.path.insert(0, os.path.join(RAIZ, "dev"))
     import generar_pdfs
     pdfs = [("Apuntes de Anatomía", generar_pdfs.generar_apuntes(os.path.join(base, "apuntes-anatomia.pdf"))),
             ("Resumen de repaso", generar_pdfs.generar_otra_fuente(os.path.join(base, "resumen-repaso.pdf")))]
-    entorno = dict(os.environ, FUENTES_CAPTURAS=salida, FUENTES_PDFS=json.dumps(pdfs),
+    entorno = dict(os.environ, PAGEWISE_CAPTURAS=salida, PAGEWISE_PDFS=json.dumps(pdfs),
                    QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox", QTWEBENGINE_DISABLE_SANDBOX="1",
                    QT_QPA_PLATFORM="offscreen", QT_SCALE_FACTOR="2")
     subprocess.run([sys.executable, "-c", (
@@ -174,7 +174,7 @@ def main():
         "pm.meta['firstRun'] = False; pm.meta['defaultLang'] = 'es_ES'; pm.save()"), base],
         env=entorno, check=True)
     # Apartamos los datos reales del desarrollador mientras dura la sesión.
-    uf = os.path.join(RAIZ, "fuentes", "user_files")
+    uf = os.path.join(RAIZ, "pagewise", "user_files")
     respaldo = uf + ".respaldo-capturas"
     if os.path.exists(respaldo):
         sys.exit("Existe %s de una ejecución anterior: revísalo y restáuralo a mano." % respaldo)
@@ -186,7 +186,7 @@ def main():
     finally:
         shutil.rmtree(uf, ignore_errors=True)
         os.rename(respaldo, uf)
-        meta = os.path.join(RAIZ, "fuentes", "meta.json")
+        meta = os.path.join(RAIZ, "pagewise", "meta.json")
         if os.path.exists(meta):
             os.remove(meta)
     with open(os.path.join(salida, "posiciones.json")) as f:
