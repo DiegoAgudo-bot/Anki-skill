@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fuentes — demo</title>
+<title>Pagewise — demo</title>
 <!--
   Demo del subrayado y el popup fuera de Anki. Sírvela con un servidor local
   (fetch no funciona en file://):
@@ -14,7 +14,7 @@
   Los datos de demo-data/ son de ejemplo, generados desde PDFs con texto
   inventado (dev/generar_demo.py).
 -->
-<link rel="stylesheet" href="../fuentes/web/fuentes.css">
+<link rel="stylesheet" href="../pagewise/web/pagewise.css">
 <style>
   :root { --borde: #d0d7de; --suave: #57606a; --fondo: #f6f8fa; }
   * { box-sizing: border-box; }
@@ -36,7 +36,7 @@
 </head>
 <body>
 <header>
-  <h1>Fuentes · demo</h1>
+  <h1>Pagewise · demo</h1>
   <label>Tarjeta
     <select id="tarjeta">
       <option value="basica">Básica (anverso)</option>
@@ -56,7 +56,7 @@
 <div id="registro"></div>
 
 <script>
-  window.FUENTES_BASE = 'demo-data/';
+  window.PAGEWISE_BASE = 'demo-data/';
   var TARJETAS = {
     basica: '<div class="card">¿Qué arteria se palpa en el triángulo femoral?<br><br>' +
       '<small>Pista: continúa a la ilíaca externa, cerca del nervio femoral; detrás va el nervio ciático.</small></div>',
@@ -72,13 +72,13 @@
   function log(t) { document.getElementById('registro').textContent = t; }
   function mostrar() {
     document.getElementById('qa').innerHTML = TARJETAS[document.getElementById('tarjeta').value];
-    if (window.Fuentes && Fuentes.run) Fuentes.run();
+    if (window.Pagewise && Pagewise.run) Pagewise.run();
   }
   if (location.protocol === 'file:') document.getElementById('aviso').style.display = 'block';
   document.getElementById('tarjeta').onchange = mostrar;
   document.getElementById('movil').onchange = function () {
     document.body.classList.toggle('movil', this.checked);
-    Fuentes.forceTouch(this.checked);
+    Pagewise.forceTouch(this.checked);
     mostrar();
   };
   document.getElementById('noche').onchange = function () {
@@ -87,7 +87,7 @@
   document.getElementById('py').onchange = function () {
     if (this.checked) {
       window.pycmd = function (msg, cb) {
-        var m = JSON.parse(msg.replace(/^fuentes:/, ''));
+        var m = JSON.parse(msg.replace(/^pagewise:/, ''));
         log('pycmd → ' + JSON.stringify(m) + (m.cmd === 'abrir' ? '  (en Anki se abriría el visor de PDF)' : ''));
         if (cb) cb({ ok: true, fuentes: [{ id: 1, nombre: 'Resultado simulado', fragmentos: [
           { p: 1, x: 'En Anki, aquí saldrían más fragmentos del índice SQLite.' }] }] });
@@ -97,6 +97,6 @@
   };
   document.getElementById('qa').innerHTML = TARJETAS.basica;
 </script>
-<script src="../fuentes/web/fuentes.js"></script>
+<script src="../pagewise/web/pagewise.js"></script>
 </body>
 </html>

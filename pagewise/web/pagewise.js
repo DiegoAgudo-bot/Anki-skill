@@ -1,12 +1,12 @@
 /*
- * Fuentes — subrayado de términos y popup con fragmentos de tus fuentes.
+ * Pagewise — subrayado de términos y popup con fragmentos de tus fuentes.
  *
  * UN ÚNICO script para Anki escritorio, AnkiDroid, AnkiMobile y AnkiWeb.
  * - Escrito en ES5, sin dependencias ni APIs modernas sin comprobar
  *   (los WebViews de móvil pueden ser antiguos).
  * - Lee sus datos de la carpeta de medios de Anki:
- *     _fuentes_glosario.json   términos, sinónimos y archivo de cada término
- *     _fuentes_t_*.json        fragmentos de cada término
+ *     _pagewise_glosario.json   términos, sinónimos y archivo de cada término
+ *     _pagewise_t_*.json        fragmentos de cada término
  * - Si existe pycmd (Anki escritorio) lo usa SOLO para extras: abrir el PDF,
  *   buscar más / texto libre en el índice SQLite.
  *
@@ -21,14 +21,14 @@
   // Si el script ya está cargado (AnkiMobile y Anki escritorio reutilizan la
   // página entre tarjetas, o la plantilla y el add-on lo cargan a la vez),
   // solo volvemos a aplicar el subrayado a la tarjeta nueva.
-  if (W.Fuentes && W.Fuentes.__cargado) {
-    W.Fuentes.run();
+  if (W.Pagewise && W.Pagewise.__cargado) {
+    W.Pagewise.run();
     return;
   }
 
-  var F = (W.Fuentes = W.Fuentes || {});
+  var F = (W.Pagewise = W.Pagewise || {});
   F.__cargado = true;
-  F.version = '1.1.0';
+  F.version = '1.2.0';
 
   /* ------------------------------------------------------------------ *
    * Normalización (minúsculas, sin tildes, conserva la ñ)               *
@@ -161,7 +161,7 @@
    * Carga de datos (fetch → XMLHttpRequest → pycmd)                     *
    * ------------------------------------------------------------------ */
 
-  F.base = typeof W.FUENTES_BASE === 'string' ? W.FUENTES_BASE : '';
+  F.base = typeof W.PAGEWISE_BASE === 'string' ? W.PAGEWISE_BASE : '';
   F.dataProvider = null; // función(nombre, cb(err, datos)) para tests y demo
   var cacheDatos = {};
   var pendientes = {};
@@ -220,10 +220,10 @@
   F.cargar = cargar;
   F.limpiarCache = function () { cacheDatos = {}; glosario = null; };
 
-  /** Llamada a Python (solo escritorio). Mensajes: "fuentes:" + JSON. */
+  /** Llamada a Python (solo escritorio). Mensajes: "pagewise:" + JSON. */
   F.py = function (msg, cb) {
     if (!tienePy()) return false;
-    W.pycmd('fuentes:' + JSON.stringify(msg), cb || function () {});
+    W.pycmd('pagewise:' + JSON.stringify(msg), cb || function () {});
     return true;
   };
 
@@ -261,7 +261,7 @@
   };
 
   function idioma() {
-    var i = (glosario && glosario.ajustes.idioma) || (W.FUENTES_CONFIG && W.FUENTES_CONFIG.idioma) ||
+    var i = (glosario && glosario.ajustes.idioma) || (W.PAGEWISE_CONFIG && W.PAGEWISE_CONFIG.idioma) ||
       (W.navigator && (W.navigator.language || W.navigator.userLanguage)) || 'es';
     return String(i).toLowerCase().indexOf('es') === 0 ? 'es' : 'en';
   }
@@ -279,7 +279,7 @@
     for (k in AJUSTES_DEF) if (AJUSTES_DEF.hasOwnProperty(k)) ajustes[k] = AJUSTES_DEF[k];
     var a = (datos && datos.ajustes) || {};
     for (k in a) if (a.hasOwnProperty(k)) ajustes[k] = a[k];
-    var c = W.FUENTES_CONFIG || {};
+    var c = W.PAGEWISE_CONFIG || {};
     for (k in c) if (c.hasOwnProperty(k)) ajustes[k] = c[k];
     var terminos = (datos && datos.terminos) || [];
     var variantes = [];
@@ -296,11 +296,11 @@
     if (glosario) { cb(glosario); return; }
     esperandoGlosario.push(cb);
     if (esperandoGlosario.length > 1) return;
-    cargar('_fuentes_glosario.json', function (err, datos) {
+    cargar('_pagewise_glosario.json', function (err, datos) {
       if (err) {
         // Sin datos (p. ej. el móvil aún no ha sincronizado los medios):
         // no hacemos nada y la tarjeta se ve como siempre.
-        if (W.console) W.console.log('[Fuentes] glosario no disponible: ' + err);
+        if (W.console) W.console.log('[Pagewise] glosario no disponible: ' + err);
       }
       var g = prepararGlosario(err ? null : datos);
       // Si falló no lo guardamos: se reintentará con la siguiente tarjeta
@@ -339,10 +339,10 @@
 
   function debeSaltar(el, esReverso) {
     if (SALTAR[el.nodeName.toUpperCase()]) return true;
-    if (el.getAttribute && (el.getAttribute('data-fuentes-skip') !== null ||
+    if (el.getAttribute && (el.getAttribute('data-pagewise-skip') !== null ||
         el.getAttribute('contenteditable') === 'true')) return true;
-    if (tieneClase(el, 'fuentes-term') || tieneClase(el, 'fuentes-popup') ||
-        tieneClase(el, 'fuentes-buscar') || tieneClase(el, 'MathJax') ||
+    if (tieneClase(el, 'pagewise-term') || tieneClase(el, 'pagewise-popup') ||
+        tieneClase(el, 'pagewise-buscar') || tieneClase(el, 'MathJax') ||
         tieneClase(el, 'MathJax_Display') || tieneClase(el, 'MathJax_Preview')) return true;
     // En el anverso no tocamos el hueco del cloze ([...] o la pista).
     if (!esReverso && tieneClase(el, 'cloze')) return true;
@@ -388,7 +388,7 @@
     return D.getElementById('qa') || D.body;
   }
 
-  /** Envuelve en <span class="fuentes-term"> los trozos [a, b, id] de un nodo de texto. */
+  /** Envuelve en <span class="pagewise-term"> los trozos [a, b, id] de un nodo de texto. */
   function envolver(nodo, trozos) {
     var texto = nodo.nodeValue;
     var frag = D.createDocumentFragment();
@@ -396,8 +396,8 @@
     for (var j = 0; j < trozos.length; j++) {
       if (trozos[j][0] > pos) frag.appendChild(D.createTextNode(texto.slice(pos, trozos[j][0])));
       var span = D.createElement('span');
-      span.className = 'fuentes-term';
-      span.setAttribute('data-fuentes-t', String(trozos[j][2]));
+      span.className = 'pagewise-term';
+      span.setAttribute('data-pagewise-t', String(trozos[j][2]));
       span.setAttribute('role', 'button');
       span.appendChild(D.createTextNode(texto.slice(trozos[j][0], trozos[j][1])));
       frag.appendChild(span);
@@ -415,7 +415,7 @@
     // Si ya hay subrayados (segunda pasada sobre la misma tarjeta), cuentan.
     var previos = raiz.getElementsByTagName ? raiz.getElementsByTagName('span') : [];
     for (var p = 0; p < previos.length; p++) {
-      if (tieneClase(previos[p], 'fuentes-term')) vistos[previos[p].getAttribute('data-fuentes-t')] = 1;
+      if (tieneClase(previos[p], 'pagewise-term')) vistos[previos[p].getAttribute('data-pagewise-t')] = 1;
     }
     for (var i = 0; i < ts.length; i++) {
       var nodos = ts[i];
@@ -451,7 +451,7 @@
    * ------------------------------------------------------------------ */
 
   var popup = null;
-  var popupTermino = null; // elemento .fuentes-term activo
+  var popupTermino = null; // elemento .pagewise-term activo
   var temporAbrir = null;
   var temporCerrar = null;
   var ultimoToque = 0;
@@ -496,21 +496,21 @@
   /** HTML del popup a partir de los datos de un término. */
   function htmlFragmentos(datos, termino, max) {
     var fuentes = (datos && datos.fuentes) || [];
-    if (!fuentes.length) return '<div class="fuentes-vacio">' + escapar(T('vacio')) + '</div>';
+    if (!fuentes.length) return '<div class="pagewise-vacio">' + escapar(T('vacio')) + '</div>';
     var py = tienePy();
     var h = '';
     for (var i = 0; i < fuentes.length; i++) {
       var f = fuentes[i];
       var frs = (f.fragmentos || []).slice(0, max);
       if (!frs.length) continue;
-      h += '<div class="fuentes-fuente"><div class="fuentes-nombre">' + escapar(f.nombre) + '</div>';
+      h += '<div class="pagewise-fuente"><div class="pagewise-nombre">' + escapar(f.nombre) + '</div>';
       for (var j = 0; j < frs.length; j++) {
         var fr = frs[j];
         var donde = escapar(f.nombre) + ', ' + escapar(etiquetaPagina(fr));
-        h += '<div class="fuentes-frag' + (py ? ' fuentes-abrible' : '') + '" data-s="' + escapar(f.id) +
+        h += '<div class="pagewise-frag' + (py ? ' pagewise-abrible' : '') + '" data-s="' + escapar(f.id) +
           '" data-p="' + escapar(fr.p) + '"' + (py ? ' title="' + escapar(T('abrirPdf')) + '"' : '') + '>' +
-          '<div class="fuentes-texto">' + resaltar(fr.x, termino) + '</div>' +
-          '<div class="fuentes-donde">' + donde + (py ? ' <span class="fuentes-ir">↗</span>' : '') +
+          '<div class="pagewise-texto">' + resaltar(fr.x, termino) + '</div>' +
+          '<div class="pagewise-donde">' + donde + (py ? ' <span class="pagewise-ir">↗</span>' : '') +
           '</div></div>';
       }
       h += '</div>';
@@ -547,16 +547,16 @@
     for (var i = 0; i < acciones.length; i++) {
       var a = acciones[i];
       if (a.disponible && !a.disponible(ctx)) continue;
-      h += '<button type="button" class="fuentes-accion" data-accion="' + escapar(a.id) + '">' +
+      h += '<button type="button" class="pagewise-accion" data-accion="' + escapar(a.id) + '">' +
         escapar(typeof a.etiqueta === 'function' ? a.etiqueta() : a.etiqueta) + '</button>';
     }
-    return h ? '<div class="fuentes-acciones">' + h + '</div>' : '';
+    return h ? '<div class="pagewise-acciones">' + h + '</div>' : '';
   }
 
   function crearPopup() {
     if (popup && popup.parentNode) return popup;
     popup = D.createElement('div');
-    popup.className = 'fuentes-popup';
+    popup.className = 'pagewise-popup';
     popup.setAttribute('role', 'dialog');
     popup.style.display = 'none';
     D.body.appendChild(popup);
@@ -599,7 +599,7 @@
 
   function abrir(el) {
     if (!glosario) return;
-    var id = parseInt(el.getAttribute('data-fuentes-t'), 10);
+    var id = parseInt(el.getAttribute('data-pagewise-t'), 10);
     var t = glosario.terminos[id];
     if (!t) return;
     popupTermino = el;
@@ -608,18 +608,18 @@
       if (popupTermino !== el) return; // el usuario ya se fue a otro término
       var ctx = contexto(id);
       mostrarEn(el.getBoundingClientRect(),
-        '<div class="fuentes-cab">' + escapar(t.t) + '</div>' +
-        '<div class="fuentes-cuerpo">' + cuerpo + '</div>' + htmlAcciones(ctx));
-      popup.setAttribute('data-fuentes-t', String(id));
+        '<div class="pagewise-cab">' + escapar(t.t) + '</div>' +
+        '<div class="pagewise-cuerpo">' + cuerpo + '</div>' + htmlAcciones(ctx));
+      popup.setAttribute('data-pagewise-t', String(id));
     };
     if (cacheDatos.hasOwnProperty(t.f)) {
       pintar(htmlFragmentos(cacheDatos[t.f], t, max));
       return;
     }
-    pintar('<div class="fuentes-vacio">' + escapar(T('cargando')) + '</div>');
+    pintar('<div class="pagewise-vacio">' + escapar(T('cargando')) + '</div>');
     cargar(t.f, function (err, datos) {
       pintar(err
-        ? '<div class="fuentes-vacio">' + escapar(T('errorCarga')) + '</div>'
+        ? '<div class="pagewise-vacio">' + escapar(T('errorCarga')) + '</div>'
         : htmlFragmentos(datos, t, max));
     });
   }
@@ -636,8 +636,8 @@
   function abierto() { return !!(popup && popup.style.display === 'block'); }
   F.abierto = abierto;
 
-  function esTermino(el) { return el.nodeType === 1 && tieneClase(el, 'fuentes-term'); }
-  function esPopup(el) { return el.nodeType === 1 && tieneClase(el, 'fuentes-popup'); }
+  function esTermino(el) { return el.nodeType === 1 && tieneClase(el, 'pagewise-term'); }
+  function esPopup(el) { return el.nodeType === 1 && tieneClase(el, 'pagewise-popup'); }
 
   /* ------------------------------------------------------------------ *
    * Búsqueda de texto libre (solo escritorio, vía pycmd)                *
@@ -653,10 +653,10 @@
     var max = 10;
     var tFalso = { t: titulo, s: (res && res.resaltar) || [] };
     var cuerpo = res && res.ok ? htmlFragmentos(res, tFalso, max)
-      : '<div class="fuentes-vacio">' + escapar(T('errorBuscar')) + '</div>';
+      : '<div class="pagewise-vacio">' + escapar(T('errorBuscar')) + '</div>';
     popupTermino = null;
-    mostrarEn(rect, '<div class="fuentes-cab">' + escapar(titulo) + '</div>' +
-      '<div class="fuentes-cuerpo">' + cuerpo + '</div>');
+    mostrarEn(rect, '<div class="pagewise-cab">' + escapar(titulo) + '</div>' +
+      '<div class="pagewise-cuerpo">' + cuerpo + '</div>');
   }
 
   function textoSeleccionado() {
@@ -674,7 +674,7 @@
     if (!botonBuscar) {
       botonBuscar = D.createElement('button');
       botonBuscar.type = 'button';
-      botonBuscar.className = 'fuentes-buscar';
+      botonBuscar.className = 'pagewise-buscar';
       D.body.appendChild(botonBuscar);
     }
     botonBuscar.innerHTML = '';
@@ -701,7 +701,7 @@
       if (popupTermino === el && abierto()) return;
       // Otro trozo del mismo término (partido por etiquetas): no reabrir.
       if (abierto() && popupTermino &&
-          popupTermino.getAttribute('data-fuentes-t') === el.getAttribute('data-fuentes-t')) return;
+          popupTermino.getAttribute('data-pagewise-t') === el.getAttribute('data-pagewise-t')) return;
       if (temporAbrir) clearTimeout(temporAbrir);
       temporAbrir = setTimeout(function () { temporAbrir = null; abrir(el); }, 120);
     } else if (cercano(e.target, esPopup)) {
@@ -739,7 +739,7 @@
         e.preventDefault();
         return;
       }
-      var frag = cercano(t, function (x) { return tieneClase(x, 'fuentes-abrible'); }, enPopup);
+      var frag = cercano(t, function (x) { return tieneClase(x, 'pagewise-abrible'); }, enPopup);
       if (frag) {
         F.py({ cmd: 'abrir', fuente: parseInt(frag.getAttribute('data-s'), 10),
           pagina: parseInt(frag.getAttribute('data-p'), 10) });
@@ -759,7 +759,7 @@
   }
 
   function ejecutarAccion(idAccion) {
-    var id = popup ? parseInt(popup.getAttribute('data-fuentes-t'), 10) : NaN;
+    var id = popup ? parseInt(popup.getAttribute('data-pagewise-t'), 10) : NaN;
     var ctx = contexto(id);
     for (var i = 0; i < acciones.length; i++) {
       if (acciones[i].id !== idAccion) continue;
@@ -767,7 +767,7 @@
         if (!popup) return;
         var zona = null;
         var divs = popup.getElementsByTagName('div');
-        for (var j = 0; j < divs.length; j++) if (tieneClase(divs[j], 'fuentes-cuerpo')) zona = divs[j];
+        for (var j = 0; j < divs.length; j++) if (tieneClase(divs[j], 'pagewise-cuerpo')) zona = divs[j];
         if (zona) zona.innerHTML = html;
       });
     }
@@ -779,10 +779,10 @@
     etiqueta: function () { return T('mas'); },
     disponible: function (ctx) { return ctx.tienePy && !!ctx.termino; },
     ejecutar: function (ctx, mostrar) {
-      mostrar('<div class="fuentes-vacio">' + escapar(T('buscando')) + '</div>');
+      mostrar('<div class="pagewise-vacio">' + escapar(T('buscando')) + '</div>');
       F.py({ cmd: 'mas', variantes: ctx.variantes }, function (res) {
         mostrar(res && res.ok ? htmlFragmentos(res, ctx.termino, 10)
-          : '<div class="fuentes-vacio">' + escapar(T('errorBuscar')) + '</div>');
+          : '<div class="pagewise-vacio">' + escapar(T('errorBuscar')) + '</div>');
       });
     }
   });
@@ -795,7 +795,7 @@
     try {
       // Comprobamos si el navegador admite {passive: true}.
       var o = Object.defineProperty({}, 'passive', { get: function () { opc = { passive: true }; return true; } });
-      W.addEventListener('fuentes-test', null, o);
+      W.addEventListener('pagewise-test', null, o);
     } catch (e) { opc = false; }
     D.addEventListener('touchstart', onTouch, opc);
     D.addEventListener('mouseover', onOver, false);
@@ -839,8 +839,8 @@
   };
 
   // Anki escritorio: volver a aplicar cuando se muestra cada tarjeta.
-  if (W.onShownHook && W.onShownHook.push && !W.__fuentesHook) {
-    W.__fuentesHook = true;
+  if (W.onShownHook && W.onShownHook.push && !W.__pagewiseHook) {
+    W.__pagewiseHook = true;
     W.onShownHook.push(function () { F.run(); });
   }
 

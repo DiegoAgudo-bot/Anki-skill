@@ -11,7 +11,7 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    python dev/e2e_anki.py [--plantillas] [--ingles] [--paquete=build/fuentes-1.1.0.ankiaddon] [-q]
+    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.2.0.ankiaddon] [-q]
 """
 import json
 import os
@@ -27,9 +27,10 @@ import json, os, sys, traceback
 from aqt import mw, gui_hooks
 from aqt.qt import QTimer
 
-SALIDA = os.environ["FUENTES_E2E_SALIDA"]
-PDF = os.environ["FUENTES_E2E_PDF"]
-PLANTILLAS = os.environ.get("FUENTES_E2E_PLANTILLAS") == "1"
+SALIDA = os.environ["PAGEWISE_E2E_SALIDA"]
+PDF = os.environ["PAGEWISE_E2E_PDF"]
+PLANTILLAS = os.environ.get("PAGEWISE_E2E_PLANTILLAS") == "1"
+MIGRACION = os.environ.get("PAGEWISE_E2E_MIGRACION") == "1"
 res = {"pasos": []}
 
 def guardar():
@@ -49,15 +50,56 @@ def paso(nombre, valor=True):
 def js(codigo, cb):
     mw.reviewer.web.evalWithCallback(codigo, cb)
 
-def empezar():
+def cerrar_aviso():
+    """Cierra el aviso modal de la migración y guarda su texto."""
+    w = mw.app.activeModalWidget()
+    if w is not None:
+        res["aviso_migracion"] = w.text() if hasattr(w, "text") else w.windowTitle()
+        w.accept()
+
+def probar_migracion():
+    """Venimos del add-on antiguo «fuentes» con datos, medios y plantillas."""
     try:
-        from fuentes import core, importer, i18n
-        from fuentes.ui import asistente
+        from pagewise import core, migracion, templates
+        medios = mw.col.media.dir()
+        paso("migracion", {
+            "fuentes": [f["nombre"] for f in core.indice().fuentes()],
+            "terminos": [t["termino"] for t in core.terminos()],
+            "pdfs": len(os.listdir(core.PDFS_DIR)),
+            "antiguo_activo": mw.addonManager.isEnabled("fuentes"),
+            "asistente_visto": core.config()["asistente_visto"],
+            "medios_antiguos": sorted(n for n in os.listdir(medios) if n.startswith("_fuentes")),
+            "medios_nuevos": len([n for n in os.listdir(medios) if n.startswith("_pagewise")]),
+            "aviso": res.get("aviso_migracion", "")[:60],
+        })
+        # Plantilla con el bloque antiguo: se renueva al nombre nuevo.
+        col = mw.col
+        basico = col.models.by_name("Basic") or col.models.by_name("Básico")
+        basico["tmpls"][0]["qfmt"] += ('\n<!-- FUENTES:INICIO (antiguo) -->\n<link rel="stylesheet" href="_fuentes.css">'
+                                      '\n<script src="_fuentes.js"></script>\n<!-- FUENTES:FIN -->')
+        col.models.update_dict(basico)
+        n = migracion.actualizar_plantillas(col)
+        q = col.models.get(basico["id"])["tmpls"][0]["qfmt"]
+        paso("plantilla_migrada", {"cambiados": n, "nuevo": "_pagewise.js" in q, "antiguo": "_fuentes" in q,
+                                   "reverso_intacto": not templates.tiene(col.models.get(basico["id"])["tmpls"][0]["afmt"])})
+        res["ok"] = True
+        guardar()
+    except Exception as e:
+        fallo(e)
+        return
+    mw.unloadProfileAndExit()
+
+def empezar():
+    if MIGRACION:
+        return probar_migracion()
+    try:
+        from pagewise import core, importer, i18n
+        from pagewise.ui import asistente
         # Primer arranque: el asistente se abre solo (sin bloquear) y nada está hecho.
         a = asistente._abierto
         paso("asistente_inicial", {"visible": bool(a and a.isVisible()), "marcas": [m.text() for m in a.marcas],
                                    "titulo": a.windowTitle()})
-        menu = [x for x in mw.form.menuTools.actions() if x.menu() and x.text() == "Fuentes"][0].menu()
+        menu = [x for x in mw.form.menuTools.actions() if x.menu() and x.text() == "Pagewise"][0].menu()
         paso("idioma", {"idioma": i18n.idioma(), "menu": [x.text() for x in menu.actions() if x.text()]})
         r = importer.importar_pdf(core.indice(), PDF, core.PDFS_DIR, nombre="Apuntes de prueba")
         paso("importado", {"paginas": r.paginas, "fragmentos": r.fragmentos})
@@ -73,10 +115,10 @@ def empezar():
 def exportado(inf):
     try:
         medios = mw.col.media.dir()
-        paso("exportado", sorted(n for n in os.listdir(medios) if n.startswith("_fuentes")))
-        with open(os.path.join(medios, "_fuentes_glosario.json"), encoding="utf-8") as f:
+        paso("exportado", sorted(n for n in os.listdir(medios) if n.startswith("_pagewise")))
+        with open(os.path.join(medios, "_pagewise_glosario.json"), encoding="utf-8") as f:
             paso("ajustes_exportados", json.load(f)["ajustes"])
-        from fuentes.ui import asistente
+        from pagewise.ui import asistente
         asistente._abierto.refrescar()
         paso("asistente_despues", [m.text() for m in asistente._abierto.marcas])
         asistente._abierto.grab().save(SALIDA + ".asistente.png")
@@ -88,7 +130,7 @@ def exportado(inf):
         n.fields[1] = "La aorta da ramas; <img src='x.png'> [sound:aorta.mp3]"
         col.add_note(n, col.decks.id("Default"))
         if PLANTILLAS:
-            from fuentes import templates
+            from pagewise import templates
             cambiados = templates.activar(col, [basico["id"]])
             paso("plantillas", cambiados)
             basico = col.models.get(basico["id"])
@@ -101,8 +143,8 @@ def exportado(inf):
 
 def leer_anverso():
     js("""JSON.stringify({
-        cargado: !!(window.Fuentes && Fuentes.__cargado),
-        terminos: Array.prototype.map.call(document.querySelectorAll('.fuentes-term'), function(e){return e.textContent;}),
+        cargado: !!(window.Pagewise && Pagewise.__cargado),
+        terminos: Array.prototype.map.call(document.querySelectorAll('.pagewise-term'), function(e){return e.textContent;}),
         scripts: Array.prototype.map.call(document.querySelectorAll('#qa script'), function(e){return e.getAttribute('src');}),
         html: document.getElementById('qa').innerHTML
     })""", anverso)
@@ -110,11 +152,11 @@ def leer_anverso():
 def anverso(r):
     try:
         paso("anverso", json.loads(r))
-        js("""(function(){ var t = document.querySelector('.fuentes-term');
-            Fuentes.forceTouch(true); t.click();
-            var p = document.querySelector('.fuentes-popup');
+        js("""(function(){ var t = document.querySelector('.pagewise-term');
+            Pagewise.forceTouch(true); t.click();
+            var p = document.querySelector('.pagewise-popup');
             return JSON.stringify({visible: p && p.style.display, texto: p && p.textContent,
-                abribles: document.querySelectorAll('.fuentes-abrible').length});
+                abribles: document.querySelectorAll('.pagewise-abrible').length});
         })()""", popup)
     except Exception as e:
         fallo(e)
@@ -122,9 +164,9 @@ def anverso(r):
 def popup(r):
     try:
         paso("popup", json.loads(r))
-        js("""Fuentes.py({cmd:'mas', variantes:['arteria femoral']}, function(r){ window.__mas = r; });
-              Fuentes.py({cmd:'buscar', q:'ligamento inguinal'}, function(r){ window.__buscar = r; });
-              Fuentes.py({cmd:'archivo', nombre:'_fuentes_glosario.json'}, function(r){ window.__arch = r; }); 1""",
+        js("""Pagewise.py({cmd:'mas', variantes:['arteria femoral']}, function(r){ window.__mas = r; });
+              Pagewise.py({cmd:'buscar', q:'ligamento inguinal'}, function(r){ window.__buscar = r; });
+              Pagewise.py({cmd:'archivo', nombre:'_pagewise_glosario.json'}, function(r){ window.__arch = r; }); 1""",
            lambda _: QTimer.singleShot(1500, leer_pycmd))
     except Exception as e:
         fallo(e)
@@ -141,14 +183,14 @@ def pycmd(r):
         fallo(e)
 
 def leer_reverso():
-    js("""JSON.stringify({terminos: Array.prototype.map.call(document.querySelectorAll('.fuentes-term'),
-        function(e){return e.textContent;}), scripts: document.querySelectorAll('script[src*="fuentes"]').length})""", reverso)
+    js("""JSON.stringify({terminos: Array.prototype.map.call(document.querySelectorAll('.pagewise-term'),
+        function(e){return e.textContent;}), scripts: document.querySelectorAll('script[src*="pagewise"]').length})""", reverso)
 
 def reverso(r):
     try:
         paso("reverso", json.loads(r))
         # Diálogos de la fase d.
-        from fuentes.ui import gestor, editor_glosario, visor
+        from pagewise.ui import gestor, editor_glosario, visor
         g = gestor.GestorFuentes(mw)
         paso("gestor", {"filas": g.tabla.rowCount(), "estado": g.estado.text(),
                         "nombre": g.tabla.item(0, 1).text()})
@@ -157,23 +199,23 @@ def reverso(r):
         paso("editor", [e.tabla.item(i, 1).text() for i in range(e.tabla.rowCount())])
         e.modificado = False
         e.close()
-        from fuentes.ui import tipos_nota
+        from pagewise.ui import tipos_nota
         tn = tipos_nota.DialogoTiposNota(mw)
         paso("tipos_nota", [tn.lista.item(i).text() + ":" + str(tn.lista.item(i).checkState() == 2 or
               tn.lista.item(i).checkState().value == 2) for i in range(tn.lista.count())])
         tn.close()
-        js("Fuentes.py({cmd:'abrir', fuente:1, pagina:2}); 1", lambda _: QTimer.singleShot(5000, leer_visor))
+        js("Pagewise.py({cmd:'abrir', fuente:1, pagina:2}); 1", lambda _: QTimer.singleShot(5000, leer_visor))
     except Exception as e:
         fallo(e)
 
 def leer_visor():
     try:
-        from fuentes.ui import visor
+        from pagewise.ui import visor
         d = visor._dialogo
         paso("visor", {"abierto": d is not None and d.isVisible(), "cargado_ok": d and d.cargado_ok,
                        "alternativa": d and d.alternativa_usada, "url": d and d.web.url().toString(),
                        "titulo": d and d.titulo.text()})
-        d.grab().save(os.environ["FUENTES_E2E_SALIDA"] + ".visor.png")
+        d.grab().save(os.environ["PAGEWISE_E2E_SALIDA"] + ".visor.png")
         d.reject()
         terminar()
     except Exception as e:
@@ -182,7 +224,7 @@ def leer_visor():
 def terminar():
     try:
         if PLANTILLAS:
-            from fuentes import templates
+            from pagewise import templates
             basico = mw.col.models.by_name("Basic") or mw.col.models.by_name("Básico")
             paso("desactivado", templates.desactivar(mw.col, [basico["id"]]))
             paso("qfmt_final", mw.col.models.get(basico["id"])["tmpls"][0]["qfmt"])
@@ -193,7 +235,9 @@ def terminar():
         return
     mw.unloadProfileAndExit()
 
-gui_hooks.profile_did_open.append(lambda: QTimer.singleShot(1500, empezar))
+if MIGRACION:
+    gui_hooks.profile_did_open.append(lambda: QTimer.singleShot(1800, cerrar_aviso))
+gui_hooks.profile_did_open.append(lambda: QTimer.singleShot(3000 if MIGRACION else 1500, empezar))
 QTimer.singleShot(90000, lambda: (res.update({"error": res.get("error") or "tiempo agotado"}), guardar(), os._exit(1)))
 '''
 
@@ -207,9 +251,9 @@ def main():
     if paquete:
         # Instala el .ankiaddon tal y como lo haría el usuario.
         import zipfile
-        zipfile.ZipFile(paquete).extractall(os.path.join(addons, "fuentes"))
+        zipfile.ZipFile(paquete).extractall(os.path.join(addons, "pagewise"))
     else:
-        os.symlink(os.path.join(RAIZ, "fuentes"), os.path.join(addons, "fuentes"))
+        os.symlink(os.path.join(RAIZ, "pagewise"), os.path.join(addons, "pagewise"))
     os.makedirs(os.path.join(addons, "zz_piloto"))
     with open(os.path.join(addons, "zz_piloto", "__init__.py"), "w") as f:
         f.write(PILOTO)
@@ -217,13 +261,32 @@ def main():
     import generar_pdfs
     pdf = generar_pdfs.generar_apuntes(os.path.join(base, "apuntes.pdf"))
     salida = os.path.join(base, "resultado.json")
-    entorno = dict(os.environ, FUENTES_E2E_SALIDA=salida, FUENTES_E2E_PDF=pdf,
-                   FUENTES_E2E_PLANTILLAS="1" if plantillas else "0",
+    migracion = "--migracion" in sys.argv
+    if migracion:
+        # Simula el add-on antiguo instalado, con sus datos, y medios antiguos en la colección.
+        viejo = os.path.join(addons, "fuentes")
+        os.makedirs(os.path.join(viejo, "user_files"))
+        open(os.path.join(viejo, "__init__.py"), "w").close()
+        sys.path.insert(0, RAIZ)
+        from pagewise import glossary, importer
+        from pagewise.index import Indice
+        ind = Indice(os.path.join(viejo, "user_files", "index.sqlite3"))
+        importer.importar_pdf(ind, pdf, os.path.join(viejo, "user_files", "pdfs"), nombre="Libro antiguo")
+        ind.cerrar()
+        glossary.guardar(os.path.join(viejo, "user_files", "glosario.json"),
+                         [{"termino": "aorta", "sinonimos": [], "activo": True}])
+        medios = os.path.join(base, "Prueba", "collection.media")
+        os.makedirs(medios)
+        for n in ("_fuentes.js", "_fuentes_glosario.json", "_fuentes_t_aorta_0.json"):
+            open(os.path.join(medios, n), "w").close()
+    entorno = dict(os.environ, PAGEWISE_E2E_SALIDA=salida, PAGEWISE_E2E_PDF=pdf,
+                   PAGEWISE_E2E_MIGRACION="1" if migracion else "0",
+                   PAGEWISE_E2E_PLANTILLAS="1" if plantillas else "0",
                    QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox", QTWEBENGINE_DISABLE_SANDBOX="1",
                    QT_QPA_PLATFORM=os.environ.get("QT_QPA_PLATFORM", "offscreen"))
     # Los datos del add-on (user_files) se crean en la carpeta del repositorio:
     # los apartamos para no mezclarlos con los del desarrollador.
-    uf = os.path.join(RAIZ, "fuentes", "user_files")
+    uf = os.path.join(RAIZ, "pagewise", "user_files")
     respaldo = uf + ".respaldo-e2e"
     if os.path.exists(respaldo):
         sys.exit("Existe %s de una ejecución anterior: revísalo y restáuralo a mano." % respaldo)
@@ -244,7 +307,7 @@ def main():
         shutil.rmtree(uf, ignore_errors=True)
         os.rename(respaldo, uf)  # rename (no move) para no anidar carpetas
         for p in ("meta.json",):
-            ruta = os.path.join(RAIZ, "fuentes", p)
+            ruta = os.path.join(RAIZ, "pagewise", p)
             if os.path.exists(ruta):
                 os.remove(ruta)
     with open(salida) as f:
@@ -252,7 +315,7 @@ def main():
     for captura in ("visor", "asistente"):  # capturas para revisar a ojo
         if os.path.exists("%s.%s.png" % (salida, captura)):
             shutil.copy("%s.%s.png" % (salida, captura),
-                        os.path.join(tempfile.gettempdir(), "fuentes-e2e-%s.png" % captura))
+                        os.path.join(tempfile.gettempdir(), "pagewise-e2e-%s.png" % captura))
     print(json.dumps(res, ensure_ascii=False, indent=1))
     sys.exit(0 if res.get("ok") else 1)
 

@@ -9,7 +9,7 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, RAIZ)
 sys.path.insert(0, os.path.join(RAIZ, "dev"))
 # Probamos con el pypdf que va dentro del add-on, no con el del sistema.
-sys.path.insert(0, os.path.join(RAIZ, "fuentes", "vendor"))
+sys.path.insert(0, os.path.join(RAIZ, "pagewise", "vendor"))
 
 import generar_pdfs  # noqa: E402
 
@@ -26,7 +26,7 @@ def pdfs(tmp_path_factory):
 
 @pytest.fixture
 def indice(tmp_path):
-    from fuentes.index import Indice
+    from pagewise.index import Indice
 
     ind = Indice(str(tmp_path / "index.sqlite3"))
     yield ind

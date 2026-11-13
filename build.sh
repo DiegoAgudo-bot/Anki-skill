@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Genera build/fuentes.ankiaddon (un .zip con el CONTENIDO de fuentes/).
+# Genera build/pagewise-<versión>.ankiaddon (un .zip con el CONTENIDO de pagewise/).
 #
 #   ./build.sh              pasa los tests y empaqueta
 #   ./build.sh --sin-tests  solo empaqueta
@@ -16,15 +16,15 @@ if [[ "${1:-}" != "--sin-tests" ]]; then
   npm test --silent
 fi
 
-VERSION=$(python3 -c "import json;print(json.load(open('fuentes/manifest.json'))['human_version'])")
+VERSION=$(python3 -c "import json;print(json.load(open('pagewise/manifest.json'))['human_version'])")
 mkdir -p build
-SALIDA="build/fuentes-${VERSION}.ankiaddon"
+SALIDA="build/pagewise-${VERSION}.ankiaddon"
 rm -f "$SALIDA"
 
 # Si hay archivos nuevos sin añadir a git se quedarían fuera sin avisar.
 SIN_SEGUIR=$(git status --porcelain -- fuentes | grep '^??' || true)
 if [[ -n "$SIN_SEGUIR" ]]; then
-  echo "Hay archivos en fuentes/ sin añadir a git (git add) y no entrarían en el paquete:"
+  echo "Hay archivos en pagewise/ sin añadir a git (git add) y no entrarían en el paquete:"
   echo "$SIN_SEGUIR"
   exit 1
 fi
@@ -42,11 +42,11 @@ prohibido = [n for n in nombres if n.endswith((".pdf", ".sqlite3", ".pyc")) or n
              or (n.startswith("user_files/") and n != "user_files/README.txt")
              or n.endswith("glosario.json")]
 assert not prohibido, "datos de usuario dentro del paquete: %s" % prohibido
-for necesario in ("__init__.py", "manifest.json", "config.json", "web/fuentes.js", "i18n_en.py",
+for necesario in ("__init__.py", "manifest.json", "config.json", "web/pagewise.js", "i18n_en.py",
                   "ui/asistente.py",
-                  "web/fuentes.css", "vendor/pypdf/__init__.py", "user_files/README.txt"):
+                  "web/pagewise.css", "vendor/pypdf/__init__.py", "user_files/README.txt"):
     assert necesario in nombres, "falta " + necesario
-assert not any(n.startswith("fuentes/") for n in nombres), "el zip no debe llevar la carpeta raíz"
+assert not any(n.startswith("pagewise/") for n in nombres), "el zip no debe llevar la carpeta raíz"
 print("%d archivos, %.0f KB" % (len(nombres), sum(i.compress_size for i in z.infolist()) / 1024))
 EOF
 echo "Listo: $SALIDA"

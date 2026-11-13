@@ -5,10 +5,10 @@ import glob
 import os
 import re
 
-from fuentes import i18n
-from fuentes.i18n_en import EN
+from pagewise import i18n
+from pagewise.i18n_en import EN
 
-ADDON = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fuentes")
+ADDON = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pagewise")
 
 
 def _textos():

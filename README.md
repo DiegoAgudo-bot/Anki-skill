@@ -1,4 +1,4 @@
-# Fuentes: tus PDFs dentro de tus tarjetas de Anki
+# Pagewise: tus PDFs dentro de tus tarjetas de Anki
 
 Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón (escritorio) o tocarlos (móvil), muestra los fragmentos más relevantes de **tus propias fuentes** (los PDFs que importas tú) con su número de página. En el escritorio, un clic abre el PDF en esa página sin salir de Anki.
 
@@ -9,20 +9,22 @@ Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón
 
 > **Nota legal.** El add-on se distribuye vacío: sin libros, sin índices y sin glosarios. Importa solo material que tengas derecho a usar (apuntes propios, libros que hayas comprado para uso personal y cuya licencia lo permita, documentos con licencia abierta…). Tú eres responsable del contenido que cargas. Ten en cuenta que los fragmentos exportados para el móvil se guardan en tu colección y se sincronizan con tu cuenta de AnkiWeb.
 
+> **¿Vienes de «Fuentes»?** Es el nombre anterior de este add-on. Instala Pagewise sin borrar antes el antiguo: al arrancar copia tus PDFs, tu índice y tu glosario, actualiza tus plantillas y desactiva «Fuentes». Reinicia Anki y, cuando compruebes que todo está, elimina el complemento antiguo.
+
 ## Instalación
 
-1. Descarga o genera `fuentes-<versión>.ankiaddon` (ver [Desarrollo](#desarrollo)).
+1. Descarga o genera `pagewise-<versión>.ankiaddon` (ver [Desarrollo](#desarrollo)).
 2. En Anki: **Herramientas → Complementos → Instalar desde archivo…** y elige el `.ankiaddon`.
-3. Reinicia Anki. Aparecerá el menú **Herramientas → Fuentes** y, la primera vez, el asistente de **primeros pasos**, que te guía por lo básico y marca lo que ya has hecho. Puedes volver a abrirlo desde el menú.
+3. Reinicia Anki. Aparecerá el menú **Herramientas → Pagewise** y, la primera vez, el asistente de **primeros pasos**, que te guía por lo básico y marca lo que ya has hecho. Puedes volver a abrirlo desde el menú.
 
 ## Uso en el escritorio
 
-1. **Herramientas → Fuentes → Gestionar fuentes… → Añadir PDF…**
+1. **Herramientas → Pagewise → Gestionar fuentes… → Añadir PDF…**
    - La importación va en segundo plano con una barra de progreso (se puede cancelar cerrándola). Un libro de 1000 páginas tarda de uno a varios minutos.
    - El PDF **se copia** dentro del add-on (`user_files/pdfs/`), así que puedes mover o borrar el original.
    - Si el PDF es escaneado (sin texto), el add-on te avisa: haría falta OCR, que esta versión aún no incluye.
    - Si el PDF tiene marcadores (índice), el add-on te propone términos para el glosario. Tú eliges cuáles añadir.
-2. **Herramientas → Fuentes → Editar glosario…** Añade los términos que quieres subrayar y sus sinónimos, separados por `;`. También puedes importar una lista (`.txt`/`.csv` con una línea por término, `término; sinónimo; sinónimo`, o `.json`).
+2. **Herramientas → Pagewise → Editar glosario…** Añade los términos que quieres subrayar y sus sinónimos, separados por `;`. También puedes importar una lista (`.txt`/`.csv` con una línea por término, `término; sinónimo; sinónimo`, o `.json`).
    - El subrayado no distingue mayúsculas ni tildes (`ciático` = `CIATICO`), pero sí la ñ (`año` ≠ `ano`).
    - Si un término está dentro de otro, gana el más largo («arteria femoral profunda» antes que «arteria femoral»).
 3. Repasa como siempre:
@@ -35,10 +37,10 @@ En el gestor puedes activar o desactivar fuentes, y también renombrarlas, reind
 
 ## Activar el móvil (AnkiDroid, AnkiMobile, AnkiWeb)
 
-1. En el escritorio: **Herramientas → Fuentes → Activar en tipos de nota…** y marca los tipos de nota que uses.
-   - El add-on añade al final de sus plantillas un pequeño bloque entre `<!-- FUENTES:INICIO -->` y `<!-- FUENTES:FIN -->` que carga `_fuentes.js` y `_fuentes.css`.
+1. En el escritorio: **Herramientas → Pagewise → Activar en tipos de nota…** y marca los tipos de nota que uses.
+   - El add-on añade al final de sus plantillas un pequeño bloque entre `<!-- PAGEWISE:INICIO -->` y `<!-- PAGEWISE:FIN -->` que carga `_pagewise.js` y `_pagewise.css`.
    - Al desmarcarlo, se quita sin tocar nada más.
-2. **Sincroniza en el escritorio** y luego **en el móvil**. Los datos (`_fuentes_glosario.json`, un `_fuentes_t_*.json` por término, `_fuentes.js` y `_fuentes.css`) viajan como archivos de medios.
+2. **Sincroniza en el escritorio** y luego **en el móvil**. Los datos (`_pagewise_glosario.json`, un `_pagewise_t_*.json` por término, `_pagewise.js` y `_pagewise.css`) viajan como archivos de medios.
    - Empiezan por `_`, así que «Comprobar medios» no los borra.
    - No van en una subcarpeta porque Anki no sincroniza subcarpetas de medios.
 3. En el móvil, toca un término subrayado para ver el popup. Toca fuera para cerrarlo. En el móvil no hay visor de PDF: verás «Fuente, p. N».
@@ -54,7 +56,7 @@ Cada vez que importas, reindexas, editas el glosario o cambias la configuración
 
 ## Configuración
 
-Se cambia en **Herramientas → Complementos → Fuentes → Configuración** (ver `config.md`):
+Se cambia en **Herramientas → Complementos → Pagewise → Configuración** (ver `config.md`):
 
 | Opción | Por defecto | Qué hace |
 | --- | --- | --- |
@@ -84,7 +86,7 @@ Se cambia en **Herramientas → Complementos → Fuentes → Configuración** (v
 ## Desarrollo
 
 ```
-fuentes/              ← el add-on (lo que va dentro del .ankiaddon)
+pagewise/              ← el add-on (lo que va dentro del .ankiaddon)
   __init__.py         solo registra hooks y menús
   importer.py         PDF → páginas limpias → fragmentos (pypdf)
   index.py            SQLite + FTS5 (unicode61 remove_diacritics 2)
@@ -95,25 +97,26 @@ fuentes/              ← el add-on (lo que va dentro del .ankiaddon)
   templates.py        insertar/quitar el bloque en las plantillas
   reviewer.py         card_will_show + mensajes pycmd
   core.py             rutas, configuración, exportación en segundo plano
+  migracion.py        migración de datos, medios y plantillas del nombre anterior («Fuentes»)
   i18n.py, i18n_en.py textos de la interfaz: español en el código, inglés en el diccionario
   ui/                 asistente, gestor, editor de glosario, tipos de nota, visor de PDF, importación
-  web/fuentes.js/.css un único JS (ES5) para escritorio y móvil
+  web/pagewise.js/.css un único JS (ES5) para escritorio y móvil
   vendor/             pypdf 6.21 (BSD-3) y typing_extensions (PSF), Python puro
 tests/                pytest (fuera de Anki) + tests/js (node:test + jsdom)
 dev/                  demo, generadores de PDFs de prueba, e2e con Anki real, prueba móvil
-build.sh              genera build/fuentes-<versión>.ankiaddon
+build.sh              genera build/pagewise-<versión>.ankiaddon
 ```
 
 **¿Por qué pypdf y no PyMuPDF?** pypdf es Python puro y cabe en un único `.ankiaddon` para Windows, macOS y Linux. PyMuPDF es más rápido, pero obliga a empaquetar binarios para cada plataforma y su licencia (AGPL) no encaja con un producto de pago sin licencia comercial.
 
 **Ampliar con un botón «Explicar».**
 - En Python, crea un proveedor con la misma interfaz que `ProveedorFTS.fragmentos(variantes, source_ids, por_fuente)`.
-- En el JS, registra una acción del popup con `Fuentes.registrarAccion({id, etiqueta, disponible, ejecutar})`. La acción incluida «Más en mis fuentes» sirve de ejemplo.
-- Los mensajes a Python van como `pycmd("fuentes:" + JSON)` y se atienden en `reviewer.COMANDOS`.
+- En el JS, registra una acción del popup con `Pagewise.registrarAccion({id, etiqueta, disponible, ejecutar})`. La acción incluida «Más en mis fuentes» sirve de ejemplo.
+- Los mensajes a Python van como `pycmd("pagewise:" + JSON)` y se atienden en `reviewer.COMANDOS`.
 
 **Formatos de los datos** (en la carpeta de medios):
-- `_fuentes_glosario.json`: `{"version":1, "ajustes":{"subrayado","fragmentos","soloPrimera"}, "terminos":[{"t","s":[sinónimos],"f":archivo}]}`
-- `_fuentes_t_<slug>_<hash>.json`: `{"t":término, "fuentes":[{"id","nombre","fragmentos":[{"p":página, "e":etiqueta impresa opcional, "x":texto}]}]}`
+- `_pagewise_glosario.json`: `{"version":1, "ajustes":{"subrayado","fragmentos","soloPrimera"}, "terminos":[{"t","s":[sinónimos],"f":archivo}]}`
+- `_pagewise_t_<slug>_<hash>.json`: `{"t":término, "fuentes":[{"id","nombre","fragmentos":[{"p":página, "e":etiqueta impresa opcional, "x":texto}]}]}`
 
 ### Probar
 
@@ -154,7 +157,7 @@ node dev/prueba_movil.js
 La prueba de extremo a extremo con un Anki real sin pantalla (necesita `pip install "aqt[qt6]==2.1.66" "reportlab<4.3"` en un Python 3.9):
 
 ```bash
-python dev/e2e_anki.py --plantillas --paquete=build/fuentes-1.1.0.ankiaddon
+python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.2.0.ankiaddon
 ```
 
 Para generar el paquete:
@@ -163,15 +166,15 @@ Para generar el paquete:
 ./build.sh
 ```
 
-Añade `--ingles` para probar la interfaz en inglés. Estos mismos tests se ejecutan solos en GitHub con cada cambio (`.github/workflows/tests.yml`).
+Añade `--ingles` para probar la interfaz en inglés y `--migracion` para probar la migración desde el nombre anterior. Estos mismos tests se ejecutan solos en GitHub con cada cambio (`.github/workflows/tests.yml`).
 
-**Traducciones.** Los textos van en español dentro de `tr("…")` y su traducción en `fuentes/i18n_en.py`; un test falla si falta alguna. Los textos del popup están en `TEXTOS`, en `web/fuentes.js`.
+**Traducciones.** Los textos van en español dentro de `tr("…")` y su traducción en `pagewise/i18n_en.py`; un test falla si falta alguna. Los textos del popup están en `TEXTOS`, en `web/pagewise.js`.
 
 Todos los PDFs de prueba se generan con `dev/generar_pdfs.py` y contienen **texto inventado** escrito para este proyecto.
 
 ## English
 
-**Fuentes** is an Anki add-on that underlines the terms on your cards and, on hover (desktop) or tap (mobile), shows the most relevant excerpts from **your own sources** (PDFs you import yourself) with their page number. On desktop, one click opens the PDF at that page inside Anki.
+**Pagewise** is an Anki add-on that underlines the terms on your cards and, on hover (desktop) or tap (mobile), shows the most relevant excerpts from **your own sources** (PDFs you import yourself) with their page number. On desktop, one click opens the PDF at that page inside Anki.
 
 - Works on Anki desktop 2.1.66+ and, offline, on AnkiDroid, AnkiMobile and AnkiWeb (precomputed data travels with your own media sync).
 - Everything is processed locally. No servers, nothing shared between users.

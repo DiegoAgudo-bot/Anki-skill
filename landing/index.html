@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Fuentes: tus PDFs dentro de tus tarjetas de Anki</title>
+<title>Pagewise: tus PDFs dentro de tus tarjetas de Anki</title>
 <meta name="description" content="Add-on para Anki que subraya los términos de tus tarjetas y te enseña qué dicen sobre ellos tus propios PDFs, con la página exacta. Local y sin conexión.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Fuentes: tus PDFs dentro de tus tarjetas de Anki">
+<meta property="og:title" content="Pagewise: tus PDFs dentro de tus tarjetas de Anki">
 <meta property="og:description" content="Add-on para Anki que subraya los términos de tus tarjetas y te enseña qué dicen sobre ellos tus propios PDFs, con la página exacta. Local y sin conexión.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect y='13' width='32' height='13' fill='%23ffe83d'/%3E%3Cpath d='M9 26V5h15v4.5H14.5v4.5H22v4.5h-7.5V26z' fill='%23121a3a'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect y='13' width='32' height='13' fill='%23ffe83d'/%3E%3Cpath fill-rule='evenodd' d='M9 26V5h9a7 7 0 0 1 0 14h-3.5v7zM14.5 9.5v5H18a2.5 2.5 0 0 0 0-5z' fill='%23121a3a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Caveat:wght@500;700&display=swap">
@@ -202,7 +202,7 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
 </style>
 
 <nav aria-label="Principal"><div class="in">
-  <a class="marca" href="#inicio">Fuentes</a>
+  <a class="marca" href="#inicio">Pagewise</a>
   <ul>
     <li><a href="#que-hace">Qué hace</a></li>
     <li><a href="#como">Cómo funciona</a></li>
@@ -216,7 +216,7 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
 <div class="in portada" id="inicio">
   <div>
     <h1>Tus apuntes responden dentro de cada tarjeta</h1>
-    <p class="lead">Fuentes es un add-on para Anki. Subraya los términos de tus tarjetas y te enseña qué dicen sobre ellos tus propios PDFs, con la página exacta.</p>
+    <p class="lead">Pagewise es un add-on para Anki. Subraya los términos de tus tarjetas y te enseña qué dicen sobre ellos tus propios PDFs, con la página exacta.</p>
     <form class="lista" id="lista-a" novalidate>
       <label for="correo-a">Te avisamos cuando salga la versión Pro</label>
       <input id="correo-a" type="email" placeholder="tu@correo.es" autocomplete="email">
@@ -249,7 +249,7 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
 </div></div>
 
 <div class="banda" id="que-hace"><div class="in">
-  <div class="cab"><h2>Lee tus tarjetas como las escribiste tú</h2><p>Nadie escribe sus tarjetas con cuidado a las dos de la mañana. Fuentes reconoce los términos igualmente.</p></div>
+  <div class="cab"><h2>Lee tus tarjetas como las escribiste tú</h2><p>Nadie escribe sus tarjetas con cuidado a las dos de la mañana. Pagewise reconoce los términos igualmente.</p></div>
   <div class="mural">
     <div class="adhesiva"><h3>Sin tildes, sin mayúsculas</h3>Da igual cómo lo teclees.<span class="ej">CIATICO = ciático</span></div>
     <div class="adhesiva"><h3>Gana la frase más larga</h3>Si un término contiene a otro, subraya el completo.<span class="ej">arteria femoral profunda</span></div>
@@ -287,7 +287,7 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
     <li><div class="mini"><b>anatomia-apuntes.pdf</b><div class="prog"><i></i></div><span style="color:var(--tinta-2)">Leyendo texto, página 412 de 1 030</span></div>
       <div><h3>Importa tus PDFs</h3><p>Apuntes o manuales. Se indexan en tu ordenador, en segundo plano; mil páginas tardan unos minutos.</p></div></li>
     <li><div class="mini"><table><tr><th>Término</th><th>Sinónimos</th></tr><tr><td>arteria femoral</td><td>a. femoral</td></tr><tr><td>nervio ciático</td><td>ciático</td></tr><tr><td>vena safena mayor</td><td>safena mayor</td></tr></table></div>
-      <div><h3>Haz tu glosario</h3><p>Los términos que quieres ver subrayados. Si el PDF trae índice, Fuentes te propone candidatos y tú eliges.</p></div></li>
+      <div><h3>Haz tu glosario</h3><p>Los términos que quieres ver subrayados. Si el PDF trae índice, Pagewise te propone candidatos y tú eliges.</p></div></li>
     <li><div class="mini"><div class="pdf"><b>p. 12</b><u style="width:92%"></u>La <mark>arteria femoral</mark> continúa a la arteria ilíaca externa por debajo del ligamento inguinal.<u style="width:80%"></u><u style="width:64%"></u></div></div>
       <div><h3>Repasa como siempre</h3><p>Pasa el ratón por un término y lee el fragmento. Un clic abre el PDF en esa página, sin salir de Anki.</p></div></li>
   </ol>
@@ -302,8 +302,8 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
   <div><div class="movil" data-touch id="movil-a">¿Qué vaso nace del ventrículo izquierdo?<hr>La aorta.</div></div>
   <div>
     <video class="video" controls preload="none" playsinline poster="video/poster.jpg" aria-label="Vídeo de 30 segundos: de PDF a popup">
-      <source src="video/fuentes-30s.mp4" type="video/mp4">
-      <source src="video/fuentes-30s.webm" type="video/webm">
+      <source src="video/pagewise-30s.mp4" type="video/mp4">
+      <source src="video/pagewise-30s.webm" type="video/webm">
     </video>
     <p class="mano" style="margin:12px 0 0;font-size:20px">30 segundos, grabado con el add-on real</p>
   </div>
@@ -339,7 +339,7 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
   <div class="cab"><h2>Preguntas que nos hacen</h2></div>
   <div class="faq">
     <details><summary>¿Qué PDFs puedo usar?</summary><p>Cualquiera que tenga texto: apuntes, manuales, guías. Usa solo material que tengas derecho a usar.</p></details>
-    <details><summary>¿Y si mi PDF es escaneado?</summary><p>Fuentes te avisa al importarlo. Las fotos de páginas necesitan OCR, que llegará con la versión Pro.</p></details>
+    <details><summary>¿Y si mi PDF es escaneado?</summary><p>Pagewise te avisa al importarlo. Las fotos de páginas necesitan OCR, que llegará con la versión Pro.</p></details>
     <details><summary>¿Se suben mis libros a algún sitio?</summary><p>No. Todo el procesado es local. Al móvil solo llegan los fragmentos de tus términos, por tu sincronización de AnkiWeb.</p></details>
     <details><summary>¿Tengo que cambiar mis tarjetas?</summary><p>No. En el escritorio funciona con las que ya tienes. Para el móvil eliges los tipos de nota y el add-on añade un bloque pequeño a la plantilla, que se quita con un clic.</p></details>
     <details><summary>¿Con qué versiones de Anki funciona?</summary><p>Anki 2.1.66 o posterior en escritorio, y las versiones actuales de AnkiDroid y AnkiMobile.</p></details>
@@ -358,10 +358,10 @@ footer .marca { color: var(--tinta); display: inline-block; margin-bottom: 10px;
 </div></div>
 
 <footer><div class="in">
-  <div><span class="marca">Fuentes</span><p>Tus PDFs dentro de tus tarjetas de Anki.</p></div>
+  <div><span class="marca">Pagewise</span><p>Tus PDFs dentro de tus tarjetas de Anki.</p></div>
   <div><b>Producto</b><ul><li><a href="#que-hace">Qué hace</a></li><li><a href="#como">Cómo funciona</a></li><li><a href="#movil">Móvil</a></li><li><a href="#precios">Precios</a></li></ul></div>
   <div><b>Recursos</b><ul><li><a href="https://github.com/DiegoAgudo-bot/Anki-skill">Descarga y guía de instalación</a></li><li><a href="#preguntas">Preguntas frecuentes</a></li></ul></div>
-  <div><b>Nota legal</b><p>Fuentes no incluye ni distribuye contenido de terceros. Los ejemplos de esta página son apuntes inventados.</p></div>
+  <div><b>Nota legal</b><p>Pagewise no incluye ni distribuye contenido de terceros. Los ejemplos de esta página son apuntes inventados.</p></div>
 </div></footer>
 
 <script>

@@ -3,7 +3,7 @@
 
     python3 landing/build.py
 
-Fuentes:  src/pagina.html (estilos y contenido) + src/demo.js (demo en vivo)
+Pagewise:  src/pagina.html (estilos y contenido) + src/demo.js (demo en vivo)
 Ajustes:  config.json
   lista_endpoint  URL del servicio de formularios que guarda los correos
                   (p. ej. https://formspree.io/f/XXXXXXXX). Vacío = la página
@@ -17,15 +17,16 @@ import sys
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 
-TITULO = "Fuentes: tus PDFs dentro de tus tarjetas de Anki"
+TITULO = "Pagewise: tus PDFs dentro de tus tarjetas de Anki"
 DESCRIPCION = ("Add-on para Anki que subraya los términos de tus tarjetas y te enseña qué dicen "
                "sobre ellos tus propios PDFs, con la página exacta. Local y sin conexión.")
-FUENTES = ("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400"
+PAGEWISE = ("https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400"
            "&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Caveat:wght@500;700&display=swap")
-# Icono: una "F" sobre trazo de subrayador.
+# Icono: una "P" sobre trazo de subrayador.
 ICONO = ("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
          "%3Crect y='13' width='32' height='13' fill='%23ffe83d'/%3E"
-         "%3Cpath d='M9 26V5h15v4.5H14.5v4.5H22v4.5h-7.5V26z' fill='%23121a3a'/%3E%3C/svg%3E")
+         "%3Cpath fill-rule='evenodd' d='M9 26V5h9a7 7 0 0 1 0 14h-3.5v7zM14.5 9.5v5H18a2.5 2.5 0 0 0 0-5z' "
+         "fill='%23121a3a'/%3E%3C/svg%3E")
 
 
 def leer(*partes):
@@ -64,7 +65,7 @@ def main(salida=None, lista=None):
 %(b)s
 </body>
 </html>
-""" % {"t": TITULO, "d": DESCRIPCION, "c": canonica, "i": ICONO, "f": FUENTES, "b": cuerpo}
+""" % {"t": TITULO, "d": DESCRIPCION, "c": canonica, "i": ICONO, "f": PAGEWISE, "b": cuerpo}
     with open(salida or os.path.join(AQUI, "index.html"), "w", encoding="utf-8") as f:
         f.write(html)
     print("%s generado (%d KB). Lista de espera: %s"

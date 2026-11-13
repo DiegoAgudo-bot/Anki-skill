@@ -4,9 +4,9 @@ import os
 
 import pytest
 
-from fuentes import exporter, importer
+from pagewise import exporter, importer
 
-WEB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fuentes", "web")
+WEB = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pagewise", "web")
 
 GLOSARIO = [
     {"termino": "arteria femoral", "sinonimos": ["a. femoral"], "activo": True},
@@ -37,12 +37,12 @@ def _leer(medios, nombre):
 def test_exporta_glosario_terminos_y_web(cargado):
     indice, medios, a, b = cargado
     inf = exporter.exportar(indice, GLOSARIO, medios, WEB)
-    g = _leer(medios, "_fuentes_glosario.json")
+    g = _leer(medios, "_pagewise_glosario.json")
     assert [t["t"] for t in g["terminos"]] == ["arteria femoral", "nervio ciático", "aorta", "año"]
     assert g["ajustes"] == {"subrayado": True, "fragmentos": 3, "soloPrimera": True, "idioma": "es"}
     assert inf.sin_resultados == ["término inexistente"]
-    assert os.path.exists(os.path.join(medios, "_fuentes.js"))
-    assert os.path.exists(os.path.join(medios, "_fuentes.css"))
+    assert os.path.exists(os.path.join(medios, "_pagewise.js"))
+    assert os.path.exists(os.path.join(medios, "_pagewise.css"))
 
     datos = _leer(medios, g["terminos"][0]["f"])
     assert datos["t"] == "arteria femoral"
@@ -64,7 +64,7 @@ def test_fragmentos_por_fuente_y_fuentes_inactivas(cargado):
     indice, medios, a, b = cargado
     exporter.exportar(indice, GLOSARIO, medios, WEB,
                       {"fragmentos_por_fuente": 1, "fuentes_inactivas": [b]})
-    g = _leer(medios, "_fuentes_glosario.json")
+    g = _leer(medios, "_pagewise_glosario.json")
     datos = _leer(medios, g["terminos"][0]["f"])
     assert [f["id"] for f in datos["fuentes"]] == [a]
     assert len(datos["fuentes"][0]["fragmentos"]) == 1
@@ -91,7 +91,7 @@ def test_sin_fuentes(indice, tmp_path):
     medios = str(tmp_path)
     inf = exporter.exportar(indice, GLOSARIO, medios, WEB)
     assert inf.terminos == 0
-    assert _leer(medios, "_fuentes_glosario.json")["terminos"] == []
+    assert _leer(medios, "_pagewise_glosario.json")["terminos"] == []
 
 
 def test_borrar_todo(cargado):

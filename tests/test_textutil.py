@@ -5,7 +5,7 @@ import os
 
 import pytest
 
-from fuentes.textutil import Matcher, clave, normalizar, recortar
+from pagewise.textutil import Matcher, clave, normalizar, recortar
 
 with open(os.path.join(os.path.dirname(__file__), "casos_matching.json"), encoding="utf-8") as f:
     DATOS = json.load(f)

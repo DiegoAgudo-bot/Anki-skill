@@ -1,4 +1,4 @@
-# Landing de Fuentes
+# Landing de Pagewise
 
 Una página (`index.html`, más la carpeta `video/`) con la demo en vivo y la lista de espera.
 No necesita servidor propio: vale cualquier alojamiento de páginas estáticas.
@@ -46,6 +46,6 @@ El vídeo se monta con capturas reales del add-on en Anki (PDFs de prueba con te
 
 1. `python dev/capturas_anki.py carpeta/cap` (con un Python que tenga `aqt`) saca las capturas y las posiciones del cursor.
 2. Copia `dev/video/player.html` y `dev/video/render.js` a `carpeta/` y ejecuta `node render.js 30`: dibuja los 900 fotogramas.
-3. Únelos con ffmpeg: `ffmpeg -framerate 30 -i frames/%04d.png -c:v libx264 -pix_fmt yuv420p -crf 20 -movflags +faststart fuentes-30s.mp4`.
+3. Únelos con ffmpeg: `ffmpeg -framerate 30 -i frames/%04d.png -c:v libx264 -pix_fmt yuv420p -crf 20 -movflags +faststart pagewise-30s.mp4`.
 
 El guion (textos y tiempos) está en `dev/video/player.html`.

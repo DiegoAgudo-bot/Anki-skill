@@ -16,7 +16,7 @@ FASES = {"extraer": tr("leyendo texto"), "indexar": tr("indexando texto")}
 
 
 def elegir_e_importar(parent=None, al_terminar=None):
-    rutas, _ = QFileDialog.getOpenFileNames(parent or mw, tr("Añadir PDFs a Fuentes"), "", tr("PDF (*.pdf)"))
+    rutas, _ = QFileDialog.getOpenFileNames(parent or mw, tr("Añadir PDFs a Pagewise"), "", tr("PDF (*.pdf)"))
     if rutas:
         importar(list(rutas), parent, al_terminar)
 
@@ -76,7 +76,7 @@ def importar(rutas, parent=None, al_terminar=None):
         try:
             resultados = fut.result()
         except Exception as e:
-            showWarning(tr("Fuentes: error al importar: %s") % e)
+            showWarning(tr("Pagewise: error al importar: %s") % e)
             return
         _resumen(resultados, parent)
         if al_terminar:
@@ -105,7 +105,7 @@ def _resumen(resultados, parent):
                 linea += tr(" Aviso: %d páginas sin texto (¿imágenes o escaneadas?).") % r.paginas_sin_texto
             lineas.append(linea)
             propuestos.extend(prop)
-    showInfo("\n\n".join(lineas), parent=parent or mw, title="Fuentes")
+    showInfo("\n\n".join(lineas), parent=parent or mw, title="Pagewise")
 
     if propuestos:
         actuales = core.terminos()
@@ -134,12 +134,12 @@ def reindexar(source_id, parent=None, al_terminar=None):
         try:
             r = fut.result()
             showInfo(tr("Reindexado: %d páginas, %d fragmentos.") % (r.paginas, r.fragmentos),
-                     parent=parent or mw, title="Fuentes")
+                     parent=parent or mw, title="Pagewise")
         except importer.ImportacionCancelada:
             showWarning(tr("Reindexado cancelado. La fuente queda incompleta: vuelve a reindexarla."),
                         parent=parent or mw)
         except Exception as e:
-            showWarning(tr("Fuentes: error al reindexar: %s") % e, parent=parent or mw)
+            showWarning(tr("Pagewise: error al reindexar: %s") % e, parent=parent or mw)
         core.exportar()
         if al_terminar:
             al_terminar()

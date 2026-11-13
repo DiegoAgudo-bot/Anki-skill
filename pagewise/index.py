@@ -79,7 +79,7 @@ class Indice:
             self.db.execute("PRAGMA journal_mode = WAL")
         except sqlite3.DatabaseError:
             pass
-        self.db.create_function("fuentes_norm", 1, _norm_sql)
+        self.db.create_function("pagewise_norm", 1, _norm_sql)
         self.db.executescript(_ESQUEMA)
         self.fts = usar_fts and self._preparar_fts()
         self.db.commit()
@@ -192,7 +192,7 @@ class Indice:
             filas = self.db.execute(sql, args)
         else:
             # Plan B sin FTS5: LIKE sobre el texto normalizado (lento pero funciona).
-            condiciones = " OR ".join(["fuentes_norm(c.texto) LIKE ?"] * len(variantes))
+            condiciones = " OR ".join(["pagewise_norm(c.texto) LIKE ?"] * len(variantes))
             sql = (
                 "SELECT c.source_id, c.pagina, c.etiqueta, c.texto FROM chunks c"
                 " JOIN sources s ON s.id = c.source_id WHERE (" + condiciones + ")"
@@ -228,7 +228,7 @@ class Indice:
         return [dict(f) for f in self.db.execute(sql, [consulta] + params + [limite])]
 
     def _buscar_libre_sin_fts(self, palabras, source_ids, limite):
-        condiciones = " AND ".join(["fuentes_norm(c.texto) LIKE ?"] * len(palabras))
+        condiciones = " AND ".join(["pagewise_norm(c.texto) LIKE ?"] * len(palabras))
         params = ["%" + p + "%" for p in palabras]
         filtro = " AND s.estado='lista'"
         if source_ids is not None:

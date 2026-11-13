@@ -1,11 +1,11 @@
-// Utilidades para cargar fuentes.js en un DOM simulado (jsdom) desde Node.
+// Utilidades para cargar pagewise.js en un DOM simulado (jsdom) desde Node.
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');
 
 const RAIZ = path.join(__dirname, '..', '..');
-const CODIGO = fs.readFileSync(path.join(RAIZ, 'fuentes', 'web', 'fuentes.js'), 'utf8');
+const CODIGO = fs.readFileSync(path.join(RAIZ, 'pagewise', 'web', 'pagewise.js'), 'utf8');
 const CASOS = JSON.parse(fs.readFileSync(path.join(RAIZ, 'tests', 'casos_matching.json'), 'utf8'));
 
 // Glosario y datos de ejemplo (texto inventado).
@@ -13,11 +13,11 @@ const GLOSARIO = {
   version: 1,
   ajustes: { subrayado: true, fragmentos: 3, soloPrimera: true, idioma: 'es' },
   terminos: [
-    { t: 'arteria femoral', s: ['a. femoral'], f: '_fuentes_t_arteria-femoral.json' },
-    { t: 'arteria femoral profunda', s: [], f: '_fuentes_t_arteria-femoral-profunda.json' },
-    { t: 'nervio ciático', s: ['ciático'], f: '_fuentes_t_nervio-ciatico.json' },
-    { t: 'aorta', s: [], f: '_fuentes_t_aorta.json' },
-    { t: 'vena cava', s: [], f: '_fuentes_t_vena-cava.json' }
+    { t: 'arteria femoral', s: ['a. femoral'], f: '_pagewise_t_arteria-femoral.json' },
+    { t: 'arteria femoral profunda', s: [], f: '_pagewise_t_arteria-femoral-profunda.json' },
+    { t: 'nervio ciático', s: ['ciático'], f: '_pagewise_t_nervio-ciatico.json' },
+    { t: 'aorta', s: [], f: '_pagewise_t_aorta.json' },
+    { t: 'vena cava', s: [], f: '_pagewise_t_vena-cava.json' }
   ]
 };
 const TERMINO = {
@@ -42,27 +42,27 @@ function montar(html, opciones) {
     runScripts: 'outside-only', pretendToBeVisual: true
   });
   const w = dom.window;
-  const datos = Object.assign({ '_fuentes_glosario.json': GLOSARIO,
-    '_fuentes_t_arteria-femoral.json': TERMINO }, opciones.datos || {});
+  const datos = Object.assign({ '_pagewise_glosario.json': GLOSARIO,
+    '_pagewise_t_arteria-femoral.json': TERMINO }, opciones.datos || {});
   w.__peticiones = [];
   if (opciones.pycmd) w.pycmd = opciones.pycmd;
   // Proveedor de datos en memoria (en Anki se usa fetch/XHR).
-  w.eval('window.Fuentes = { };');
+  w.eval('window.Pagewise = { };');
   w.__datos = datos;
   w.eval(CODIGO);
-  w.Fuentes.dataProvider = function (nombre, cb) {
+  w.Pagewise.dataProvider = function (nombre, cb) {
     w.__peticiones.push(nombre);
     const d = w.__datos[nombre];
     setTimeout(function () { d ? cb(null, d) : cb(new Error('no existe')); }, 0);
   };
   return new Promise((resolve) => setTimeout(() => {
-    w.Fuentes.run();
+    w.Pagewise.run();
     setTimeout(() => resolve(w), 20);
   }, 0));
 }
 
 function subrayados(w) {
-  return Array.from(w.document.querySelectorAll('.fuentes-term')).map((e) => e.textContent);
+  return Array.from(w.document.querySelectorAll('.pagewise-term')).map((e) => e.textContent);
 }
 
 const esperar = (ms) => new Promise((r) => setTimeout(r, ms));

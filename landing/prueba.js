@@ -12,9 +12,9 @@ const ok = (c, t) => { console.log((c ? '  ✓ ' : '  ✗ ') + t); if (!c) fallo
 
 (async () => {
   // Copia de prueba con la lista conectada a un servicio ficticio.
-  const conLista = path.join(os.tmpdir(), 'fuentes-landing-con-lista.html');
+  const conLista = path.join(os.tmpdir(), 'pagewise-landing-con-lista.html');
   execFileSync('python3', [path.join(__dirname, 'build.py'), conLista, 'https://formularios.test/f/abc'], { stdio: 'ignore' });
-  for (const f of ['fuentes-30s.mp4', 'fuentes-30s.webm', 'poster.jpg']) ok(require('fs').existsSync(path.join(__dirname, 'video', f)), 'existe video/' + f);
+  for (const f of ['pagewise-30s.mp4', 'pagewise-30s.webm', 'poster.jpg']) ok(require('fs').existsSync(path.join(__dirname, 'video', f)), 'existe video/' + f);
   const b = await chromium.launch();
 
   for (const [w, h, nombre] of [[1280, 900, 'escritorio'], [390, 800, 'móvil']]) {

@@ -10,17 +10,17 @@ EN = {
     "Activar en tipos de nota…": "Enable on note types…",
     "Exportar datos para el móvil ahora": "Export mobile data now",
     # --- core
-    "Fuentes: error al exportar los datos para el móvil: %s": "Fuentes: error exporting the mobile data: %s",
-    "Fuentes: %d términos exportados (%s)": "Fuentes: %d terms exported (%s)",
-    "Fuentes: los datos para el móvil ocupan %s. Considera reducir el glosario o los fragmentos por fuente.":
-        "Fuentes: the mobile data takes up %s. Consider trimming the glossary or the excerpts per source.",
+    "Pagewise: error al exportar los datos para el móvil: %s": "Pagewise: error exporting the mobile data: %s",
+    "Pagewise: %d términos exportados (%s)": "Pagewise: %d terms exported (%s)",
+    "Pagewise: los datos para el móvil ocupan %s. Considera reducir el glosario o los fragmentos por fuente.":
+        "Pagewise: the mobile data takes up %s. Consider trimming the glossary or the excerpts per source.",
     # --- importador
     "El PDF está protegido con contraseña.": "The PDF is password-protected.",
     "El PDF está cifrado y no se puede leer sin librerías extra.":
         "The PDF is encrypted and cannot be read without extra libraries.",
     "No se puede leer el PDF: %s": "Cannot read the PDF: %s",
     "Este PDF ya está importado como \"%s\".": "This PDF is already imported as \"%s\".",
-    "Añadir PDFs a Fuentes": "Add PDFs to Fuentes",
+    "Añadir PDFs a Pagewise": "Add PDFs to Pagewise",
     "PDF (*.pdf)": "PDF (*.pdf)",
     "leyendo texto": "reading text,",
     "indexando texto": "indexing text,",
@@ -28,7 +28,7 @@ EN = {
     "Importando %d de %d: %s\n": "Importing %d of %d: %s\n",
     "Importando PDF…": "Importing PDF…",
     "Cancelado.": "Cancelled.",
-    "Fuentes: error al importar: %s": "Fuentes: import error: %s",
+    "Pagewise: error al importar: %s": "Pagewise: import error: %s",
     "✓ %s: %d páginas, %d fragmentos.": "✓ %s: %d pages, %d excerpts.",
     " Aviso: %d páginas sin texto (¿imágenes o escaneadas?).":
         " Note: %d pages without text (images or scanned?).",
@@ -40,9 +40,9 @@ EN = {
     "Reindexado: %d páginas, %d fragmentos.": "Reindexed: %d pages, %d excerpts.",
     "Reindexado cancelado. La fuente queda incompleta: vuelve a reindexarla.":
         "Reindexing cancelled. The source is incomplete: reindex it again.",
-    "Fuentes: error al reindexar: %s": "Fuentes: reindex error: %s",
+    "Pagewise: error al reindexar: %s": "Pagewise: reindex error: %s",
     # --- términos propuestos
-    "Fuentes: términos propuestos": "Fuentes: suggested terms",
+    "Pagewise: términos propuestos": "Pagewise: suggested terms",
     "Estos términos salen de los marcadores (índice) del PDF.\nMarca los que quieras añadir al glosario. Podrás editarlos después.":
         "These terms come from the PDF's bookmarks (outline).\nTick the ones you want to add to the glossary. "
         "You can edit them later.",
@@ -53,15 +53,15 @@ EN = {
     # --- visor
     "Abrir con el visor del sistema": "Open with the system viewer",
     "%s — página %d": "%s — page %d",
-    "Fuentes: %s": "Fuentes: %s",
+    "Pagewise: %s": "Pagewise: %s",
     "Este Anki no puede mostrar el PDF dentro; se abre con el visor del sistema.":
         "This Anki cannot display the PDF inside; opening it with the system viewer.",
     "No se encuentra el PDF de esta fuente. Elimínala y vuelve a importarla.":
         "The PDF for this source is missing. Delete the source and import it again.",
-    "Fuentes: visor integrado no disponible (%s); uso el del sistema.":
-        "Fuentes: built-in viewer unavailable (%s); using the system viewer.",
+    "Pagewise: visor integrado no disponible (%s); uso el del sistema.":
+        "Pagewise: built-in viewer unavailable (%s); using the system viewer.",
     # --- gestor
-    "Fuentes: gestionar fuentes": "Fuentes: manage sources",
+    "Pagewise: gestionar fuentes": "Pagewise: manage sources",
     "Importa solo material que tengas derecho a usar. Todo se procesa y se guarda en este ordenador; al móvil solo llega a través de tu propia sincronización con AnkiWeb.":
         "Only import material you have the right to use. Everything is processed and stored on this computer; "
         "it only reaches your phone through your own AnkiWeb sync.",
@@ -94,7 +94,7 @@ EN = {
     "Eliminar fuente": "Delete source",
     "Fuente eliminada.": "Source deleted.",
     # --- editor de glosario
-    "Fuentes: editar glosario": "Fuentes: edit glossary",
+    "Pagewise: editar glosario": "Pagewise: edit glossary",
     "Cada término se subraya en tus tarjetas (sin distinguir mayúsculas ni tildes). Escribe los sinónimos separados por punto y coma.":
         "Each term is underlined on your cards (ignoring case and accents). Separate synonyms with semicolons.",
     "Filtrar:": "Filter:",
@@ -124,10 +124,10 @@ EN = {
         "\n\n%d terms do not appear in any active source and will not be underlined:\n%s",
     "¿Salir sin guardar los cambios del glosario?": "Close without saving your glossary changes?",
     # --- tipos de nota
-    "Fuentes: activar en tipos de nota": "Fuentes: enable on note types",
-    "Marca los tipos de nota en los que quieres el subrayado en el <b>móvil</b> (AnkiDroid, AnkiMobile, AnkiWeb). Se añade al final de sus plantillas un pequeño bloque que carga <code>_fuentes.js</code>; al desmarcar se quita sin tocar nada más.<br><br>En el escritorio no hace falta: allí el add-on lo carga solo.":
+    "Pagewise: activar en tipos de nota": "Pagewise: enable on note types",
+    "Marca los tipos de nota en los que quieres el subrayado en el <b>móvil</b> (AnkiDroid, AnkiMobile, AnkiWeb). Se añade al final de sus plantillas un pequeño bloque que carga <code>_pagewise.js</code>; al desmarcar se quita sin tocar nada más.<br><br>En el escritorio no hace falta: allí el add-on lo carga solo.":
         "Tick the note types where you want underlining on <b>mobile</b> (AnkiDroid, AnkiMobile, AnkiWeb). "
-        "A small block that loads <code>_fuentes.js</code> is added at the end of their templates; unticking "
+        "A small block that loads <code>_pagewise.js</code> is added at the end of their templates; unticking "
         "removes it without touching anything else.<br><br>On desktop this is not needed: the add-on loads it by itself.",
     "  (parcial)": "  (partial)",
     "Aplicar": "Apply",
@@ -135,9 +135,9 @@ EN = {
         "Templates updated on %d note types.\n\nTo use it on mobile: sync here, then sync on your phone "
         "(the data travels as media).",
     # --- asistente de primeros pasos
-    "Fuentes: primeros pasos": "Fuentes: getting started",
-    "<b>Fuentes</b> subraya los términos de tus tarjetas y te muestra qué dicen sobre ellos <b>tus propios PDFs</b>, con su página. Todo se procesa en este ordenador.<br><br>Importa solo material que tengas derecho a usar.":
-        "<b>Fuentes</b> underlines the terms on your cards and shows what <b>your own PDFs</b> say about them, "
+    "Pagewise: primeros pasos": "Pagewise: getting started",
+    "<b>Pagewise</b> subraya los términos de tus tarjetas y te muestra qué dicen sobre ellos <b>tus propios PDFs</b>, con su página. Todo se procesa en este ordenador.<br><br>Importa solo material que tengas derecho a usar.":
+        "<b>Pagewise</b> underlines the terms on your cards and shows what <b>your own PDFs</b> say about them, "
         "with page numbers. Everything is processed on this computer.<br><br>"
         "Only import material you have the right to use.",
     "<b>1. Añade un PDF</b><br>Un libro o tus apuntes, con texto (no escaneado).":
@@ -146,10 +146,14 @@ EN = {
         "<b>2. Build your glossary</b><br>The terms you want underlined, with their synonyms.",
     "<b>3. Actívalo en el móvil</b> (opcional)<br>Elige los tipos de nota y sincroniza.":
         "<b>3. Enable it on mobile</b> (optional)<br>Pick your note types, then sync.",
-    "¡Listo! Repasa una tarjeta que contenga alguno de tus términos y pasa el ratón por encima. Encontrarás todo en Herramientas → Fuentes.":
+    "¡Listo! Repasa una tarjeta que contenga alguno de tus términos y pasa el ratón por encima. Encontrarás todo en Herramientas → Pagewise.":
         "All set! Review a card containing one of your terms and hover over it. "
-        "You will find everything under Tools → Fuentes.",
+        "You will find everything under Tools → Pagewise.",
     "Ya tienes fuentes. Ahora añade los términos que quieres subrayar.":
         "You have sources. Now add the terms you want underlined.",
     "Empieza por el paso 1.": "Start with step 1.",
+    # --- migración desde el nombre anterior
+    "Fuentes ahora se llama Pagewise.\n\nTus PDFs, tu índice y tu glosario se han copiado a Pagewise y el complemento antiguo ha quedado desactivado.\n\nReinicia Anki. Después puedes eliminar «Fuentes» en Herramientas → Complementos.":
+        "Fuentes is now called Pagewise.\n\nYour PDFs, index and glossary have been copied to Pagewise and the old "
+        "add-on has been disabled.\n\nRestart Anki. Afterwards you can delete “Fuentes” under Tools → Add-ons.",
 }

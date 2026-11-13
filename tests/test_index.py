@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import pytest
 
-from fuentes.index import Indice, consulta_fts
+from pagewise.index import Indice, consulta_fts
 
 
 def _cargar(indice):
