@@ -22,7 +22,7 @@ SALIDA="build/pagewise-${VERSION}.ankiaddon"
 rm -f "$SALIDA"
 
 # Si hay archivos nuevos sin añadir a git se quedarían fuera sin avisar.
-SIN_SEGUIR=$(git status --porcelain -- fuentes | grep '^??' || true)
+SIN_SEGUIR=$(git status --porcelain -- pagewise | grep '^??' || true)
 if [[ -n "$SIN_SEGUIR" ]]; then
   echo "Hay archivos en pagewise/ sin añadir a git (git add) y no entrarían en el paquete:"
   echo "$SIN_SEGUIR"
@@ -31,7 +31,7 @@ fi
 
 # Solo se empaqueta lo que está bajo control de versiones (así nunca se
 # cuelan user_files/, meta.json ni cachés). user_files/ va con su README.
-(cd fuentes && git ls-files -z . | xargs -0 zip -q -X "../$SALIDA")
+(cd pagewise && git ls-files -z . | xargs -0 zip -q -X "../$SALIDA")
 
 echo "== Comprobando el contenido"
 python3 - "$SALIDA" <<'EOF'
