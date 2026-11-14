@@ -8,7 +8,7 @@ import os
 from aqt import mw
 from aqt.utils import tooltip
 
-from . import exporter, glossary
+from . import exporter, glossary, licencia
 from .index import Indice
 from . import i18n
 from .i18n import tr
@@ -21,6 +21,9 @@ PDFS_DIR = os.path.join(USER_FILES, "pdfs")
 INDEX_PATH = os.path.join(USER_FILES, "index.sqlite3")
 GLOSARIO_PATH = os.path.join(USER_FILES, "glosario.json")
 CACHE_PATH = os.path.join(USER_FILES, "export_cache.json")
+LICENCIA_PATH = os.path.join(USER_FILES, "licencia.txt")
+# Página donde se consigue Pagewise Pro. Vacía mientras no haya venta: el botón no se muestra.
+URL_PRO = ""
 
 DEFECTO = {
     "subrayado": True,
@@ -86,6 +89,40 @@ def guardar_terminos(ts):
 
 def carpeta_medios():
     return mw.col.media.dir() if mw.col else None
+
+
+# ---------------------------------------------------------------- licencia
+
+def licencia_actual():
+    """Licencia Pro válida guardada en este ordenador, o None (versión gratuita)."""
+    return licencia.guardada(LICENCIA_PATH)
+
+
+def es_pro():
+    return licencia_actual() is not None
+
+
+def hay_licencia_guardada():
+    return os.path.exists(LICENCIA_PATH)
+
+
+def motivo_licencia_guardada():
+    """Por qué no vale la licencia guardada: 'formato', 'firma', 'caducada' o ''."""
+    try:
+        with open(LICENCIA_PATH, encoding="utf-8") as f:
+            licencia.leer(f.read())
+    except licencia.LicenciaInvalida as e:
+        return e.motivo
+    except OSError:
+        pass
+    return ""
+
+
+def huecos_para_fuentes():
+    """Cuántas fuentes más se pueden añadir: None = sin límite (Pro)."""
+    if es_pro():
+        return None
+    return max(0, licencia.LIMITE_FUENTES_GRATIS - len(indice().fuentes()))
 
 
 def fuentes_activas():

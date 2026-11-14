@@ -8,7 +8,7 @@ from aqt.qt import (QAbstractItemView, QDialog, QHBoxLayout, QHeaderView, QInput
 from aqt.utils import askUser, restoreGeom, saveGeom, tooltip
 
 from .. import core, exporter
-from . import importar, visor
+from . import importar, pro, visor
 from ..i18n import tr
 
 COLUMNAS = [tr("Activa"), tr("Nombre"), tr("Páginas"), tr("Fragmentos"), tr("Importada"), tr("Estado")]
@@ -92,7 +92,7 @@ class GestorFuentes(QDialog):
             texto += tr("  ⚠ más de %d MB: la sincronización con el móvil será lenta") % c["aviso_tamano_mb"]
         if not fuentes:
             texto = tr("Aún no hay fuentes. Pulsa «Añadir PDF…» para importar la primera.")
-        self.estado.setText(texto)
+        self.estado.setText(texto + "\n" + pro.texto_estado())
 
     def _seleccionada(self):
         filas = self.tabla.selectionModel().selectedRows()

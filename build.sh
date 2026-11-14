@@ -38,12 +38,12 @@ python3 - "$SALIDA" <<'EOF'
 import sys, zipfile
 z = zipfile.ZipFile(sys.argv[1])
 nombres = z.namelist()
-prohibido = [n for n in nombres if n.endswith((".pdf", ".sqlite3", ".pyc")) or n == "meta.json"
+prohibido = [n for n in nombres if n.endswith((".pdf", ".sqlite3", ".pyc", ".clave-privada", "licencia.txt")) or n == "meta.json"
              or (n.startswith("user_files/") and n != "user_files/README.txt")
              or n.endswith("glosario.json")]
 assert not prohibido, "datos de usuario dentro del paquete: %s" % prohibido
 for necesario in ("__init__.py", "manifest.json", "config.json", "web/pagewise.js", "i18n_en.py",
-                  "ui/asistente.py",
+                  "ui/asistente.py", "licencia.py", "ed25519.py", "ui/pro.py",
                   "web/pagewise.css", "vendor/pypdf/__init__.py", "user_files/README.txt"):
     assert necesario in nombres, "falta " + necesario
 assert not any(n.startswith("pagewise/") for n in nombres), "el zip no debe llevar la carpeta raíz"

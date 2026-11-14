@@ -7,7 +7,7 @@ from aqt import mw
 from aqt.qt import QFileDialog
 from aqt.utils import showInfo, showWarning
 
-from .. import core, glossary, importer
+from .. import core, glossary, importer, licencia
 from ..index import Indice
 from .propuestas import DialogoPropuestas
 from ..i18n import tr
@@ -16,9 +16,22 @@ FASES = {"extraer": tr("leyendo texto"), "indexar": tr("indexando texto")}
 
 
 def elegir_e_importar(parent=None, al_terminar=None):
+    # Versión gratuita: hasta 2 fuentes. Con Pro no hay límite.
+    huecos = core.huecos_para_fuentes()
+    if huecos == 0:
+        from . import pro
+        pro.mostrar(parent, por_limite=True)
+        if al_terminar:
+            al_terminar()
+        return
     rutas, _ = QFileDialog.getOpenFileNames(parent or mw, tr("Añadir PDFs a Pagewise"), "", tr("PDF (*.pdf)"))
+    rutas = list(rutas)
+    if huecos is not None and len(rutas) > huecos:
+        showInfo(tr("La versión gratuita admite %d fuentes: se importarán solo los primeros %d PDF de los %d elegidos.")
+                 % (licencia.LIMITE_FUENTES_GRATIS, huecos, len(rutas)), parent=parent or mw, title="Pagewise")
+        rutas = rutas[:huecos]
     if rutas:
-        importar(list(rutas), parent, al_terminar)
+        importar(rutas, parent, al_terminar)
 
 
 def _en_segundo_plano(trabajo, titulo, parent, al_terminar):

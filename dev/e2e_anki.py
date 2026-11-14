@@ -11,7 +11,7 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.2.0.ankiaddon] [-q]
+    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.3.0.ankiaddon] [-q]
 """
 import json
 import os
@@ -199,6 +199,30 @@ def reverso(r):
         paso("editor", [e.tabla.item(i, 1).text() for i in range(e.tabla.rowCount())])
         e.modificado = False
         e.close()
+        # Pagewise Pro: versión gratuita, licencia inválida, activación y retirada.
+        from pagewise import core, ed25519, licencia
+        from pagewise.ui import pro
+        privada = bytes(range(32))                      # clave SOLO de esta prueba
+        real = licencia.CLAVE_PUBLICA
+        d = pro.DialogoPro(mw, por_limite=True)
+        r = {"gratis": d.estado.text(), "huecos_gratis": core.huecos_para_fuentes(), "es_pro_antes": core.es_pro()}
+        d.campo.setPlainText(licencia.emitir(privada, "ana@correo.es"))   # firmada con una clave que no es la del add-on
+        d._activar()
+        r["rechaza_clave_ajena"] = d.mensaje.text()[:40]
+        licencia.CLAVE_PUBLICA = ed25519.clave_publica(privada)
+        try:
+            d.campo.setPlainText("  " + licencia.emitir(privada, "ana@correo.es", caduca="2099-12-31") + "\n")
+            d._activar()
+            r.update({"pro": d.estado.text(), "es_pro": core.es_pro(), "huecos_pro": core.huecos_para_fuentes()})
+            g2 = gestor.GestorFuentes(mw)
+            r["gestor"] = g2.estado.text().split("\n")[-1]
+            g2.close()
+            d._quitar()
+            r.update({"tras_quitar": core.es_pro(), "archivo": os.path.exists(core.LICENCIA_PATH)})
+        finally:
+            licencia.CLAVE_PUBLICA = real
+        d.close()
+        paso("pro", r)
         from pagewise.ui import tipos_nota
         tn = tipos_nota.DialogoTiposNota(mw)
         paso("tipos_nota", [tn.lista.item(i).text() + ":" + str(tn.lista.item(i).checkState() == 2 or
