@@ -28,7 +28,7 @@
 
   var F = (W.Pagewise = W.Pagewise || {});
   F.__cargado = true;
-  F.version = '1.2.0';
+  F.version = '1.3.0';
 
   /* ------------------------------------------------------------------ *
    * Normalización (minúsculas, sin tildes, conserva la ñ)               *

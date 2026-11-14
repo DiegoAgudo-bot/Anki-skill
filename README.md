@@ -54,6 +54,15 @@ Cada vez que importas, reindexas, editas el glosario o cambias la configuración
 - En AnkiDroid, si un toque en el término pasa la tarjeta, revisa los gestos de toque en *Ajustes → Controles*.
 - AnkiWeb ejecuta el JavaScript de las plantillas de forma limitada: allí el soporte es «lo mejor posible».
 
+## Versión gratuita y Pagewise Pro
+
+- **Gratuita:** todo lo descrito arriba, con hasta **2 fuentes** (PDFs).
+- **Pro:** fuentes ilimitadas. El OCR para PDFs escaneados y el botón «Explicar» están en desarrollo.
+
+Para activar Pro, pega tu licencia en **Herramientas → Pagewise → Pagewise Pro…**. Se comprueba en tu ordenador, sin conexión. Si una licencia caduca no pierdes nada: tus fuentes siguen funcionando y solo se bloquea añadir más de dos.
+
+Cómo se emiten las licencias: `herramientas/README.md`.
+
 ## Configuración
 
 Se cambia en **Herramientas → Complementos → Pagewise → Configuración** (ver `config.md`):
@@ -97,6 +106,8 @@ pagewise/              ← el add-on (lo que va dentro del .ankiaddon)
   templates.py        insertar/quitar el bloque en las plantillas
   reviewer.py         card_will_show + mensajes pycmd
   core.py             rutas, configuración, exportación en segundo plano
+  licencia.py         licencias Pro: formato, verificación sin conexión y límite de la versión gratuita
+  ed25519.py          firmas Ed25519 en Python puro (RFC 8032)
   migracion.py        migración de datos, medios y plantillas del nombre anterior («Fuentes»)
   i18n.py, i18n_en.py textos de la interfaz: español en el código, inglés en el diccionario
   ui/                 asistente, gestor, editor de glosario, tipos de nota, visor de PDF, importación
@@ -104,6 +115,7 @@ pagewise/              ← el add-on (lo que va dentro del .ankiaddon)
   vendor/             pypdf 6.21 (BSD-3) y typing_extensions (PSF), Python puro
 tests/                pytest (fuera de Anki) + tests/js (node:test + jsdom)
 dev/                  demo, generadores de PDFs de prueba, e2e con Anki real, prueba móvil
+herramientas/         emisión de licencias (para el vendedor; no va en el add-on)
 build.sh              genera build/pagewise-<versión>.ankiaddon
 ```
 
@@ -157,7 +169,7 @@ node dev/prueba_movil.js
 La prueba de extremo a extremo con un Anki real sin pantalla (necesita `pip install "aqt[qt6]==2.1.66" "reportlab<4.3"` en un Python 3.9):
 
 ```bash
-python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.2.0.ankiaddon
+python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.3.0.ankiaddon
 ```
 
 Para generar el paquete:

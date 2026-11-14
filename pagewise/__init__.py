@@ -15,7 +15,7 @@ if mw is not None:
 
     from . import core, migracion, reviewer
     from .i18n import tr
-    from .ui import asistente, editor_glosario, gestor, tipos_nota
+    from .ui import asistente, editor_glosario, gestor, pro, tipos_nota
 
     def _accion(menu, texto, funcion):
         a = QAction(texto, mw)
@@ -32,6 +32,8 @@ if mw is not None:
         _accion(menu, tr("Activar en tipos de nota…"), tipos_nota.mostrar)
         menu.addSeparator()
         _accion(menu, tr("Exportar datos para el móvil ahora"), core.exportar)
+        menu.addSeparator()
+        _accion(menu, tr("Pagewise Pro…"), pro.mostrar)
         mw.form.menuTools.addMenu(menu)
 
     # El JS y el CSS se sirven desde la carpeta del add-on en escritorio.

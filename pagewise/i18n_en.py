@@ -156,4 +156,31 @@ EN = {
     "Fuentes ahora se llama Pagewise.\n\nTus PDFs, tu índice y tu glosario se han copiado a Pagewise y el complemento antiguo ha quedado desactivado.\n\nReinicia Anki. Después puedes eliminar «Fuentes» en Herramientas → Complementos.":
         "Fuentes is now called Pagewise.\n\nYour PDFs, index and glossary have been copied to Pagewise and the old "
         "add-on has been disabled.\n\nRestart Anki. Afterwards you can delete “Fuentes” under Tools → Add-ons.",
+    # --- Pagewise Pro
+    "Pagewise Pro…": "Pagewise Pro…",
+    "Pagewise Pro": "Pagewise Pro",
+    "Versión gratuita: hasta %d fuentes.": "Free version: up to %d sources.",
+    "Pagewise Pro activo. Licencia de %s, válida hasta el %s.": "Pagewise Pro is active. Licensed to %s, valid until %s.",
+    "Pagewise Pro activo. Licencia de %s, sin caducidad.": "Pagewise Pro is active. Licensed to %s, never expires.",
+    "<b>Has llegado al límite de la versión gratuita: %d fuentes.</b><br>Para añadir más, activa Pagewise Pro o elimina una fuente.":
+        "<b>You have reached the free version limit: %d sources.</b><br>To add more, activate Pagewise Pro or delete a source.",
+    "Pagewise Pro incluye:<ul><li>Fuentes ilimitadas</li><li>PDFs escaneados con OCR <i>(en desarrollo)</i></li><li>Botón «Explicar» con tus fuentes como contexto <i>(en desarrollo)</i></li></ul>":
+        "Pagewise Pro includes:<ul><li>Unlimited sources</li><li>Scanned PDFs with OCR <i>(in development)</i></li>"
+        "<li>“Explain” button using your sources as context <i>(in development)</i></li></ul>",
+    "Pega aquí tu licencia:": "Paste your license here:",
+    "Activar licencia": "Activate license",
+    "Conseguir Pagewise Pro": "Get Pagewise Pro",
+    "Quitar la licencia de este ordenador": "Remove the license from this computer",
+    "La licencia se comprueba en tu ordenador: Pagewise no se conecta a ningún servidor.":
+        "The license is checked on your computer: Pagewise does not connect to any server.",
+    "Ese texto no parece una licencia de Pagewise. Cópiala entera, desde «PW1.» hasta el final.":
+        "That text does not look like a Pagewise license. Copy all of it, from “PW1.” to the end.",
+    "La licencia no es válida. Comprueba que la has copiado entera y sin cambios.":
+        "The license is not valid. Check that you copied all of it, unchanged.",
+    "Esta licencia ha caducado. Tus fuentes siguen funcionando; renuévala para añadir más.":
+        "This license has expired. Your sources keep working; renew it to add more.",
+    "Pagewise Pro activado. Gracias, %s.": "Pagewise Pro activated. Thank you, %s.",
+    "Licencia quitada de este ordenador.": "License removed from this computer.",
+    "La versión gratuita admite %d fuentes: se importarán solo los primeros %d PDF de los %d elegidos.":
+        "The free version allows %d sources: only the first %d of the %d PDFs you picked will be imported.",
 }

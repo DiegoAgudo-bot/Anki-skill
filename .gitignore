@@ -10,3 +10,5 @@ build/
 *.ankiaddon
 dev/capturas/
 *.bundle
+# Claves privadas de licencias: NUNCA al repositorio.
+*.clave-privada
