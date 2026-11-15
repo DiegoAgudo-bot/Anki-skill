@@ -44,7 +44,9 @@ prohibido = [n for n in nombres if n.endswith((".pdf", ".sqlite3", ".pyc", ".cla
 assert not prohibido, "datos de usuario dentro del paquete: %s" % prohibido
 for necesario in ("__init__.py", "manifest.json", "config.json", "web/pagewise.js", "i18n_en.py",
                   "ui/asistente.py", "licencia.py", "ed25519.py", "ui/pro.py",
-                  "web/pagewise.css", "vendor/pypdf/__init__.py", "user_files/README.txt"):
+                  "web/pagewise.css", "vendor/pypdf/__init__.py", "user_files/README.txt",
+                  "web/pdfjs/LICENSE", "web/pdfjs/web/viewer.html", "web/pdfjs/web/viewer.mjs",
+                  "web/pdfjs/web/pagewise-visor.js", "web/pdfjs/build/pdf.mjs", "web/pdfjs/build/pdf.worker.mjs"):
     assert necesario in nombres, "falta " + necesario
 assert not any(n.startswith("pagewise/") for n in nombres), "el zip no debe llevar la carpeta raíz"
 print("%d archivos, %.0f KB" % (len(nombres), sum(i.compress_size for i in z.infolist()) / 1024))

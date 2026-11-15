@@ -95,7 +95,14 @@ test('escritorio con pycmd: clic en un fragmento abre el PDF en su página', asy
   await esperar(10);
   const frag = popup(w).querySelectorAll('.pagewise-abrible')[1];
   click(w, frag);
-  assert.deepEqual(JSON.parse(mensajes[0].replace(/^pagewise:/, '')), { cmd: 'abrir', fuente: 1, pagina: 4 });
+  // Además de la página, manda el texto resaltado en ese fragmento para que
+  // el visor lo marque también en el PDF.
+  const msg = JSON.parse(mensajes[0].replace(/^pagewise:/, ''));
+  assert.equal(msg.cmd, 'abrir');
+  assert.equal(msg.fuente, 1);
+  assert.equal(msg.pagina, 4);
+  assert.equal(msg.q, frag.querySelector('mark').textContent);
+  assert.equal(msg.frase, true);
   // Acción "Más en mis fuentes" disponible en escritorio.
   const boton = popup(w).querySelector('.pagewise-accion');
   assert.equal(boton.textContent, 'Más en mis fuentes');
@@ -141,4 +148,15 @@ test('interfaz en inglés cuando el glosario exportado lo indica', async () => {
   await esperar(10);
   assert.equal(popup(w).querySelector('.pagewise-accion').textContent, 'More from my sources');
   assert.equal(popup(w).querySelector('.pagewise-abrible').getAttribute('title'), 'Open the PDF at this page');
+});
+
+test('textoResaltado: una expresión se busca como frase; varias palabras, sueltas', async () => {
+  const w = await montar(HTML);
+  const d = w.document.createElement('div');
+  d.innerHTML = 'La <mark>Arteria  femoral</mark> y otra vez la <mark>arteria femoral</mark>.';
+  assert.deepEqual({ ...w.Pagewise.textoResaltado(d) }, { q: 'Arteria femoral', frase: true });
+  d.innerHTML = 'El <mark>nervio</mark> y el <mark>muslo</mark> y el <mark>Nervio</mark>.';
+  assert.deepEqual({ ...w.Pagewise.textoResaltado(d) }, { q: 'nervio muslo', frase: false });
+  d.innerHTML = 'Sin nada resaltado.';
+  assert.deepEqual({ ...w.Pagewise.textoResaltado(d) }, { q: '', frase: true });
 });

@@ -21,6 +21,7 @@ Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón
 
 1. **Herramientas → Pagewise → Gestionar fuentes… → Añadir PDF…**
    - La importación va en segundo plano con una barra de progreso (se puede cancelar cerrándola). Un libro de 1000 páginas tarda de uno a varios minutos.
+   - Admite PDFs grandes (probado con 2 GB): ni la importación ni el visor cargan el archivo entero en memoria. Hace falta espacio en disco para la copia.
    - El PDF **se copia** dentro del add-on (`user_files/pdfs/`), así que puedes mover o borrar el original.
    - Si el PDF es escaneado (sin texto), el add-on te avisa: haría falta OCR, que esta versión aún no incluye.
    - Si el PDF tiene marcadores (índice), el add-on te propone términos para el glosario. Tú eliges cuáles añadir.
@@ -29,7 +30,7 @@ Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón
    - Si un término está dentro de otro, gana el más largo («arteria femoral profunda» antes que «arteria femoral»).
 3. Repasa como siempre:
    - Pasa el ratón por un término subrayado para ver los fragmentos (hasta 3 por fuente).
-   - Haz clic en un fragmento para abrir el PDF en esa página.
+   - Haz clic en un fragmento para abrir el PDF en esa página, con el término **resaltado** en el texto (como al buscarlo con Ctrl+F).
    - **Más en mis fuentes** busca más resultados en el índice completo.
    - Si seleccionas un texto cualquiera de la tarjeta, aparece **Buscar en fuentes** para hacer una búsqueda libre.
 
@@ -76,9 +77,12 @@ Se cambia en **Herramientas → Complementos → Pagewise → Configuración** (
 | `fuentes_inactivas` | `[]` | IDs de las fuentes que no se usan (mejor desde el gestor). |
 | `aviso_tamano_mb` | `50` | Umbral del aviso de tamaño de los datos para el móvil. |
 | `inyectar_en_escritorio` | `true` | En el escritorio, carga el script aunque la plantilla no tenga el bloque. |
+| `visor_pdf` | `pdfjs` | Visor al hacer clic en un fragmento: `pdfjs` (resalta el término y aguanta PDFs de varios GB), `chromium` (el integrado de Anki, sin resaltado) o `sistema` (tu lector de PDF). |
 
 ## Limitaciones conocidas
 
+- El resaltado en el PDF depende del texto que pdf.js lee de la página: si el PDF lo guarda de forma rara (ligaduras, columnas partidas) puede abrirse la página sin marcar nada.
+- En PDFs de más de 200 MB el visor solo prepara el resaltado de las páginas cercanas a la que miras, para no cargar el libro entero en memoria. Si buscas tú con la lupa del visor (Ctrl+F) sí recorre todo el libro, y entonces el consumo de memoria puede acercarse al tamaño del archivo.
 - Sin OCR: los PDFs escaneados no se pueden indexar todavía.
 - Un término repartido entre etiquetas de formato (`arteria <b>femoral</b>`) sí se detecta. No se detecta si lo corta un salto de línea, un párrafo, un enlace o una celda de tabla.
 - En el anverso no se subraya dentro del hueco del cloze, para no revelar nada. En el reverso sí.
@@ -88,7 +92,7 @@ Se cambia en **Herramientas → Complementos → Pagewise → Configuración** (
 
 ## Privacidad
 
-- No hay ninguna conexión de red.
+- No hay ninguna conexión de red. El visor de PDF lee tus PDFs a través del servidor local que Anki ya usa para mostrar las tarjetas (solo escucha en tu propio ordenador, `127.0.0.1`).
 - El índice SQLite, el glosario y las copias de los PDFs se quedan en la carpeta `user_files/` del add-on, que sobrevive a las actualizaciones.
 - Al móvil solo llegan los fragmentos exportados, por tu propia sincronización de AnkiWeb.
 
@@ -112,6 +116,7 @@ pagewise/              ← el add-on (lo que va dentro del .ankiaddon)
   i18n.py, i18n_en.py textos de la interfaz: español en el código, inglés en el diccionario
   ui/                 asistente, gestor, editor de glosario, tipos de nota, visor de PDF, importación
   web/pagewise.js/.css un único JS (ES5) para escritorio y móvil
+  web/pdfjs/          visor de PDF: pdf.js 4.10 (Apache 2.0) con ajustes mínimos (ver LEEME-PAGEWISE.md)
   vendor/             pypdf 6.21 (BSD-3) y typing_extensions (PSF), Python puro
 tests/                pytest (fuera de Anki) + tests/js (node:test + jsdom)
 dev/                  demo, generadores de PDFs de prueba, e2e con Anki real, prueba móvil
@@ -169,7 +174,7 @@ node dev/prueba_movil.js
 La prueba de extremo a extremo con un Anki real sin pantalla (necesita `pip install "aqt[qt6]==2.1.66" "reportlab<4.3"` en un Python 3.9):
 
 ```bash
-python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.3.0.ankiaddon
+python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.4.0.ankiaddon
 ```
 
 Para generar el paquete:

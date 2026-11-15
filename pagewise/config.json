@@ -6,5 +6,6 @@
     "fuentes_inactivas": [],
     "aviso_tamano_mb": 50,
     "inyectar_en_escritorio": true,
+    "visor_pdf": "pdfjs",
     "asistente_visto": false
 }

@@ -489,6 +489,26 @@
   }
   F.resaltar = resaltar;
 
+  /**
+   * Lo que el popup resalta en un fragmento, para que el visor de PDF lo
+   * marque también en la página. Una sola expresión → se busca como frase;
+   * varias palabras distintas (búsqueda libre) → se marcan por separado.
+   */
+  function textoResaltado(frag) {
+    var marcas = frag.getElementsByTagName('mark');
+    var vistos = {};
+    var lista = [];
+    for (var i = 0; i < marcas.length; i++) {
+      var x = String(marcas[i].textContent || '').replace(/\s+/g, ' ').replace(/^ | $/g, '');
+      var k = x.toLowerCase();
+      if (!x || vistos.hasOwnProperty(k)) continue;
+      vistos[k] = true;
+      lista.push(x);
+    }
+    return { q: lista.slice(0, 8).join(' '), frase: lista.length < 2 };
+  }
+  F.textoResaltado = textoResaltado;
+
   function etiquetaPagina(fr) {
     return T('pagina') + (fr.e || fr.p);
   }
@@ -741,8 +761,9 @@
       }
       var frag = cercano(t, function (x) { return tieneClase(x, 'pagewise-abrible'); }, enPopup);
       if (frag) {
+        var b = textoResaltado(frag);
         F.py({ cmd: 'abrir', fuente: parseInt(frag.getAttribute('data-s'), 10),
-          pagina: parseInt(frag.getAttribute('data-p'), 10) });
+          pagina: parseInt(frag.getAttribute('data-p'), 10), q: b.q, frase: b.frase });
         e.preventDefault();
       }
       return; // los toques dentro del popup no lo cierran

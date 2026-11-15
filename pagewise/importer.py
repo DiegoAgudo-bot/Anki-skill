@@ -27,6 +27,10 @@ UMBRAL_ESCANEADO = 0.9
 # Tamaño objetivo de cada fragmento indexado (en caracteres).
 TAM_FRAGMENTO = 700
 TAM_MAX_FRAGMENTO = 1100
+# Cada cuántas páginas se vacía la caché de objetos de pypdf (ver extraer_paginas).
+PAGINAS_POR_CACHE = 10
+# Tamaño de bloque al copiar el PDF (permite progreso y cancelación).
+BLOQUE_COPIA = 4 << 20
 
 
 class ImportacionCancelada(Exception):
@@ -51,8 +55,17 @@ class Resultado:
 # --------------------------------------------------------------------------
 
 def abrir_pdf(ruta):
+    """Abre el PDF sin cargarlo entero en memoria.
+
+    Si a pypdf se le da una ruta, lee el archivo completo en RAM (un PDF de
+    2 GB son 2 GB). Con un archivo abierto solo lee lo que va necesitando.
+    Quien llama debe cerrar el lector con cerrar_pdf().
+    """
+    archivo = None
     try:
-        lector = PdfReader(ruta, strict=False)
+        archivo = open(ruta, "rb")
+        lector = PdfReader(archivo, strict=False)
+        lector._pagewise_archivo = archivo
         if lector.is_encrypted:
             # Muchos PDFs "protegidos" solo tienen contraseña de propietario.
             try:
@@ -67,9 +80,33 @@ def abrir_pdf(ruta):
         len(lector.pages)  # fuerza la lectura de la estructura de páginas
         return lector
     except PdfNoLegible:
+        _cerrar(archivo)
         raise
     except Exception as e:
+        _cerrar(archivo)
         raise PdfNoLegible(tr("No se puede leer el PDF: %s") % e)
+
+
+def _cerrar(archivo):
+    try:
+        if archivo is not None:
+            archivo.close()
+    except Exception:
+        pass
+
+
+def cerrar_pdf(lector):
+    """Cierra el archivo que abrió abrir_pdf()."""
+    _cerrar(getattr(lector, "_pagewise_archivo", None))
+
+
+def _vaciar_cache(lector):
+    """pypdf guarda en memoria cada objeto que resuelve, imágenes incluidas:
+    en un PDF grande con muchas figuras eso acaba siendo el archivo entero.
+    Vaciar la caché solo obliga a releer del disco lo que se vuelva a pedir."""
+    cache = getattr(lector, "resolved_objects", None)
+    if isinstance(cache, dict):
+        cache.clear()
 
 
 def _etiqueta(lector, i):
@@ -97,6 +134,8 @@ def extraer_paginas(lector, progreso=None, cancelado=None):
         except Exception:
             texto = ""  # una página rota no debe tumbar la importación
         paginas.append((_etiqueta(lector, i), texto))
+        if i % PAGINAS_POR_CACHE == PAGINAS_POR_CACHE - 1:
+            _vaciar_cache(lector)
         if progreso and (i % 5 == 0 or i == total - 1):
             progreso(i + 1, total)
     return paginas
@@ -217,20 +256,53 @@ def _slug(nombre):
     return base[:40] or "fuente"
 
 
-def copiar_pdf(ruta_original, carpeta_pdfs, sha1):
+def copiar_pdf(ruta_original, carpeta_pdfs, sha1, progreso=None, cancelado=None):
     """Copia el PDF a la carpeta del add-on (user_files/pdfs).
 
     Así la fuente sigue funcionando aunque el usuario mueva o borre el original.
+    Se copia por bloques: `progreso(MB hechos, MB totales)` y `cancelado()`
+    funcionan también con archivos de varios GB. Si no hay sitio en el disco
+    se avisa antes de empezar.
     Devuelve el nombre del archivo copiado (relativo a carpeta_pdfs).
     """
     os.makedirs(carpeta_pdfs, exist_ok=True)
     nombre = os.path.splitext(os.path.basename(ruta_original))[0]
     destino = "%s-%s.pdf" % (_slug(nombre), sha1[:10])
     ruta_destino = os.path.join(carpeta_pdfs, destino)
-    if not os.path.exists(ruta_destino):
-        temporal = ruta_destino + ".tmp"
-        shutil.copyfile(ruta_original, temporal)
+    if os.path.exists(ruta_destino):
+        return destino
+    tam = os.path.getsize(ruta_original)
+    try:
+        libre = shutil.disk_usage(carpeta_pdfs).free
+    except OSError:
+        libre = None
+    if libre is not None and libre < tam + (50 << 20):
+        raise OSError(
+            tr("No hay espacio suficiente en el disco: el PDF ocupa %d MB y quedan %d MB libres.")
+            % (tam >> 20, libre >> 20)
+        )
+    temporal = ruta_destino + ".tmp"
+    total_mb = max(1, tam >> 20)
+    try:
+        hecho = 0
+        with open(ruta_original, "rb") as origen, open(temporal, "wb") as salida:
+            while True:
+                if cancelado and cancelado():
+                    raise ImportacionCancelada()
+                bloque = origen.read(BLOQUE_COPIA)
+                if not bloque:
+                    break
+                salida.write(bloque)
+                hecho += len(bloque)
+                if progreso:
+                    progreso(min(total_mb, hecho >> 20), total_mb)
         os.replace(temporal, ruta_destino)
+    except BaseException:
+        try:
+            os.remove(temporal)
+        except OSError:
+            pass
+        raise
     return destino
 
 
@@ -276,25 +348,29 @@ def importar_pdf(indice, ruta, carpeta_pdfs, nombre=None, progreso=None, cancela
         return (lambda h, t: progreso(fase, h, t)) if progreso else None
 
     lector = abrir_pdf(ruta)
-    sha1 = sha1_archivo(ruta)
-    existente = indice.fuente_por_sha1(sha1)
-    if existente:
-        raise ValueError(tr('Este PDF ya está importado como "%s".') % existente["nombre"])
-
-    paginas = extraer_paginas(lector, prog("extraer"), cancelado)
+    try:
+        sha1 = sha1_archivo(ruta)
+        existente = indice.fuente_por_sha1(sha1)
+        if existente:
+            raise ValueError(tr('Este PDF ya está importado como "%s".') % existente["nombre"])
+        paginas = extraer_paginas(lector, prog("extraer"), cancelado)
+    finally:
+        cerrar_pdf(lector)
     total = len(paginas)
     vacias = sum(1 for _, t in paginas if len(t.strip()) < MIN_CARACTERES_PAGINA)
     if es_escaneado(vacias, total):
         return Resultado(None, total, 0, vacias, True)
 
-    archivo = copiar_pdf(ruta, carpeta_pdfs, sha1)
+    archivo = copiar_pdf(ruta, carpeta_pdfs, sha1, prog("copiar"), cancelado)
     nombre = nombre or os.path.splitext(os.path.basename(ruta))[0]
-    source_id = indice.agregar_fuente(nombre, archivo, ruta, total, sha1)
+    source_id = None
     try:
+        source_id = indice.agregar_fuente(nombre, archivo, ruta, total, sha1)
         n, sin_texto = indexar_paginas(indice, source_id, paginas, prog("indexar"), cancelado)
     except BaseException:
         # Cancelación o error: no dejamos fuentes a medias.
-        indice.eliminar_fuente(source_id)
+        if source_id is not None:
+            indice.eliminar_fuente(source_id)
         try:
             os.remove(os.path.join(carpeta_pdfs, archivo))
         except OSError:
@@ -311,7 +387,10 @@ def reindexar(indice, source_id, carpeta_pdfs, progreso=None, cancelado=None):
 
     fuente = indice.fuente(source_id)
     lector = abrir_pdf(os.path.join(carpeta_pdfs, fuente["archivo"]))
-    paginas = extraer_paginas(lector, prog("extraer"), cancelado)
+    try:
+        paginas = extraer_paginas(lector, prog("extraer"), cancelado)
+    finally:
+        cerrar_pdf(lector)
     indice.borrar_fragmentos(source_id)
     n, sin_texto = indexar_paginas(indice, source_id, paginas, prog("indexar"), cancelado)
     indice.marcar_lista(source_id, len(paginas))
@@ -354,12 +433,21 @@ def proponer_terminos(ruta):
     from .textutil import clave
 
     try:
-        outline = abrir_pdf(ruta).outline
+        lector = abrir_pdf(ruta)
     except Exception:
         return []
+    try:
+        outline = lector.outline
+    except Exception:
+        outline = []
+    try:
+        titulos = list(_titulos_outline(outline))
+    except Exception:
+        titulos = []
+    cerrar_pdf(lector)
     vistos = set()
     propuestos = []
-    for titulo in _titulos_outline(outline):
+    for titulo in titulos:
         t = re.sub(r"\s+", " ", titulo).strip(" .:-–—")
         t = _NUMERACION.sub("", t).strip(" .:-–—")
         k = clave(t)
