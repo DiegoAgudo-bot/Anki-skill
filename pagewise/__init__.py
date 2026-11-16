@@ -37,7 +37,14 @@ if mw is not None:
         mw.form.menuTools.addMenu(menu)
 
     # El JS y el CSS se sirven desde la carpeta del add-on en escritorio.
-    mw.addonManager.setWebExports(__name__, r"web/.*\.(js|css)")
+    # El Python de Anki 2.1.66 no conoce la extensión .mjs y el visor (módulos
+    # de JavaScript) no cargaría con un tipo MIME genérico.
+    import mimetypes
+    if not mimetypes.guess_type("x.mjs")[0]:
+        mimetypes.add_type("text/javascript", ".mjs")
+    # También el visor de PDF (web/pdfjs) y las copias de los PDFs: el visor
+    # los pide por trozos al servidor local de Anki (solo escucha en 127.0.0.1).
+    mw.addonManager.setWebExports(__name__, r"(web/.*|user_files/pdfs/[^/\\]+\.pdf)")
     gui_hooks.card_will_show.append(reviewer.al_mostrar_tarjeta)
     gui_hooks.webview_did_receive_js_message.append(reviewer.al_recibir_mensaje)
     migracion.migrar_datos()  # datos del nombre anterior del add-on, si los hay

@@ -11,7 +11,9 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.3.0.ankiaddon] [-q]
+    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.4.0.ankiaddon] [-q]
+        [--pdf-grande=RUTA]   además abre ese PDF (p. ej. de 2 GB) y mide tiempo y memoria
+                              (PAGEWISE_E2E_GRANDE_PAGINA y PAGEWISE_E2E_GRANDE_BUSCAR eligen dónde)
 """
 import json
 import os
@@ -31,6 +33,7 @@ SALIDA = os.environ["PAGEWISE_E2E_SALIDA"]
 PDF = os.environ["PAGEWISE_E2E_PDF"]
 PLANTILLAS = os.environ.get("PAGEWISE_E2E_PLANTILLAS") == "1"
 MIGRACION = os.environ.get("PAGEWISE_E2E_MIGRACION") == "1"
+GRANDE = os.environ.get("PAGEWISE_E2E_GRANDE") or ""
 res = {"pasos": []}
 
 def guardar():
@@ -228,20 +231,125 @@ def reverso(r):
         paso("tipos_nota", [tn.lista.item(i).text() + ":" + str(tn.lista.item(i).checkState() == 2 or
               tn.lista.item(i).checkState().value == 2) for i in range(tn.lista.count())])
         tn.close()
-        js("Pagewise.py({cmd:'abrir', fuente:1, pagina:2}); 1", lambda _: QTimer.singleShot(5000, leer_visor))
+        js("Pagewise.py({cmd:'abrir', fuente:1, pagina:2, q:'nervio ciático', frase:true}); 1",
+           lambda _: QTimer.singleShot(8000, leer_visor))
     except Exception as e:
         fallo(e)
 
 def leer_visor():
+    """El visor (pdf.js) debe estar en la página pedida y con el texto resaltado."""
     try:
         from pagewise.ui import visor
         d = visor._dialogo
         paso("visor", {"abierto": d is not None and d.isVisible(), "cargado_ok": d and d.cargado_ok,
                        "alternativa": d and d.alternativa_usada, "url": d and d.web.url().toString(),
-                       "titulo": d and d.titulo.text()})
+                       "titulo": d and d.titulo.text(), "modo": d and d.modo, "pdfjs_listo": d and d.pdfjs_listo})
+        d.web.page().runJavaScript("window.pagewiseEstado ? JSON.stringify(pagewiseEstado()) : ''", visor_estado)
+    except Exception as e:
+        fallo(e)
+
+def visor_estado(texto):
+    try:
+        from pagewise.ui import visor
+        d = visor._dialogo
+        paso("visor_pdfjs", json.loads(texto) if texto else None)
         d.grab().save(os.environ["PAGEWISE_E2E_SALIDA"] + ".visor.png")
+        # Mismo libro, otra página y otro texto: salta sin recargar.
+        visor.abrir(1, 3, "bíceps braquial")
+        QTimer.singleShot(3000, lambda: d.web.page().runJavaScript(
+            "JSON.stringify(pagewiseEstado())", visor_segundo))
+    except Exception as e:
+        fallo(e)
+
+def visor_segundo(texto):
+    try:
+        from pagewise.ui import visor
+        d = visor._dialogo
+        paso("visor_pdfjs_2", json.loads(texto) if texto else None)
+        if GRANDE:
+            visor_grande()
+            return
         d.reject()
         terminar()
+    except Exception as e:
+        fallo(e)
+
+def memoria_mb():
+    """Memoria (PSS) de Anki y sus procesos hijos (los de Chromium). Solo Linux."""
+    try:
+        padres = {}
+        for pid in os.listdir("/proc"):
+            if pid.isdigit():
+                try:
+                    with open("/proc/%s/stat" % pid) as f:
+                        padres[int(pid)] = int(f.read().rsplit(")", 1)[1].split()[1])
+                except (OSError, ValueError, IndexError):
+                    pass
+        mios = {os.getpid()}
+        cambio = True
+        while cambio:
+            cambio = False
+            for pid, padre in padres.items():
+                if padre in mios and pid not in mios:
+                    mios.add(pid)
+                    cambio = True
+        kb = 0
+        for pid in mios:
+            try:
+                with open("/proc/%d/smaps_rollup" % pid) as f:
+                    kb += sum(int(l.split()[1]) for l in f if l.startswith("Pss:"))
+            except (OSError, ValueError):
+                pass
+        return kb // 1024
+    except Exception:
+        return None
+
+def visor_grande():
+    """Opcional (--pdf-grande=RUTA): abre un PDF enorme por la mitad, con
+    resaltado, y apunta cuánto tarda y cuánta memoria gasta."""
+    import time
+    try:
+        from pagewise import core
+        from pagewise.ui import visor
+        nombre = "grande-e2e.pdf"
+        destino = os.path.join(core.PDFS_DIR, nombre)
+        os.makedirs(core.PDFS_DIR, exist_ok=True)
+        try:
+            os.link(GRANDE, destino)
+        except OSError:
+            os.symlink(GRANDE, destino)
+        sid = core.indice().agregar_fuente("Grande", nombre, GRANDE, 0, "e2e-grande")
+        core.indice().marcar_lista(sid)
+        pagina = int(os.environ.get("PAGEWISE_E2E_GRANDE_PAGINA") or 2)
+        buscar = os.environ.get("PAGEWISE_E2E_GRANDE_BUSCAR") or ""
+        antes = memoria_mb()
+        t0 = time.time()
+        visor.abrir(sid, pagina, buscar)
+        d = visor._dialogo
+        pico = [antes or 0]
+
+        def mirar():
+            d.web.page().runJavaScript("window.pagewiseEstado ? JSON.stringify(pagewiseEstado()) : ''", leido)
+
+        def leido(texto):
+            try:
+                estado = json.loads(texto) if texto else {}
+                pico[0] = max(pico[0], memoria_mb() or 0)
+                seg = time.time() - t0
+                hecho = estado.get("listo") and estado.get("pagina") == pagina and (
+                    not buscar or estado.get("paginaCoincidencia") == pagina)
+                if hecho or seg > 240 or d.modo != "pdfjs":
+                    paso("visor_grande", {"mb_archivo": os.path.getsize(GRANDE) >> 20, "segundos": round(seg, 1),
+                                          "mb_antes": antes, "mb_pico": pico[0], "modo": d.modo, "estado": estado})
+                    d.grab().save(os.environ["PAGEWISE_E2E_SALIDA"] + ".grande.png")
+                    d.reject()
+                    terminar()
+                else:
+                    QTimer.singleShot(1000, mirar)
+            except Exception as e:
+                fallo(e)
+
+        QTimer.singleShot(1000, mirar)
     except Exception as e:
         fallo(e)
 
@@ -303,7 +411,8 @@ def main():
         os.makedirs(medios)
         for n in ("_fuentes.js", "_fuentes_glosario.json", "_fuentes_t_aorta_0.json"):
             open(os.path.join(medios, n), "w").close()
-    entorno = dict(os.environ, PAGEWISE_E2E_SALIDA=salida, PAGEWISE_E2E_PDF=pdf,
+    grande = next((os.path.abspath(a.split("=", 1)[1]) for a in sys.argv if a.startswith("--pdf-grande=")), "")
+    entorno = dict(os.environ, PAGEWISE_E2E_SALIDA=salida, PAGEWISE_E2E_PDF=pdf, PAGEWISE_E2E_GRANDE=grande,
                    PAGEWISE_E2E_MIGRACION="1" if migracion else "0",
                    PAGEWISE_E2E_PLANTILLAS="1" if plantillas else "0",
                    QTWEBENGINE_CHROMIUM_FLAGS="--no-sandbox", QTWEBENGINE_DISABLE_SANDBOX="1",
@@ -325,7 +434,7 @@ def main():
         "en_US" if "--ingles" in sys.argv else "es_ES"],
         env=entorno, check=True)
     try:
-        subprocess.run([sys.executable, "-c", "import aqt; aqt.run()", "-b", base, "-p", "Prueba"], env=entorno, timeout=150,
+        subprocess.run([sys.executable, "-c", "import aqt; aqt.run()", "-b", base, "-p", "Prueba"], env=entorno, timeout=420 if grande else 150,
                        stdout=subprocess.DEVNULL if "-q" in sys.argv else None)
     finally:
         shutil.rmtree(uf, ignore_errors=True)
@@ -336,12 +445,28 @@ def main():
                 os.remove(ruta)
     with open(salida) as f:
         res = json.load(f)
-    for captura in ("visor", "asistente"):  # capturas para revisar a ojo
+    for captura in ("visor", "asistente", "grande"):  # capturas para revisar a ojo
         if os.path.exists("%s.%s.png" % (salida, captura)):
             shutil.copy("%s.%s.png" % (salida, captura),
                         os.path.join(tempfile.gettempdir(), "pagewise-e2e-%s.png" % captura))
     print(json.dumps(res, ensure_ascii=False, indent=1))
-    sys.exit(0 if res.get("ok") else 1)
+    fallos = []
+    if res.get("ok") and not migracion:
+        # El visor abre la página pedida con el texto resaltado, y al pedir
+        # otra página del mismo libro salta y resalta sin recargar.
+        v1, v2 = res.get("visor_pdfjs") or {}, res.get("visor_pdfjs_2") or {}
+        if (res.get("visor") or {}).get("modo") != "pdfjs":
+            fallos.append("el visor no ha usado pdf.js")
+        if not (v1.get("pagina") == 2 and v1.get("paginaCoincidencia") == 2 and v1.get("resaltadas", 0) >= 1):
+            fallos.append("no resalta el término en la página 2: %s" % v1)
+        if not (v2.get("pagina") == 3 and v2.get("paginaCoincidencia") == 3 and v2.get("resaltadas", 0) >= 1):
+            fallos.append("no salta/resalta en la página 3: %s" % v2)
+        g = res.get("visor_grande")
+        if grande and not (g and g["modo"] == "pdfjs" and g["estado"].get("listo")):
+            fallos.append("el PDF grande no se ha abierto con pdf.js: %s" % g)
+    for f in fallos:
+        print("FALLO:", f)
+    sys.exit(0 if res.get("ok") and not fallos else 1)
 
 
 if __name__ == "__main__":

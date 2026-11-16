@@ -23,6 +23,9 @@ EN = {
     "Añadir PDFs a Pagewise": "Add PDFs to Pagewise",
     "PDF (*.pdf)": "PDF (*.pdf)",
     "leyendo texto": "reading text,",
+    "%scopiando el PDF: %d de %d MB": "%scopying the PDF: %d of %d MB",
+    "No hay espacio suficiente en el disco: el PDF ocupa %d MB y quedan %d MB libres.":
+        "Not enough disk space: the PDF takes %d MB and only %d MB are free.",
     "indexando texto": "indexing text,",
     "%s%s página %d de %d": "%s%s page %d of %d",
     "Importando %d de %d: %s\n": "Importing %d of %d: %s\n",

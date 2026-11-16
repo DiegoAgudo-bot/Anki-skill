@@ -13,6 +13,8 @@ from .propuestas import DialogoPropuestas
 from ..i18n import tr
 
 FASES = {"extraer": tr("leyendo texto"), "indexar": tr("indexando texto")}
+# La copia del PDF avanza en MB, no en páginas.
+COPIANDO = tr("%scopiando el PDF: %d de %d MB")
 
 
 def elegir_e_importar(parent=None, al_terminar=None):
@@ -70,6 +72,9 @@ def importar(rutas, parent=None, al_terminar=None):
                 pre = tr("Importando %d de %d: %s\n") % (n + 1, len(rutas), nombre) if len(rutas) > 1 else "%s\n" % nombre
 
                 def prog(fase, hechas, total, pre=pre):
+                    if fase == "copiar":
+                        progreso(COPIANDO % (pre, hechas, total), hechas, total)
+                        return
                     progreso(tr("%s%s página %d de %d") % (pre, FASES[fase], hechas, total), hechas, total)
 
                 try:

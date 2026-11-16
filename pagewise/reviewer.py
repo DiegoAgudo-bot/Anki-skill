@@ -36,7 +36,10 @@ def al_mostrar_tarjeta(texto, card, kind):
 def _cmd_abrir(msg):
     from .ui import visor
 
-    visor.abrir(int(msg["fuente"]), int(msg.get("pagina") or 1))
+    # "q": el texto que el popup resalta en ese fragmento; el visor lo marca
+    # en la página (como Ctrl+F). "frase": false = palabras sueltas.
+    q = " ".join(str(msg.get("q") or "").split())[:200]
+    visor.abrir(int(msg["fuente"]), int(msg.get("pagina") or 1), q, msg.get("frase") is not False)
     return {"ok": True}
 
 
