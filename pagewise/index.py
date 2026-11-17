@@ -15,7 +15,7 @@ sobre el texto normalizado.
 import datetime
 import sqlite3
 
-from .textutil import normalizar
+from .textutil import normalizar, plurales_palabra
 
 _TOKENIZER_PREFERIDO = "unicode61 remove_diacritics 2"
 _TOKENIZER_ANTIGUO = "unicode61 remove_diacritics 1"  # SQLite < 3.27
@@ -213,7 +213,10 @@ class Indice:
             return []
         if not self.fts:
             return self._buscar_libre_sin_fts(palabras, source_ids, limite)
-        consulta = " AND ".join('"%s"' % p for p in palabras[:12])
+        # Cada palabra, en singular o en plural: ("arteria" OR "arterias").
+        consulta = " AND ".join(
+            "(%s)" % " OR ".join('"%s"' % f for f in [p] + plurales_palabra(p)) for p in palabras[:12]
+        )
         filtro, params = " AND s.estado='lista'", []
         if source_ids is not None:
             if not source_ids:

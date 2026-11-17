@@ -171,6 +171,8 @@ EN = {
         "Pagewise Pro includes:<ul><li>Unlimited sources</li><li>Scanned PDFs with OCR <i>(in development)</i></li>"
         "<li>“Explain” button using your sources as context <i>(in development)</i></li></ul>",
     "Pega aquí tu licencia:": "Paste your license here:",
+    "Pagewise Pro (edición completa): fuentes ilimitadas, sin licencia que activar.":
+        "Pagewise Pro (full edition): unlimited sources, no license to activate.",
     "Activar licencia": "Activate license",
     "Conseguir Pagewise Pro": "Get Pagewise Pro",
     "Quitar la licencia de este ordenador": "Remove the license from this computer",

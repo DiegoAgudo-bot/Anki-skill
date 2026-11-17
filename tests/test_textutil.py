@@ -47,3 +47,39 @@ def test_recortar_centra_en_el_termino():
     assert "AORTA" in r and r.startswith("…") and r.endswith("…")
     assert len(r) <= 102
     assert recortar("corto", 0, 5) == "corto"
+
+
+# ------------------------------------------------------------------ plurales
+
+from pagewise.textutil import con_plurales, plurales, plurales_palabra  # noqa: E402
+
+
+@pytest.mark.parametrize("singular, plural", [
+    ("arteria", "arterias"), ("nervio", "nervios"), ("común", "comunes"), ("nariz", "narices"),
+    ("mes", "meses"), ("rey", "reyes"), ("artery", "arteries"), ("bisturí", "bisturies"),
+    ("tendon", "tendons"), ("ligamento cruzado anterior", "ligamentos cruzados anteriores"),
+    ("agujero de conjunción", "agujeros de conjuncion"), ("a. femoral", "a. femorales"),
+])
+def test_plurales(singular, plural):
+    assert plural in plurales(singular)
+
+
+def test_sin_plural_para_palabras_cortas_numeros_y_preposiciones():
+    assert plurales_palabra("de") == [] and plurales_palabra("c3") == [] and plurales_palabra("ii") == []
+    assert plurales("de la mano") == [] and plurales("T4") == []
+
+
+def test_el_termino_del_usuario_gana_al_plural_generado():
+    m = Matcher([("vena", 0), ("venas", 1)])
+    assert [i for _, _, i in m.buscar("venas")] == [1]
+    assert [i for _, _, i in m.buscar("vena")] == [0]
+
+
+def test_con_plurales_no_repite():
+    r = con_plurales(["arteria", "arterias", "aorta"])
+    assert r[:3] == ["arteria", "arterias", "aorta"]          # primero los originales
+    assert "aortas" in r and r.count("arterias") == 1        # luego plurales, sin repetir
+
+
+def test_sin_plurales_si_se_pide():
+    assert Matcher([("aorta", 0)], con_plurales=False).buscar("aortas") == []

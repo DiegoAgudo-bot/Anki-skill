@@ -95,19 +95,86 @@
 
   var FIN = '\u0000';
 
-  /** variantes: [[texto, id], ...] */
-  function Matcher(variantes) {
-    this.raiz = {};
-    for (var i = 0; i < variantes.length; i++) {
-      var k = clave(variantes[i][0]);
-      if (!k) continue;
-      var nodo = this.raiz;
-      for (var j = 0; j < k.length; j++) {
-        var c = k.charAt(j);
-        if (!nodo.hasOwnProperty(c)) nodo[c] = {};
-        nodo = nodo[c];
+  /* Plurales (gemelo de plurales() en textutil.py): un término en singular
+   * casa también con su plural. Se pluraliza hasta la primera preposición o
+   * artículo ("agujero de conjunción" → "agujeros de conjunción"). */
+  var SIN_PLURAL = {};
+  ('de del la las el los lo un una y e o u ni en a al con por para sin sobre entre tras' +
+   ' desde hasta segun of the and or in on to for with from by at an as').replace(/\S+/g, function (w) {
+    SIN_PLURAL[w] = true;
+  });
+  var MAX_COMBINACIONES = 16;
+
+  function pluralesPalabra(p) {
+    if (p.length < 3 || SIN_PLURAL.hasOwnProperty(p)) return [];
+    for (var i = 0; i < p.length; i++) if (!esPalabra(p.charAt(i))) return [];
+    var u = p.charAt(p.length - 1);
+    if (u >= '0' && u <= '9') return [];
+    if (u === 's' || u === 'x') return [p + 'es'];
+    if (u === 'z') return [p.slice(0, -1) + 'ces', p + 'es'];
+    if (u === 'y') return [p + 's', p + 'es', p.slice(0, -1) + 'ies'];
+    if (u === 'i' || u === 'u') return [p + 's', p + 'es'];
+    if ('aeo'.indexOf(u) !== -1) return [p + 's'];
+    return [p + 'es', p + 's'];
+  }
+
+  function plurales(texto) {
+    var palabras = clave(texto).split(' ');
+    if (!palabras[0]) return [];
+    var corte = palabras.length;
+    for (var i = 0; i < palabras.length; i++) {
+      if (SIN_PLURAL.hasOwnProperty(palabras[i])) { corte = i; break; }
+    }
+    var opciones = [];
+    var alguna = false;
+    var total = 1;
+    for (i = 0; i < corte; i++) {
+      var o = pluralesPalabra(palabras[i]);
+      if (o.length) alguna = true; else o = [palabras[i]];
+      opciones.push(o);
+      total *= o.length;
+    }
+    if (!alguna) return [];
+    if (total > MAX_COMBINACIONES) {
+      for (i = 0; i < opciones.length; i++) opciones[i] = opciones[i].slice(0, 1);
+    }
+    var formas = [''];
+    for (i = 0; i < opciones.length; i++) {
+      var nuevas = [];
+      for (var a = 0; a < formas.length; a++) {
+        for (var b = 0; b < opciones[i].length; b++) {
+          nuevas.push(formas[a] ? formas[a] + ' ' + opciones[i][b] : opciones[i][b]);
+        }
       }
-      if (!nodo.hasOwnProperty(FIN)) nodo[FIN] = variantes[i][1];
+      formas = nuevas;
+    }
+    var resto = palabras.slice(corte).join(' ');
+    if (resto) for (i = 0; i < formas.length; i++) formas[i] += ' ' + resto;
+    return formas;
+  }
+
+  function insertar(raiz, k, id) {
+    if (!k) return;
+    var nodo = raiz;
+    for (var j = 0; j < k.length; j++) {
+      var c = k.charAt(j);
+      if (!nodo.hasOwnProperty(c)) nodo[c] = {};
+      nodo = nodo[c];
+    }
+    if (!nodo.hasOwnProperty(FIN)) nodo[FIN] = id;
+  }
+
+  /** variantes: [[texto, id], ...]. sinPlurales: no añadir los plurales. */
+  function Matcher(variantes, sinPlurales) {
+    this.raiz = {};
+    var i;
+    for (i = 0; i < variantes.length; i++) insertar(this.raiz, clave(variantes[i][0]), variantes[i][1]);
+    if (sinPlurales) return;
+    // Después de los originales: si el plural de un término coincide con
+    // otro término del glosario, gana el que escribió el usuario.
+    for (i = 0; i < variantes.length; i++) {
+      var fs = plurales(variantes[i][0]);
+      for (var j = 0; j < fs.length; j++) insertar(this.raiz, fs[j], variantes[i][1]);
     }
   }
 
@@ -156,6 +223,7 @@
   F.normalizar = normalizar;
   F.clave = clave;
   F.Matcher = Matcher;
+  F.plurales = plurales;
 
   /* ------------------------------------------------------------------ *
    * Carga de datos (fetch → XMLHttpRequest → pycmd)                     *

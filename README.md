@@ -28,6 +28,7 @@ Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón
 2. **Herramientas → Pagewise → Editar glosario…** Añade los términos que quieres subrayar y sus sinónimos, separados por `;`. También puedes importar una lista (`.txt`/`.csv` con una línea por término, `término; sinónimo; sinónimo`, o `.json`).
    - El subrayado no distingue mayúsculas ni tildes (`ciático` = `CIATICO`), pero sí la ñ (`año` ≠ `ano`).
    - Si un término está dentro de otro, gana el más largo («arteria femoral profunda» antes que «arteria femoral»).
+   - Un término en singular también se reconoce en plural: «arteria» subraya «arterias», «nervio ciático» subraya «nervios ciáticos» y «agujero de conjunción» subraya «agujeros de conjunción». Lo mismo al buscar en tus fuentes y con **Buscar en fuentes** sobre un texto seleccionado.
 3. Repasa como siempre:
    - Pasa el ratón por un término subrayado para ver los fragmentos (hasta 3 por fuente).
    - Haz clic en un fragmento para abrir el PDF en esa página, con el término **resaltado** en el texto (como al buscarlo con Ctrl+F).
@@ -60,9 +61,11 @@ Cada vez que importas, reindexas, editas el glosario o cambias la configuración
 - **Gratuita:** todo lo descrito arriba, con hasta **2 fuentes** (PDFs).
 - **Pro:** fuentes ilimitadas. El OCR para PDFs escaneados y el botón «Explicar» están en desarrollo.
 
-Para activar Pro, pega tu licencia en **Herramientas → Pagewise → Pagewise Pro…**. Se comprueba en tu ordenador, sin conexión. Si una licencia caduca no pierdes nada: tus fuentes siguen funcionando y solo se bloquea añadir más de dos.
+Para activar Pro en la versión gratuita, pega tu licencia en **Herramientas → Pagewise → Pagewise Pro…**. Se comprueba en tu ordenador, sin conexión. Si una licencia caduca no pierdes nada: tus fuentes siguen funcionando y solo se bloquea añadir más de dos.
 
 Cómo se emiten las licencias: `herramientas/README.md`.
+
+**Edición Pro empaquetada.** `./build.sh --pro` genera `build/pagewise-pro-<versión>.ankiaddon`: el mismo add-on con una marca (`EDICION_PRO`) que quita el límite de fuentes sin pedir licencia, y que en Anki aparece como «Pagewise Pro». Se instala encima de la gratuita sin perder fuentes ni glosario. Cualquiera que tenga ese archivo tiene Pro: repártelo solo a quien haya pagado.
 
 ## Configuración
 
@@ -174,7 +177,7 @@ node dev/prueba_movil.js
 La prueba de extremo a extremo con un Anki real sin pantalla (necesita `pip install "aqt[qt6]==2.1.66" "reportlab<4.3"` en un Python 3.9):
 
 ```bash
-python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.4.0.ankiaddon
+python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.5.0.ankiaddon
 ```
 
 Para generar el paquete:

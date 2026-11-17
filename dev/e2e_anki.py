@@ -11,7 +11,7 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.4.0.ankiaddon] [-q]
+    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.5.0.ankiaddon] [-q]
         [--pdf-grande=RUTA]   además abre ese PDF (p. ej. de 2 GB) y mide tiempo y memoria
                               (PAGEWISE_E2E_GRANDE_PAGINA y PAGEWISE_E2E_GRANDE_BUSCAR eligen dónde)
 """
@@ -129,7 +129,7 @@ def exportado(inf):
         col = mw.col
         basico = col.models.by_name("Basic") or col.models.by_name("Básico")
         n = col.new_note(basico)
-        n.fields[0] = "¿Qué <b>arteria femoral</b> se palpa? Cerca del nervio ciatico."
+        n.fields[0] = "¿Qué <b>arteria femoral</b> se palpa? Cerca del nervio ciatico. Las aortas."
         n.fields[1] = "La aorta da ramas; <img src='x.png'> [sound:aorta.mp3]"
         col.add_note(n, col.decks.id("Default"))
         if PLANTILLAS:
@@ -205,6 +205,13 @@ def reverso(r):
         # Pagewise Pro: versión gratuita, licencia inválida, activación y retirada.
         from pagewise import core, ed25519, licencia
         from pagewise.ui import pro
+        if licencia.edicion_pro():
+            # Paquete de la edición Pro (./build.sh --pro): sin licencia ni límite.
+            d = pro.DialogoPro(mw)
+            paso("pro", {"edicion_pro": True, "estado": d.estado.text(), "es_pro": core.es_pro(),
+                         "huecos": core.huecos_para_fuentes(), "campo_licencia": hasattr(d, "campo")})
+            d.close()
+            return seguir_tras_pro()
         privada = bytes(range(32))                      # clave SOLO de esta prueba
         real = licencia.CLAVE_PUBLICA
         d = pro.DialogoPro(mw, por_limite=True)
@@ -226,6 +233,12 @@ def reverso(r):
             licencia.CLAVE_PUBLICA = real
         d.close()
         paso("pro", r)
+        seguir_tras_pro()
+    except Exception as e:
+        fallo(e)
+
+def seguir_tras_pro():
+    try:
         from pagewise.ui import tipos_nota
         tn = tipos_nota.DialogoTiposNota(mw)
         paso("tipos_nota", [tn.lista.item(i).text() + ":" + str(tn.lista.item(i).checkState() == 2 or
@@ -461,6 +474,11 @@ def main():
             fallos.append("no resalta el término en la página 2: %s" % v1)
         if not (v2.get("pagina") == 3 and v2.get("paginaCoincidencia") == 3 and v2.get("resaltadas", 0) >= 1):
             fallos.append("no salta/resalta en la página 3: %s" % v2)
+        if "aortas" not in (res.get("anverso") or {}).get("terminos", []):
+            fallos.append("no subraya el plural «aortas»: %s" % (res.get("anverso") or {}).get("terminos"))
+        p = res.get("pro") or {}
+        if p.get("edicion_pro") and not (p.get("es_pro") and p.get("huecos") is None and not p.get("campo_licencia")):
+            fallos.append("la edición Pro no quita el límite: %s" % p)
         g = res.get("visor_grande")
         if grande and not (g and g["modo"] == "pdfjs" and g["estado"].get("listo")):
             fallos.append("el PDF grande no se ha abierto con pdf.js: %s" % g)
