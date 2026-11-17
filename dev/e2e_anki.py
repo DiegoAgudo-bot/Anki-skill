@@ -11,7 +11,7 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.5.0.ankiaddon] [-q]
+    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.6.0.ankiaddon] [-q]
         [--pdf-grande=RUTA]   además abre ese PDF (p. ej. de 2 GB) y mide tiempo y memoria
                               (PAGEWISE_E2E_GRANDE_PAGINA y PAGEWISE_E2E_GRANDE_BUSCAR eligen dónde)
 """
@@ -279,10 +279,103 @@ def visor_segundo(texto):
         from pagewise.ui import visor
         d = visor._dialogo
         paso("visor_pdfjs_2", json.loads(texto) if texto else None)
+        d.reject()
+        probar_ajustes_y_explicar()
+    except Exception as e:
+        fallo(e)
+
+def probar_ajustes_y_explicar():
+    """Ajustes (visor del sistema) y botón «Explicar», con Claude simulado (sin red)."""
+    try:
+        from pagewise import core, explicar
+        from pagewise.ui import ajustes, visor
+        r = {}
+        # 1) Ajustes: elegir el visor del sistema y guardar.
+        d = ajustes.DialogoAjustes(mw)
+        d.show()
+        d.grab().save(SALIDA + ".ajustes.png")
+        r["visor_inicial"] = "sistema" if d.r_sistema.isChecked() else "pagewise"
+        d.r_sistema.setChecked(True)
+        d._guardar()
+        r["visor_guardado"] = core.config()["visor_pdf"]
+        abiertos = []
+        original = visor.abrir_con_sistema
+        visor.abrir_con_sistema = lambda ruta: abiertos.append(os.path.basename(ruta))
+        try:
+            visor.abrir(1, 2, "aorta")
+        finally:
+            visor.abrir_con_sistema = original
+        r["abierto_con_sistema"] = abiertos
+        d = ajustes.DialogoAjustes(mw)
+        d.r_pagewise.setChecked(True)
+        d._guardar()
+        r["visor_restaurado"] = core.config()["visor_pdf"]
+        paso("ajustes", r)
+        # 2) Explicar: en la gratuita pide Pro; con Pro y clave, explica.
+        estado["explicar"] = {}
+        pedido = []
+
+        def falso(clave, termino, fuentes, tarjeta, idioma, modelo, esfuerzo):
+            pedido.append({"clave": clave, "termino": termino, "n_fuentes": len(fuentes),
+                           "fragmentos": sum(len(f["fragmentos"]) for f in fuentes),
+                           "tarjeta": tarjeta[:40], "modelo": modelo, "esfuerzo": esfuerzo})
+            return "Explicación simulada de %s (Apuntes de prueba, p. 1).\n\nSegundo párrafo." % termino
+
+        estado["pedido"] = pedido
+        estado["restaurar"] = (explicar.explicar, core.es_pro, core.clave_api)
+        explicar.explicar = falso
+        ABRIR_EXPLICAR = """(function(){ Pagewise.cerrar(); var t = document.querySelector('.pagewise-term');
+            Pagewise.forceTouch(true); t.click();
+            var b = Array.prototype.filter.call(document.querySelectorAll('.pagewise-accion'),
+                function(x){ return x.textContent === 'Explicar' || x.textContent === 'Explain'; })[0];
+            if (!b) return 'sin boton'; b.click(); return 'ok'; })()"""
+        es_pro_real = core.es_pro()
+        estado["es_pro_real"] = es_pro_real
+        if not es_pro_real:
+            js(ABRIR_EXPLICAR, lambda _: QTimer.singleShot(800, lambda: leer_explicar("gratis", ABRIR_EXPLICAR)))
+        else:
+            leer_explicar("gratis", ABRIR_EXPLICAR, saltar=True)
+    except Exception as e:
+        fallo(e)
+
+estado = {}
+
+def cerrar_dialogos():
+    for w in mw.app.topLevelWidgets():
+        if w.isVisible() and w.__class__.__name__ in ("DialogoPro", "DialogoAjustes"):
+            estado.setdefault("dialogos", []).append(w.__class__.__name__)
+            w.reject()
+
+def leer_explicar(fase, abrir_js, saltar=False):
+    from pagewise import core
+    def leido(texto):
+        try:
+            if not saltar:
+                estado["explicar"][fase] = texto
+            if fase == "pro":
+                mw.reviewer.web.grab().save(SALIDA + ".explicar.png")
+            cerrar_dialogos()
+            if fase == "gratis":
+                core.es_pro = lambda: True
+                core.clave_api = lambda: "sk-ant-prueba"
+                js(abrir_js, lambda _: QTimer.singleShot(1500, lambda: leer_explicar("pro", abrir_js)))
+            else:
+                acabar_explicar()
+        except Exception as e:
+            fallo(e)
+    js("""JSON.stringify({texto: (document.querySelector('.pagewise-popup .pagewise-cuerpo')||{}).textContent || '',
+        parrafos: document.querySelectorAll('.pagewise-explicacion p').length})""", leido)
+
+def acabar_explicar():
+    try:
+        from pagewise import core, explicar
+        explicar.explicar, core.es_pro, core.clave_api = estado["restaurar"]
+        paso("explicar", {"popup": {k: json.loads(v) for k, v in estado["explicar"].items()},
+                          "pedido": estado["pedido"], "es_pro_real": estado["es_pro_real"],
+                          "dialogos": estado.get("dialogos", [])})
         if GRANDE:
             visor_grande()
             return
-        d.reject()
         terminar()
     except Exception as e:
         fallo(e)
@@ -458,7 +551,7 @@ def main():
                 os.remove(ruta)
     with open(salida) as f:
         res = json.load(f)
-    for captura in ("visor", "asistente", "grande"):  # capturas para revisar a ojo
+    for captura in ("visor", "asistente", "grande", "ajustes", "explicar"):  # capturas para revisar a ojo
         if os.path.exists("%s.%s.png" % (salida, captura)):
             shutil.copy("%s.%s.png" % (salida, captura),
                         os.path.join(tempfile.gettempdir(), "pagewise-e2e-%s.png" % captura))
@@ -479,6 +572,17 @@ def main():
         p = res.get("pro") or {}
         if p.get("edicion_pro") and not (p.get("es_pro") and p.get("huecos") is None and not p.get("campo_licencia")):
             fallos.append("la edición Pro no quita el límite: %s" % p)
+        aj = res.get("ajustes") or {}
+        if not (aj.get("visor_guardado") == "sistema" and aj.get("abierto_con_sistema")
+                and aj.get("visor_restaurado") == "pdfjs"):
+            fallos.append("el ajuste del visor no funciona: %s" % aj)
+        ex = res.get("explicar") or {}
+        pro_popup = (ex.get("popup") or {}).get("pro") or {}
+        if not (pro_popup.get("parrafos") == 2 and "Explicación simulada" in pro_popup.get("texto", "")
+                and ex.get("pedido") and ex["pedido"][0]["fragmentos"] > 0):
+            fallos.append("«Explicar» no muestra la explicación: %s" % ex)
+        if not ex.get("es_pro_real") and "Pro" not in ((ex.get("popup") or {}).get("gratis") or {}).get("texto", ""):
+            fallos.append("en la gratuita «Explicar» no pide Pro: %s" % ex)
         g = res.get("visor_grande")
         if grande and not (g and g["modo"] == "pdfjs" and g["estado"].get("listo")):
             fallos.append("el PDF grande no se ha abierto con pdf.js: %s" % g)

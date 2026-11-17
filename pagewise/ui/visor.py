@@ -235,6 +235,9 @@ def abrir(source_id, pagina=1, buscar="", frase=True):
         return
     if modo_visor() == "sistema":
         abrir_con_sistema(ruta)
+        if pagina > 1:
+            # El visor del sistema no recibe la página: se la decimos al usuario.
+            tooltip(tr("%s: ve a la página %d.") % (nombre, pagina), period=6000)
         return
     try:
         if _dialogo is None:

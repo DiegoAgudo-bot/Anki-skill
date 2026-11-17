@@ -15,7 +15,7 @@ if mw is not None:
 
     from . import core, migracion, reviewer
     from .i18n import tr
-    from .ui import asistente, editor_glosario, gestor, pro, tipos_nota
+    from .ui import ajustes, asistente, editor_glosario, gestor, pro, tipos_nota
 
     def _accion(menu, texto, funcion):
         a = QAction(texto, mw)
@@ -33,6 +33,7 @@ if mw is not None:
         menu.addSeparator()
         _accion(menu, tr("Exportar datos para el móvil ahora"), core.exportar)
         menu.addSeparator()
+        _accion(menu, tr("Ajustes…"), ajustes.mostrar)
         _accion(menu, tr("Pagewise Pro…"), pro.mostrar)
         mw.form.menuTools.addMenu(menu)
 

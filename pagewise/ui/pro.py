@@ -45,7 +45,8 @@ class DialogoPro(QDialog):
 
         incluye = QLabel(tr("Pagewise Pro incluye:<ul><li>Fuentes ilimitadas</li>"
                             "<li>PDFs escaneados con OCR <i>(en desarrollo)</i></li>"
-                            "<li>Botón «Explicar» con tus fuentes como contexto <i>(en desarrollo)</i></li></ul>"))
+                            "<li>Botón «Explicar»: Claude te explica el término a partir de tus fuentes "
+                            "(con tu clave de la API de Anthropic)</li></ul>"))
         incluye.setWordWrap(True)
         capa.addWidget(incluye)
 

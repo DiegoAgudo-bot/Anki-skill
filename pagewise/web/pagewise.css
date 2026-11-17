@@ -114,3 +114,7 @@
 }
 @-webkit-keyframes pagewise-entrar { from { opacity: 0; } to { opacity: 1; } }
 @keyframes pagewise-entrar { from { opacity: 0; } to { opacity: 1; } }
+
+/* «Explicar» */
+.pagewise-popup .pagewise-explicacion p { margin: 0 0 8px; line-height: 1.45; }
+.pagewise-popup .pagewise-pie { font-size: 11px; opacity: .65; margin-top: 4px; }

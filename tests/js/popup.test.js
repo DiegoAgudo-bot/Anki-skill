@@ -160,3 +160,52 @@ test('textoResaltado: una expresión se busca como frase; varias palabras, suelt
   d.innerHTML = 'Sin nada resaltado.';
   assert.deepEqual({ ...w.Pagewise.textoResaltado(d) }, { q: '', frase: true });
 });
+
+test('Explicar: pide a Python con el término y la tarjeta, y pinta la respuesta al llegar', async () => {
+  const mensajes = [];
+  const w = await montar(HTML, { pycmd: (m, cb) => {
+    mensajes.push(JSON.parse(m.replace(/^pagewise:/, '')));
+    if (cb) cb(mensajes[mensajes.length - 1].cmd === 'explicar' ? { ok: true, pendiente: 7 } : { ok: true, fuentes: [] });
+  } });
+  w.Pagewise.forceTouch(true);
+  click(w, w.document.querySelector('.pagewise-term'));
+  await esperar(10);
+  const boton = Array.from(popup(w).querySelectorAll('.pagewise-accion')).find((b) => b.textContent === 'Explicar');
+  assert.ok(boton, 'botón Explicar en escritorio');
+  click(w, boton);
+  const msg = mensajes.find((m) => m.cmd === 'explicar');
+  assert.equal(msg.termino, 'arteria femoral');
+  assert.ok(msg.variantes.includes('arteria femoral'));
+  assert.equal(typeof msg.tarjeta, 'string');
+  assert.match(popup(w).textContent, /leyendo tus fuentes/);
+  w.Pagewise.__explicado(7, { ok: true, texto: 'Primer <b>párrafo</b>.\n\nSegundo (Libro, p. 4).' });
+  const ps = popup(w).querySelectorAll('.pagewise-explicacion p');
+  assert.equal(ps.length, 2);
+  assert.equal(ps[0].textContent, 'Primer <b>párrafo</b>.');   // escapado, no HTML
+  assert.match(popup(w).textContent, /Puede equivocarse/);
+});
+
+test('Explicar: sin Pro o sin clave, mensaje claro', async () => {
+  let respuesta = { ok: false, motivo: 'pro' };
+  const w = await montar(HTML, { pycmd: (m, cb) => { if (cb) cb(m.indexOf('"explicar"') > 0 ? respuesta : { ok: true, fuentes: [] }); } });
+  w.Pagewise.forceTouch(true);
+  click(w, w.document.querySelector('.pagewise-term'));
+  await esperar(10);
+  const boton = () => Array.from(popup(w).querySelectorAll('.pagewise-accion')).find((b) => b.textContent === 'Explicar');
+  click(w, boton());
+  assert.match(popup(w).textContent, /Pagewise Pro/);
+  respuesta = { ok: false, motivo: 'clave' };
+  click(w, w.document.body);
+  click(w, w.document.querySelector('.pagewise-term'));
+  await esperar(10);
+  click(w, boton());
+  assert.match(popup(w).textContent, /clave de la API/);
+});
+
+test('Explicar no aparece en el móvil (sin pycmd)', async () => {
+  const w = await montar(HTML);
+  w.Pagewise.forceTouch(true);
+  click(w, w.document.querySelector('.pagewise-term'));
+  await esperar(10);
+  assert.ok(!Array.from(popup(w).querySelectorAll('.pagewise-accion')).some((b) => b.textContent === 'Explicar'));
+});

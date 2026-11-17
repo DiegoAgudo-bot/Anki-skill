@@ -22,6 +22,9 @@ INDEX_PATH = os.path.join(USER_FILES, "index.sqlite3")
 GLOSARIO_PATH = os.path.join(USER_FILES, "glosario.json")
 CACHE_PATH = os.path.join(USER_FILES, "export_cache.json")
 LICENCIA_PATH = os.path.join(USER_FILES, "licencia.txt")
+# Clave de la API de Anthropic para «Explicar». Fuera de la configuración de
+# Anki (que se ve en Complementos → Configuración) y de las copias de seguridad.
+CLAVE_API_PATH = os.path.join(USER_FILES, "clave_anthropic.txt")
 # Página donde se consigue Pagewise Pro. Vacía mientras no haya venta: el botón no se muestra.
 URL_PRO = ""
 
@@ -34,6 +37,9 @@ DEFECTO = {
     "aviso_tamano_mb": 50,
     "inyectar_en_escritorio": True,
     "asistente_visto": False,
+    "visor_pdf": "pdfjs",
+    "explicar_modelo": "claude-opus-5-5",
+    "explicar_esfuerzo": "low",
 }
 
 # La interfaz sigue el idioma de Anki: español, o inglés para el resto.
@@ -116,6 +122,39 @@ def motivo_licencia_guardada():
     except OSError:
         pass
     return ""
+
+
+# ---------------------------------------------------------------- «Explicar»
+
+def clave_api_guardada():
+    """Clave de la API de Anthropic guardada en Ajustes ('' si no hay)."""
+    try:
+        with open(CLAVE_API_PATH, encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return ""
+
+
+def clave_api():
+    """Clave para «Explicar»: la de Ajustes o, si no hay, ANTHROPIC_API_KEY."""
+    return clave_api_guardada() or os.environ.get("ANTHROPIC_API_KEY", "").strip()
+
+
+def guardar_clave_api(clave):
+    clave = "".join(str(clave or "").split())
+    if not clave:
+        try:
+            os.remove(CLAVE_API_PATH)
+        except OSError:
+            pass
+        return
+    os.makedirs(USER_FILES, exist_ok=True)
+    with open(CLAVE_API_PATH, "w", encoding="utf-8") as f:
+        f.write(clave + "\n")
+    try:
+        os.chmod(CLAVE_API_PATH, 0o600)  # solo el usuario (sin efecto en Windows)
+    except OSError:
+        pass
 
 
 def huecos_para_fuentes():

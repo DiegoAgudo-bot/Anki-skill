@@ -7,5 +7,7 @@
     "aviso_tamano_mb": 50,
     "inyectar_en_escritorio": true,
     "visor_pdf": "pdfjs",
+    "explicar_modelo": "claude-opus-5-5",
+    "explicar_esfuerzo": "low",
     "asistente_visto": false
 }

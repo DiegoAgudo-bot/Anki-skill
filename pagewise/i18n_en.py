@@ -167,9 +167,38 @@ EN = {
     "Pagewise Pro activo. Licencia de %s, sin caducidad.": "Pagewise Pro is active. Licensed to %s, never expires.",
     "<b>Has llegado al límite de la versión gratuita: %d fuentes.</b><br>Para añadir más, activa Pagewise Pro o elimina una fuente.":
         "<b>You have reached the free version limit: %d sources.</b><br>To add more, activate Pagewise Pro or delete a source.",
-    "Pagewise Pro incluye:<ul><li>Fuentes ilimitadas</li><li>PDFs escaneados con OCR <i>(en desarrollo)</i></li><li>Botón «Explicar» con tus fuentes como contexto <i>(en desarrollo)</i></li></ul>":
+    "Pagewise Pro incluye:<ul><li>Fuentes ilimitadas</li><li>PDFs escaneados con OCR <i>(en desarrollo)</i></li><li>Botón «Explicar»: Claude te explica el término a partir de tus fuentes (con tu clave de la API de Anthropic)</li></ul>":
         "Pagewise Pro includes:<ul><li>Unlimited sources</li><li>Scanned PDFs with OCR <i>(in development)</i></li>"
-        "<li>“Explain” button using your sources as context <i>(in development)</i></li></ul>",
+        "<li>“Explain” button: Claude explains the term from your sources (with your Anthropic API key)</li></ul>",
+    "Ajustes…": "Settings…",
+    "Pagewise: ajustes": "Pagewise: settings",
+    "Al hacer clic en un fragmento, abrir el PDF con": "When you click an excerpt, open the PDF with",
+    "El visor de Pagewise: abre la página y resalta el término":
+        "The Pagewise viewer: opens the page and highlights the term",
+    "El visor de PDF del ordenador: abre el archivo y tú vas a la página":
+        "Your computer's PDF viewer: opens the file and you go to the page",
+    "Con el visor del ordenador no se puede saltar a la página ni resaltar: Pagewise te dice en qué página está.":
+        "Your computer's viewer cannot jump to the page or highlight: Pagewise tells you which page it is.",
+    "Botón «Explicar» (Pagewise Pro)": "“Explain” button (Pagewise Pro)",
+    "«Explicar» pide a Claude, la IA de Anthropic, que te explique el término a partir de los fragmentos de tus fuentes, citando la página. Usa tu propia clave de la API de Anthropic (cada explicación cuesta unos céntimos en tu cuenta de Anthropic).<br><br><b>Privacidad:</b> es lo único de Pagewise que se conecta a internet, y solo cuando pulsas «Explicar». Se envían a Anthropic el término, el texto de la tarjeta y los fragmentos de tus fuentes sobre ese término. Nunca se envían los PDFs completos.":
+        "“Explain” asks Claude, Anthropic's AI, to explain the term from the excerpts of your sources, "
+        "citing the page. It uses your own Anthropic API key (each explanation costs a few cents on your "
+        "Anthropic account).<br><br><b>Privacy:</b> this is the only part of Pagewise that goes online, and "
+        "only when you press “Explain”. Anthropic receives the term, the card text and the excerpts of your "
+        "sources about that term. Whole PDFs are never sent.",
+    "Clave de la API de Anthropic:": "Anthropic API key:",
+    "Mostrar": "Show",
+    "Comprobar la clave": "Check the key",
+    "Conseguir una clave": "Get a key",
+    "Necesitas Pagewise Pro para usar «Explicar». Puedes guardar la clave igualmente.":
+        "You need Pagewise Pro to use “Explain”. You can save the key anyway.",
+    "Para usar «Explicar», pega aquí tu clave de la API de Anthropic.":
+        "To use “Explain”, paste your Anthropic API key here.",
+    "Escribe primero la clave.": "Type the key first.",
+    "Comprobando…": "Checking…",
+    "✓ La clave funciona.": "✓ The key works.",
+    "Ajustes guardados.": "Settings saved.",
+    "%s: ve a la página %d.": "%s: go to page %d.",
     "Pega aquí tu licencia:": "Paste your license here:",
     "Pagewise Pro (edición completa): fuentes ilimitadas, sin licencia que activar.":
         "Pagewise Pro (full edition): unlimited sources, no license to activate.",

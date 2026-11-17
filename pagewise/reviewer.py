@@ -70,6 +70,80 @@ def _cmd_archivo(msg):
         return {"ok": False}
 
 
+# ------------------------------------------------------------- «Explicar»
+
+# Explicaciones ya pedidas en esta sesión de Anki: (término, fragmentos, tarjeta) → texto.
+_explicaciones = {}
+_pendientes = [0]
+
+
+def _abrir_luego(funcion):
+    """Abre un diálogo después de responder al JS (no dentro del mensaje pycmd)."""
+    from aqt import mw
+
+    mw.progress.single_shot(50, funcion)
+
+
+def _cmd_explicar(msg, contexto):
+    """Pide a Claude una explicación del término con las fuentes del usuario.
+
+    Responde enseguida con {"pendiente": n} y, al llegar la respuesta, llama a
+    Pagewise.__explicado(n, resultado) en la misma vista web.
+    """
+    from aqt import mw
+
+    from . import explicar
+    from .i18n import idioma
+
+    if not core.es_pro():
+        from .ui import pro
+        _abrir_luego(lambda: pro.mostrar(mw))
+        return {"ok": False, "motivo": "pro"}
+    clave = core.clave_api()
+    if not clave:
+        from .ui import ajustes
+        _abrir_luego(lambda: ajustes.mostrar(mw, foco="clave"))
+        return {"ok": False, "motivo": "clave"}
+    web = getattr(contexto, "web", None)
+    if web is None:
+        return {"ok": False, "error": "sin vista"}
+
+    variantes = [str(v) for v in msg.get("variantes", [])][:20]
+    termino = str(msg.get("termino") or (variantes[0] if variantes else ""))[:200]
+    tarjeta = str(msg.get("tarjeta") or "")[:explicar.MAX_TEXTO_TARJETA]
+    prov = ProveedorFTS(core.indice(), max_caracteres=900)
+    fuentes = prov.fragmentos(variantes, core.fuentes_activas(), 4)
+    clave_cache = json.dumps([termino, fuentes, " ".join(tarjeta.split())], ensure_ascii=False)
+    if clave_cache in _explicaciones:
+        return {"ok": True, "texto": _explicaciones[clave_cache]}
+
+    c = core.config()
+    _pendientes[0] += 1
+    n = _pendientes[0]
+
+    def tarea():
+        return explicar.explicar(clave, termino, fuentes, tarjeta, idioma(),
+                                 c.get("explicar_modelo"), c.get("explicar_esfuerzo"))
+
+    def terminado(fut):
+        try:
+            texto = fut.result()
+            _explicaciones[clave_cache] = texto
+            res = {"ok": True, "texto": texto}
+        except explicar.ErrorExplicar as e:
+            res = {"ok": False, "error": str(e)}
+        except Exception as e:  # nunca dejar el popup en «Explicando…»
+            res = {"ok": False, "error": str(e)}
+        try:
+            web.eval("window.Pagewise && Pagewise.__explicado && Pagewise.__explicado(%d, %s);"
+                     % (n, json.dumps(res, ensure_ascii=False)))
+        except Exception:
+            pass  # la tarjeta ya no está en pantalla
+
+    mw.taskman.run_in_background(tarea, terminado)
+    return {"ok": True, "pendiente": n}
+
+
 COMANDOS = {"abrir": _cmd_abrir, "mas": _cmd_mas, "buscar": _cmd_buscar, "archivo": _cmd_archivo}
 
 
@@ -78,6 +152,8 @@ def al_recibir_mensaje(handled, mensaje, contexto):
         return handled
     try:
         msg = json.loads(mensaje[len(PREFIJO_MSG):])
+        if msg.get("cmd") == "explicar":
+            return (True, _cmd_explicar(msg, contexto))
         funcion = COMANDOS.get(msg.get("cmd"))
         if funcion is None:
             return (True, {"ok": False, "error": "comando desconocido"})

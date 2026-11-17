@@ -313,7 +313,13 @@
       buscando: 'Buscando…',
       errorBuscar: 'No se pudo buscar en las fuentes.',
       buscar: 'Buscar en fuentes',
-      pagina: 'p. '
+      pagina: 'p. ',
+      explicar: 'Explicar',
+      explicando: 'Claude está leyendo tus fuentes…',
+      explicarPie: 'Explicación de Claude a partir de tus fuentes. Puede equivocarse: compruébalo en el PDF.',
+      explicarPro: '«Explicar» es parte de Pagewise Pro.',
+      explicarClave: 'Falta la clave de la API de Anthropic: ponla en Ajustes.',
+      errorExplicar: 'No se pudo obtener la explicación.'
     },
     en: {
       vacio: 'No excerpts for this term.',
@@ -324,7 +330,13 @@
       buscando: 'Searching…',
       errorBuscar: 'Could not search your sources.',
       buscar: 'Search sources',
-      pagina: 'p. '
+      pagina: 'p. ',
+      explicar: 'Explain',
+      explicando: 'Claude is reading your sources…',
+      explicarPie: 'Explanation by Claude based on your sources. It can be wrong: check it in the PDF.',
+      explicarPro: '"Explain" is part of Pagewise Pro.',
+      explicarClave: 'The Anthropic API key is missing: add it in Settings.',
+      errorExplicar: 'Could not get the explanation.'
     }
   };
 
@@ -873,6 +885,61 @@
         mostrar(res && res.ok ? htmlFragmentos(res, ctx.termino, 10)
           : '<div class="pagewise-vacio">' + escapar(T('errorBuscar')) + '</div>');
       });
+    }
+  });
+
+  /* Acción incluida: "Explicar" (escritorio). Python pide a Claude una
+   * explicación con los fragmentos de tus fuentes y responde más tarde por
+   * Pagewise.__explicado(n, resultado). */
+  var explicacionesPendientes = {};
+
+  function htmlExplicacion(texto) {
+    var parrafos = String(texto).split(/\n\s*\n/);
+    var h = '';
+    for (var i = 0; i < parrafos.length; i++) {
+      var p = parrafos[i].replace(/^\s+|\s+$/g, '');
+      if (p) h += '<p>' + escapar(p).replace(/\n/g, '<br>') + '</p>';
+    }
+    return '<div class="pagewise-explicacion">' + h + '</div>' +
+      '<div class="pagewise-pie">' + escapar(T('explicarPie')) + '</div>';
+  }
+  F.htmlExplicacion = htmlExplicacion;
+
+  function htmlResultadoExplicar(res) {
+    if (res && res.ok && res.texto) return htmlExplicacion(res.texto);
+    var msg = res && res.motivo === 'pro' ? T('explicarPro')
+      : res && res.motivo === 'clave' ? T('explicarClave')
+      : (res && res.error) || T('errorExplicar');
+    return '<div class="pagewise-vacio">' + escapar(msg) + '</div>';
+  }
+
+  F.__explicado = function (n, res) {
+    var mostrar = explicacionesPendientes[n];
+    delete explicacionesPendientes[n];
+    if (mostrar) mostrar(htmlResultadoExplicar(res));
+  };
+
+  function textoTarjeta() {
+    var qa = D.getElementById('qa') || D.body;
+    var t = qa ? String(qa.innerText || qa.textContent || '') : '';
+    return t.replace(/\s+/g, ' ').slice(0, 1500);
+  }
+
+  F.registrarAccion({
+    id: 'explicar',
+    etiqueta: function () { return T('explicar'); },
+    disponible: function (ctx) { return ctx.tienePy && !!ctx.termino; },
+    ejecutar: function (ctx, mostrar) {
+      // Solo pinta si el popup sigue siendo el de este término.
+      var enEste = function (html) {
+        if (popup && popup.getAttribute('data-pagewise-t') === String(ctx.id)) mostrar(html);
+      };
+      enEste('<div class="pagewise-vacio">' + escapar(T('explicando')) + '</div>');
+      F.py({ cmd: 'explicar', termino: ctx.termino.t, variantes: ctx.variantes, tarjeta: textoTarjeta() },
+        function (res) {
+          if (res && res.ok && res.pendiente) explicacionesPendientes[res.pendiente] = enEste;
+          else enEste(htmlResultadoExplicar(res));
+        });
     }
   });
 
