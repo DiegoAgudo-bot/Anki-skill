@@ -11,7 +11,7 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.6.0.ankiaddon] [-q]
+    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.7.0.ankiaddon] [-q]
         [--pdf-grande=RUTA]   además abre ese PDF (p. ej. de 2 GB) y mide tiempo y memoria
                               (PAGEWISE_E2E_GRANDE_PAGINA y PAGEWISE_E2E_GRANDE_BUSCAR eligen dónde)
 """
@@ -315,8 +315,8 @@ def probar_ajustes_y_explicar():
         estado["explicar"] = {}
         pedido = []
 
-        def falso(clave, termino, fuentes, tarjeta, idioma, modelo, esfuerzo):
-            pedido.append({"clave": clave, "termino": termino, "n_fuentes": len(fuentes),
+        def falso(clave, termino, fuentes, tarjeta, idioma, modelo, esfuerzo, proveedor="anthropic"):
+            pedido.append({"proveedor": proveedor, "clave": clave, "termino": termino, "n_fuentes": len(fuentes),
                            "fragmentos": sum(len(f["fragmentos"]) for f in fuentes),
                            "tarjeta": tarjeta[:40], "modelo": modelo, "esfuerzo": esfuerzo})
             return "Explicación simulada de %s (Apuntes de prueba, p. 1).\n\nSegundo párrafo." % termino
@@ -359,7 +359,16 @@ def leer_explicar(fase, abrir_js, saltar=False):
                 core.es_pro = lambda: True
                 core.clave_api = lambda: "sk-ant-prueba"
                 js(abrir_js, lambda _: QTimer.singleShot(1500, lambda: leer_explicar("pro", abrir_js)))
+            elif fase == "pro":
+                # Misma tarjeta con ChatGPT elegido en Ajustes.
+                c = core.config()
+                c["explicar_proveedor"] = "openai"
+                core.guardar_config(c)
+                js(abrir_js, lambda _: QTimer.singleShot(1500, lambda: leer_explicar("openai", abrir_js)))
             else:
+                c = core.config()
+                c["explicar_proveedor"] = "anthropic"
+                core.guardar_config(c)
                 acabar_explicar()
         except Exception as e:
             fallo(e)
@@ -581,6 +590,10 @@ def main():
         if not (pro_popup.get("parrafos") == 2 and "Explicación simulada" in pro_popup.get("texto", "")
                 and ex.get("pedido") and ex["pedido"][0]["fragmentos"] > 0):
             fallos.append("«Explicar» no muestra la explicación: %s" % ex)
+        oa = (ex.get("popup") or {}).get("openai") or {}
+        if not (("Explicación de ChatGPT" in oa.get("texto", "") or "Explanation by ChatGPT" in oa.get("texto", "")) and len(ex.get("pedido") or []) == 2
+                and ex["pedido"][1]["proveedor"] == "openai" and ex["pedido"][1]["modelo"] == "gpt-5"):
+            fallos.append("«Explicar» con ChatGPT no funciona: %s" % ex)
         if not ex.get("es_pro_real") and "Pro" not in ((ex.get("popup") or {}).get("gratis") or {}).get("texto", ""):
             fallos.append("en la gratuita «Explicar» no pide Pro: %s" % ex)
         g = res.get("visor_grande")

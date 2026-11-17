@@ -167,9 +167,9 @@ EN = {
     "Pagewise Pro activo. Licencia de %s, sin caducidad.": "Pagewise Pro is active. Licensed to %s, never expires.",
     "<b>Has llegado al límite de la versión gratuita: %d fuentes.</b><br>Para añadir más, activa Pagewise Pro o elimina una fuente.":
         "<b>You have reached the free version limit: %d sources.</b><br>To add more, activate Pagewise Pro or delete a source.",
-    "Pagewise Pro incluye:<ul><li>Fuentes ilimitadas</li><li>PDFs escaneados con OCR <i>(en desarrollo)</i></li><li>Botón «Explicar»: Claude te explica el término a partir de tus fuentes (con tu clave de la API de Anthropic)</li></ul>":
+    "Pagewise Pro incluye:<ul><li>Fuentes ilimitadas</li><li>PDFs escaneados con OCR <i>(en desarrollo)</i></li><li>Botón «Explicar»: Claude o ChatGPT te explican el término a partir de tus fuentes (con tu clave de su API)</li></ul>":
         "Pagewise Pro includes:<ul><li>Unlimited sources</li><li>Scanned PDFs with OCR <i>(in development)</i></li>"
-        "<li>“Explain” button: Claude explains the term from your sources (with your Anthropic API key)</li></ul>",
+        "<li>“Explain” button: Claude or ChatGPT explain the term from your sources (with your API key)</li></ul>",
     "Ajustes…": "Settings…",
     "Pagewise: ajustes": "Pagewise: settings",
     "Al hacer clic en un fragmento, abrir el PDF con": "When you click an excerpt, open the PDF with",
@@ -180,20 +180,24 @@ EN = {
     "Con el visor del ordenador no se puede saltar a la página ni resaltar: Pagewise te dice en qué página está.":
         "Your computer's viewer cannot jump to the page or highlight: Pagewise tells you which page it is.",
     "Botón «Explicar» (Pagewise Pro)": "“Explain” button (Pagewise Pro)",
-    "«Explicar» pide a Claude, la IA de Anthropic, que te explique el término a partir de los fragmentos de tus fuentes, citando la página. Usa tu propia clave de la API de Anthropic (cada explicación cuesta unos céntimos en tu cuenta de Anthropic).<br><br><b>Privacidad:</b> es lo único de Pagewise que se conecta a internet, y solo cuando pulsas «Explicar». Se envían a Anthropic el término, el texto de la tarjeta y los fragmentos de tus fuentes sobre ese término. Nunca se envían los PDFs completos.":
-        "“Explain” asks Claude, Anthropic's AI, to explain the term from the excerpts of your sources, "
-        "citing the page. It uses your own Anthropic API key (each explanation costs a few cents on your "
-        "Anthropic account).<br><br><b>Privacy:</b> this is the only part of Pagewise that goes online, and "
-        "only when you press “Explain”. Anthropic receives the term, the card text and the excerpts of your "
-        "sources about that term. Whole PDFs are never sent.",
+    "«Explicar» pide a una IA que te explique el término a partir de los fragmentos de tus fuentes, citando la página. Elige Claude (Anthropic) o ChatGPT (OpenAI) y pon tu propia clave de su API: cada explicación cuesta unos céntimos en tu cuenta.<br><br><b>Privacidad:</b> es lo único de Pagewise que se conecta a internet, y solo cuando pulsas «Explicar». Se envían a la empresa que elijas el término, el texto de la tarjeta y los fragmentos de tus fuentes sobre ese término. Nunca se envían los PDFs completos.":
+        "“Explain” asks an AI to explain the term from the excerpts of your sources, citing the page. "
+        "Choose Claude (Anthropic) or ChatGPT (OpenAI) and add your own API key for it: each explanation "
+        "costs a few cents on your account.<br><br><b>Privacy:</b> this is the only part of Pagewise that "
+        "goes online, and only when you press “Explain”. The company you choose receives the term, the card "
+        "text and the excerpts of your sources about that term. Whole PDFs are never sent.",
+    "Usar:": "Use:",
+    "Claude (Anthropic)": "Claude (Anthropic)",
+    "ChatGPT (OpenAI)": "ChatGPT (OpenAI)",
+    "Clave de la API de OpenAI:": "OpenAI API key:",
     "Clave de la API de Anthropic:": "Anthropic API key:",
     "Mostrar": "Show",
     "Comprobar la clave": "Check the key",
     "Conseguir una clave": "Get a key",
     "Necesitas Pagewise Pro para usar «Explicar». Puedes guardar la clave igualmente.":
         "You need Pagewise Pro to use “Explain”. You can save the key anyway.",
-    "Para usar «Explicar», pega aquí tu clave de la API de Anthropic.":
-        "To use “Explain”, paste your Anthropic API key here.",
+    "Para usar «Explicar», pega aquí la clave de la API que hayas elegido.":
+        "To use “Explain”, paste the API key for the AI you chose here.",
     "Escribe primero la clave.": "Type the key first.",
     "Comprobando…": "Checking…",
     "✓ La clave funciona.": "✓ The key works.",

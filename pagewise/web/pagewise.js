@@ -315,10 +315,10 @@
       buscar: 'Buscar en fuentes',
       pagina: 'p. ',
       explicar: 'Explicar',
-      explicando: 'Claude está leyendo tus fuentes…',
-      explicarPie: 'Explicación de Claude a partir de tus fuentes. Puede equivocarse: compruébalo en el PDF.',
+      explicando: 'Leyendo tus fuentes…',
+      explicarPie: 'Explicación de {autor} a partir de tus fuentes. Puede equivocarse: compruébalo en el PDF.',
       explicarPro: '«Explicar» es parte de Pagewise Pro.',
-      explicarClave: 'Falta la clave de la API de Anthropic: ponla en Ajustes.',
+      explicarClave: 'Falta la clave de la API: ponla en Herramientas → Pagewise → Ajustes.',
       errorExplicar: 'No se pudo obtener la explicación.'
     },
     en: {
@@ -332,10 +332,10 @@
       buscar: 'Search sources',
       pagina: 'p. ',
       explicar: 'Explain',
-      explicando: 'Claude is reading your sources…',
-      explicarPie: 'Explanation by Claude based on your sources. It can be wrong: check it in the PDF.',
+      explicando: 'Reading your sources…',
+      explicarPie: 'Explanation by {autor} based on your sources. It can be wrong: check it in the PDF.',
       explicarPro: '"Explain" is part of Pagewise Pro.',
-      explicarClave: 'The Anthropic API key is missing: add it in Settings.',
+      explicarClave: 'The API key is missing: add it in Tools → Pagewise → Settings.',
       errorExplicar: 'Could not get the explanation.'
     }
   };
@@ -888,12 +888,12 @@
     }
   });
 
-  /* Acción incluida: "Explicar" (escritorio). Python pide a Claude una
+  /* Acción incluida: "Explicar" (escritorio). Python pide a la IA elegida (Claude o ChatGPT) una
    * explicación con los fragmentos de tus fuentes y responde más tarde por
    * Pagewise.__explicado(n, resultado). */
   var explicacionesPendientes = {};
 
-  function htmlExplicacion(texto) {
+  function htmlExplicacion(texto, autor) {
     var parrafos = String(texto).split(/\n\s*\n/);
     var h = '';
     for (var i = 0; i < parrafos.length; i++) {
@@ -901,12 +901,12 @@
       if (p) h += '<p>' + escapar(p).replace(/\n/g, '<br>') + '</p>';
     }
     return '<div class="pagewise-explicacion">' + h + '</div>' +
-      '<div class="pagewise-pie">' + escapar(T('explicarPie')) + '</div>';
+      '<div class="pagewise-pie">' + escapar(T('explicarPie').replace('{autor}', autor || 'IA')) + '</div>';
   }
   F.htmlExplicacion = htmlExplicacion;
 
   function htmlResultadoExplicar(res) {
-    if (res && res.ok && res.texto) return htmlExplicacion(res.texto);
+    if (res && res.ok && res.texto) return htmlExplicacion(res.texto, res.autor);
     var msg = res && res.motivo === 'pro' ? T('explicarPro')
       : res && res.motivo === 'clave' ? T('explicarClave')
       : (res && res.error) || T('errorExplicar');

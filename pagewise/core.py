@@ -25,6 +25,8 @@ LICENCIA_PATH = os.path.join(USER_FILES, "licencia.txt")
 # Clave de la API de Anthropic para «Explicar». Fuera de la configuración de
 # Anki (que se ve en Complementos → Configuración) y de las copias de seguridad.
 CLAVE_API_PATH = os.path.join(USER_FILES, "clave_anthropic.txt")
+CLAVE_OPENAI_PATH = os.path.join(USER_FILES, "clave_openai.txt")
+_CLAVES = {"anthropic": (CLAVE_API_PATH, "ANTHROPIC_API_KEY"), "openai": (CLAVE_OPENAI_PATH, "OPENAI_API_KEY")}
 # Página donde se consigue Pagewise Pro. Vacía mientras no haya venta: el botón no se muestra.
 URL_PRO = ""
 
@@ -38,8 +40,11 @@ DEFECTO = {
     "inyectar_en_escritorio": True,
     "asistente_visto": False,
     "visor_pdf": "pdfjs",
+    "explicar_proveedor": "anthropic",
     "explicar_modelo": "claude-opus-5-5",
     "explicar_esfuerzo": "low",
+    "explicar_modelo_openai": "gpt-5",
+    "explicar_esfuerzo_openai": "low",
 }
 
 # La interfaz sigue el idioma de Anki: español, o inglés para el resto.
@@ -126,33 +131,42 @@ def motivo_licencia_guardada():
 
 # ---------------------------------------------------------------- «Explicar»
 
-def clave_api_guardada():
-    """Clave de la API de Anthropic guardada en Ajustes ('' si no hay)."""
+def proveedor_explicar():
+    """'anthropic' (Claude) u 'openai' (ChatGPT), según Ajustes."""
+    p = str(config().get("explicar_proveedor") or "anthropic").lower()
+    return p if p in _CLAVES else "anthropic"
+
+
+def clave_api_guardada(proveedor="anthropic"):
+    """Clave de la API del proveedor guardada en Ajustes ('' si no hay)."""
     try:
-        with open(CLAVE_API_PATH, encoding="utf-8") as f:
+        with open(_CLAVES[proveedor][0], encoding="utf-8") as f:
             return f.read().strip()
     except OSError:
         return ""
 
 
-def clave_api():
-    """Clave para «Explicar»: la de Ajustes o, si no hay, ANTHROPIC_API_KEY."""
-    return clave_api_guardada() or os.environ.get("ANTHROPIC_API_KEY", "").strip()
+def clave_api(proveedor=None):
+    """Clave para «Explicar»: la de Ajustes o, si no hay, su variable de entorno
+    (ANTHROPIC_API_KEY u OPENAI_API_KEY)."""
+    proveedor = proveedor or proveedor_explicar()
+    return clave_api_guardada(proveedor) or os.environ.get(_CLAVES[proveedor][1], "").strip()
 
 
-def guardar_clave_api(clave):
+def guardar_clave_api(clave, proveedor="anthropic"):
+    ruta = _CLAVES[proveedor][0]
     clave = "".join(str(clave or "").split())
     if not clave:
         try:
-            os.remove(CLAVE_API_PATH)
+            os.remove(ruta)
         except OSError:
             pass
         return
     os.makedirs(USER_FILES, exist_ok=True)
-    with open(CLAVE_API_PATH, "w", encoding="utf-8") as f:
+    with open(ruta, "w", encoding="utf-8") as f:
         f.write(clave + "\n")
     try:
-        os.chmod(CLAVE_API_PATH, 0o600)  # solo el usuario (sin efecto en Windows)
+        os.chmod(ruta, 0o600)  # solo el usuario (sin efecto en Windows)
     except OSError:
         pass
 

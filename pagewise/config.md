@@ -10,6 +10,9 @@
 - `visor_pdf`: con qué se abre el PDF al hacer clic en un fragmento. `pdfjs` (por defecto) abre la página y resalta el texto, y aguanta PDFs de varios GB; `chromium` usa el visor integrado de Anki, sin resaltado; `sistema` abre tu lector de PDF habitual. Es más cómodo cambiarlo en *Herramientas → Pagewise → Ajustes*.
 - `explicar_modelo`: modelo de Claude que usa el botón «Explicar» (por defecto `claude-opus-5-5`).
 - `explicar_esfuerzo`: cuánto piensa Claude antes de explicar: `low` (por defecto, más rápido), `medium`, `high`, `xhigh` o `max`. La clave de API se pone en *Ajustes*, no aquí.
+- `explicar_proveedor`: `anthropic` (Claude, por defecto) u `openai` (ChatGPT). Mejor desde *Ajustes*.
+- `explicar_modelo_openai`: modelo de OpenAI para «Explicar» (por defecto `gpt-5`).
+- `explicar_esfuerzo_openai`: `reasoning_effort` de OpenAI (`minimal`, `low`, `medium` o `high`; por defecto `low`). Déjalo vacío (`""`) si eliges un modelo sin razonamiento.
 - `asistente_visto`: ponlo en `false` para volver a ver el asistente de primeros pasos al abrir Anki.
 
 Al guardar, los datos del móvil se vuelven a exportar.

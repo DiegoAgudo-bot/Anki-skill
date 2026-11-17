@@ -33,7 +33,7 @@ Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón
    - Pasa el ratón por un término subrayado para ver los fragmentos (hasta 3 por fuente).
    - Haz clic en un fragmento para abrir el PDF en esa página, con el término **resaltado** en el texto (como al buscarlo con Ctrl+F).
    - **Más en mis fuentes** busca más resultados en el índice completo.
-   - **Explicar** (Pro, escritorio): Claude, la IA de Anthropic, te explica el término a partir de los fragmentos de tus fuentes y cita la página. Necesita tu clave de la API de Anthropic (ver [Explicar](#explicar)).
+   - **Explicar** (Pro, escritorio): Claude (Anthropic) o ChatGPT (OpenAI), el que elijas, te explica el término a partir de los fragmentos de tus fuentes y cita la página. Necesita tu clave de su API (ver [Explicar](#explicar)).
    - Si seleccionas un texto cualquiera de la tarjeta, aparece **Buscar en fuentes** para hacer una búsqueda libre.
 
 En el gestor puedes activar o desactivar fuentes, y también renombrarlas, reindexarlas o eliminarlas. Además, ves cuánto ocupan los datos exportados para el móvil.
@@ -60,7 +60,7 @@ Cada vez que importas, reindexas, editas el glosario o cambias la configuración
 ## Versión gratuita y Pagewise Pro
 
 - **Gratuita:** todo lo descrito arriba, con hasta **2 fuentes** (PDFs).
-- **Pro:** fuentes ilimitadas y el botón «Explicar». El OCR para PDFs escaneados está en desarrollo.
+- **Pro:** fuentes ilimitadas y el botón «Explicar» (Claude o ChatGPT). El OCR para PDFs escaneados está en desarrollo.
 
 Para activar Pro en la versión gratuita, pega tu licencia en **Herramientas → Pagewise → Pagewise Pro…**. Se comprueba en tu ordenador, sin conexión. Si una licencia caduca no pierdes nada: tus fuentes siguen funcionando y solo se bloquea añadir más de dos.
 
@@ -70,20 +70,29 @@ Cómo se emiten las licencias: `herramientas/README.md`.
 
 ## Explicar
 
-1. Consigue una clave de la API de Anthropic en [console.anthropic.com](https://console.anthropic.com/settings/keys). Cada explicación se cobra en tu cuenta de Anthropic (unos céntimos).
-2. **Herramientas → Pagewise → Ajustes…**, pega la clave y pulsa **Comprobar la clave** (no gasta nada) y **Guardar**.
+Funciona con **Claude** (Anthropic) o con **ChatGPT** (OpenAI). Usa tu propia clave de la API: cada explicación se cobra en tu cuenta (unos céntimos).
+
+1. Consigue una clave: de Anthropic en [console.anthropic.com](https://console.anthropic.com/settings/keys) o de OpenAI en [platform.openai.com](https://platform.openai.com/api-keys). La API se paga aparte de la suscripción a ChatGPT Plus.
+2. **Herramientas → Pagewise → Ajustes…**: elige Claude o ChatGPT, pega la clave, pulsa **Comprobar la clave** (no gasta nada) y **Guardar**. Puedes guardar las dos claves y cambiar de una a otra cuando quieras.
 3. En el repaso, abre el popup de un término y pulsa **Explicar**. Tarda unos segundos. Cada término se explica una sola vez por sesión de Anki; las siguientes salen al instante.
 
-Claude recibe el término, el texto de la tarjeta y hasta 12 fragmentos de tus fuentes sobre él, con su fuente y página. Se le pide que se apoye en ellos, que cite «(Fuente, p. N)» y que avise cuando algo no venga de tus fuentes. Puede equivocarse: compruébalo en el PDF.
+La IA recibe el término, el texto de la tarjeta y hasta 12 fragmentos de tus fuentes sobre él, con su fuente y página. Se le pide que se apoye en ellos, que cite «(Fuente, p. N)» y que avise cuando algo no venga de tus fuentes. Puede equivocarse: compruébalo en el PDF.
 
-Por defecto usa `claude-opus-5-5` con esfuerzo `low` (rápido). Se puede cambiar en la configuración (`explicar_modelo`, `explicar_esfuerzo`). Si no pones clave en Ajustes, se usa la variable de entorno `ANTHROPIC_API_KEY`, si existe.
+Modelos por defecto (se cambian en la configuración):
+
+| | Modelo | Esfuerzo |
+| --- | --- | --- |
+| Claude | `claude-opus-5-5` (`explicar_modelo`) | `low` (`explicar_esfuerzo`) |
+| ChatGPT | `gpt-5` (`explicar_modelo_openai`) | `low` (`explicar_esfuerzo_openai`, el `reasoning_effort` de OpenAI) |
+
+Si no pones clave en Ajustes, se usa la variable de entorno `ANTHROPIC_API_KEY` u `OPENAI_API_KEY`, si existe.
 
 ## Ajustes
 
 **Herramientas → Pagewise → Ajustes…** reúne lo que más se cambia:
 
 - **Con qué se abre el PDF** al hacer clic en un fragmento: el visor de Pagewise (abre la página y resalta el término) o el visor de PDF del ordenador (abre el archivo; Pagewise te dice en qué página está, porque no se le puede pasar).
-- **La clave de la API de Anthropic** para «Explicar».
+- **La IA de «Explicar»** (Claude o ChatGPT) y la clave de su API.
 
 ## Configuración
 
@@ -101,6 +110,9 @@ El resto se cambia en **Herramientas → Complementos → Pagewise → Configura
 | `visor_pdf` | `pdfjs` | Visor al hacer clic en un fragmento: `pdfjs` (resalta el término y aguanta PDFs de varios GB), `chromium` (el integrado de Anki, sin resaltado) o `sistema` (tu lector de PDF). Mejor desde Ajustes. |
 | `explicar_modelo` | `claude-opus-5-5` | Modelo de Claude para «Explicar». |
 | `explicar_esfuerzo` | `low` | Cuánto piensa Claude antes de explicar: `low`, `medium`, `high`, `xhigh` o `max`. Más esfuerzo, más espera y más coste. |
+| `explicar_proveedor` | `anthropic` | IA de «Explicar»: `anthropic` (Claude) u `openai` (ChatGPT). Mejor desde Ajustes. |
+| `explicar_modelo_openai` | `gpt-5` | Modelo de OpenAI para «Explicar». |
+| `explicar_esfuerzo_openai` | `low` | `reasoning_effort` de OpenAI: `minimal`, `low`, `medium` o `high`. Vacío (`""`) para modelos sin razonamiento. |
 
 ## Limitaciones conocidas
 
@@ -118,7 +130,7 @@ El resto se cambia en **Herramientas → Complementos → Pagewise → Configura
 - Sin «Explicar» no hay ninguna conexión de red. El visor de PDF lee tus PDFs a través del servidor local que Anki ya usa para mostrar las tarjetas (solo escucha en tu propio ordenador, `127.0.0.1`).
 - El índice SQLite, el glosario y las copias de los PDFs se quedan en la carpeta `user_files/` del add-on, que sobrevive a las actualizaciones.
 - Al móvil solo llegan los fragmentos exportados, por tu propia sincronización de AnkiWeb.
-- **Explicar** (opcional, Pro) es lo único que sale de tu ordenador, y solo cuando lo pulsas: se envían a la API de Anthropic (`api.anthropic.com`) el término, el texto de la tarjeta y los fragmentos de tus fuentes sobre ese término. Nunca los PDFs completos. Tu clave se guarda en `user_files/clave_anthropic.txt`, fuera de la configuración de Anki.
+- **Explicar** (opcional, Pro) es lo único que sale de tu ordenador, y solo cuando lo pulsas: se envían a la API que elijas (`api.anthropic.com` o `api.openai.com`) el término, el texto de la tarjeta y los fragmentos de tus fuentes sobre ese término. Nunca los PDFs completos. Las claves se guardan en `user_files/clave_anthropic.txt` y `user_files/clave_openai.txt`, fuera de la configuración de Anki.
 
 ## Desarrollo
 
@@ -134,7 +146,7 @@ pagewise/              ← el add-on (lo que va dentro del .ankiaddon)
   templates.py        insertar/quitar el bloque en las plantillas
   reviewer.py         card_will_show + mensajes pycmd
   core.py             rutas, configuración, exportación en segundo plano
-  explicar.py         botón «Explicar»: petición a la API de Claude (urllib) y lectura de la respuesta
+  explicar.py         botón «Explicar»: petición a Claude u OpenAI (urllib) y lectura de la respuesta
   licencia.py         licencias Pro: formato, verificación sin conexión y límite de la versión gratuita
   ed25519.py          firmas Ed25519 en Python puro (RFC 8032)
   migracion.py        migración de datos, medios y plantillas del nombre anterior («Fuentes»)
@@ -153,7 +165,7 @@ build.sh              genera build/pagewise-<versión>.ankiaddon
 
 **Acciones del popup.**
 - En el JS, registra una acción con `Pagewise.registrarAccion({id, etiqueta, disponible, ejecutar})`. «Más en mis fuentes» y «Explicar» son ejemplos.
-- «Explicar» (`explicar.py`) llama a la API de Mensajes con `urllib`, sin el SDK `anthropic`: el SDK necesita librerías compiladas que no caben en un único `.ankiaddon` para todos los sistemas. Responde en segundo plano y devuelve el resultado al popup con `Pagewise.__explicado(n, resultado)`.
+- «Explicar» (`explicar.py`) llama a la API de Mensajes de Anthropic o a Chat Completions de OpenAI con `urllib`, sin los SDK `anthropic` ni `openai`: necesitan librerías compiladas que no caben en un único `.ankiaddon` para todos los sistemas. Responde en segundo plano y devuelve el resultado al popup con `Pagewise.__explicado(n, resultado)`.
 - Los mensajes a Python van como `pycmd("pagewise:" + JSON)` y se atienden en `reviewer.COMANDOS`.
 
 **Formatos de los datos** (en la carpeta de medios):
@@ -199,7 +211,7 @@ node dev/prueba_movil.js
 La prueba de extremo a extremo con un Anki real sin pantalla (necesita `pip install "aqt[qt6]==2.1.66" "reportlab<4.3"` en un Python 3.9):
 
 ```bash
-python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.6.0.ankiaddon
+python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.7.0.ankiaddon
 ```
 
 Para generar el paquete:

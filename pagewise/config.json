@@ -9,5 +9,8 @@
     "visor_pdf": "pdfjs",
     "explicar_modelo": "claude-opus-5-5",
     "explicar_esfuerzo": "low",
+    "explicar_proveedor": "anthropic",
+    "explicar_modelo_openai": "gpt-5",
+    "explicar_esfuerzo_openai": "low",
     "asistente_visto": false
 }

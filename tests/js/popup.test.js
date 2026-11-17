@@ -177,12 +177,12 @@ test('Explicar: pide a Python con el término y la tarjeta, y pinta la respuesta
   assert.equal(msg.termino, 'arteria femoral');
   assert.ok(msg.variantes.includes('arteria femoral'));
   assert.equal(typeof msg.tarjeta, 'string');
-  assert.match(popup(w).textContent, /leyendo tus fuentes/);
-  w.Pagewise.__explicado(7, { ok: true, texto: 'Primer <b>párrafo</b>.\n\nSegundo (Libro, p. 4).' });
+  assert.match(popup(w).textContent, /Leyendo tus fuentes/);
+  w.Pagewise.__explicado(7, { ok: true, autor: 'ChatGPT', texto: 'Primer <b>párrafo</b>.\n\nSegundo (Libro, p. 4).' });
   const ps = popup(w).querySelectorAll('.pagewise-explicacion p');
   assert.equal(ps.length, 2);
   assert.equal(ps[0].textContent, 'Primer <b>párrafo</b>.');   // escapado, no HTML
-  assert.match(popup(w).textContent, /Puede equivocarse/);
+  assert.match(popup(w).textContent, /Explicación de ChatGPT a partir de tus fuentes\. Puede equivocarse/);
 });
 
 test('Explicar: sin Pro o sin clave, mensaje claro', async () => {

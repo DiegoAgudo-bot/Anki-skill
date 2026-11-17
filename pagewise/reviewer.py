@@ -85,7 +85,7 @@ def _abrir_luego(funcion):
 
 
 def _cmd_explicar(msg, contexto):
-    """Pide a Claude una explicación del término con las fuentes del usuario.
+    """Pide a la IA elegida en Ajustes (Claude o ChatGPT) una explicación del término.
 
     Responde enseguida con {"pendiente": n} y, al llegar la respuesta, llama a
     Pagewise.__explicado(n, resultado) en la misma vista web.
@@ -113,23 +113,29 @@ def _cmd_explicar(msg, contexto):
     tarjeta = str(msg.get("tarjeta") or "")[:explicar.MAX_TEXTO_TARJETA]
     prov = ProveedorFTS(core.indice(), max_caracteres=900)
     fuentes = prov.fragmentos(variantes, core.fuentes_activas(), 4)
-    clave_cache = json.dumps([termino, fuentes, " ".join(tarjeta.split())], ensure_ascii=False)
-    if clave_cache in _explicaciones:
-        return {"ok": True, "texto": _explicaciones[clave_cache]}
-
     c = core.config()
+    proveedor = core.proveedor_explicar()
+    if proveedor == "openai":
+        modelo, esfuerzo = c.get("explicar_modelo_openai"), c.get("explicar_esfuerzo_openai")
+    else:
+        modelo, esfuerzo = c.get("explicar_modelo"), c.get("explicar_esfuerzo")
+    autor = explicar.nombre(proveedor)
+    clave_cache = json.dumps([proveedor, modelo, termino, fuentes, " ".join(tarjeta.split())], ensure_ascii=False)
+    if clave_cache in _explicaciones:
+        return {"ok": True, "texto": _explicaciones[clave_cache], "autor": autor}
+
     _pendientes[0] += 1
     n = _pendientes[0]
 
     def tarea():
-        return explicar.explicar(clave, termino, fuentes, tarjeta, idioma(),
-                                 c.get("explicar_modelo"), c.get("explicar_esfuerzo"))
+        return explicar.explicar(clave, termino, fuentes, tarjeta, idioma(), modelo, esfuerzo,
+                                 proveedor=proveedor)
 
     def terminado(fut):
         try:
             texto = fut.result()
             _explicaciones[clave_cache] = texto
-            res = {"ok": True, "texto": texto}
+            res = {"ok": True, "texto": texto, "autor": autor}
         except explicar.ErrorExplicar as e:
             res = {"ok": False, "error": str(e)}
         except Exception as e:  # nunca dejar el popup en «Explicando…»

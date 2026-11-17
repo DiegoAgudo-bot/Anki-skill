@@ -123,3 +123,75 @@ def test_comprobar_clave_no_gasta_tokens():
     assert explicar.comprobar_clave("sk", abrir=abrir_que_responde({"data": []}, enviadas))
     req = enviadas[0]
     assert req.get_method() == "GET" and "/v1/models" in req.full_url and req.data is None
+
+
+# ------------------------------------------------------------------ OpenAI
+
+def _ok_openai(texto="Explicación (Anatomía, p. 12)."):
+    return {"choices": [{"index": 0, "finish_reason": "stop",
+                         "message": {"role": "assistant", "content": texto, "refusal": None}}]}
+
+
+def test_openai_peticion_y_cabeceras():
+    enviadas = []
+    texto = explicar.explicar("sk-openai", "arteria femoral", FUENTES, "tarjeta", "es",
+                              abrir=abrir_que_responde(_ok_openai(), enviadas), proveedor="openai")
+    assert texto == "Explicación (Anatomía, p. 12)."
+    req = enviadas[0]
+    assert req.full_url == "https://api.openai.com/v1/chat/completions" and req.get_method() == "POST"
+    cab = {k.lower(): v for k, v in req.header_items()}
+    assert cab["authorization"] == "Bearer sk-openai" and "x-api-key" not in cab
+    cuerpo = json.loads(req.data.decode("utf-8"))
+    assert cuerpo["model"] == "gpt-5" and cuerpo["reasoning_effort"] == "low"
+    assert cuerpo["max_completion_tokens"] == explicar.MAX_TOKENS
+    assert [m["role"] for m in cuerpo["messages"]] == ["system", "user"]
+    assert "[1] (Anatomía, p. 12)" in cuerpo["messages"][1]["content"]
+
+
+def test_openai_sin_reasoning_effort_si_se_deja_vacio():
+    c = explicar.peticion_openai("x", [], modelo="gpt-4o", esfuerzo="")
+    assert c["model"] == "gpt-4o" and "reasoning_effort" not in c
+
+
+def test_openai_reintenta_sin_reasoning_effort_si_el_modelo_no_lo_admite():
+    enviadas = []
+
+    def abrir(req, timeout=None):
+        enviadas.append(json.loads(req.data.decode("utf-8")))
+        if len(enviadas) == 1:
+            cuerpo = io.BytesIO(json.dumps({"error": {"message": "Unsupported parameter: 'reasoning_effort'",
+                                                      "code": "unsupported_parameter"}}).encode("utf-8"))
+            raise urllib.error.HTTPError(req.full_url, 400, "x", {}, cuerpo)
+        return Respuesta(json.dumps(_ok_openai("Hola")).encode("utf-8"))
+
+    assert explicar.explicar("k", "x", [], abrir=abrir, proveedor="openai", modelo="gpt-4o") == "Hola"
+    assert "reasoning_effort" in enviadas[0] and "reasoning_effort" not in enviadas[1]
+
+
+def test_openai_rechazo_y_vacio():
+    with pytest.raises(explicar.ErrorExplicar, match="ChatGPT no ha querido"):
+        explicar.texto_respuesta_openai({"choices": [{"message": {"content": None, "refusal": "No."}}]})
+    with pytest.raises(explicar.ErrorExplicar, match="ChatGPT no ha devuelto"):
+        explicar.texto_respuesta_openai({"choices": []})
+
+
+@pytest.mark.parametrize("codigo, error, esperado", [
+    (401, {"message": "Incorrect API key", "code": "invalid_api_key"}, "clave de API no es válida"),
+    (429, {"message": "You exceeded your current quota", "code": "insufficient_quota"}, "OpenAI no tiene saldo"),
+    (429, {"message": "Rate limit reached", "code": "rate_limit_exceeded"}, "Demasiadas peticiones"),
+    (503, {"message": "overloaded"}, "ChatGPT está saturado"),
+])
+def test_openai_errores(codigo, error, esperado):
+    def abrir(req, timeout=None):
+        raise urllib.error.HTTPError(req.full_url, codigo, "x", {},
+                                     io.BytesIO(json.dumps({"error": error}).encode("utf-8")))
+    with pytest.raises(explicar.ErrorExplicar, match=esperado):
+        explicar.explicar("k", "x", [], abrir=abrir, proveedor="openai")
+
+
+def test_openai_comprobar_clave():
+    enviadas = []
+    explicar.comprobar_clave("sk-o", abrir=abrir_que_responde({"data": []}, enviadas), proveedor="openai")
+    req = enviadas[0]
+    assert req.full_url == "https://api.openai.com/v1/models" and req.get_method() == "GET"
+    assert {k.lower(): v for k, v in req.header_items()}["authorization"] == "Bearer sk-o"
