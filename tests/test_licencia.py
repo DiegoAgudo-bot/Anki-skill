@@ -81,3 +81,14 @@ def test_limite_de_la_version_gratuita():
     assert licencia.LIMITE_FUENTES_GRATIS == 2
     assert [licencia.puede_anadir_fuente(n, None) for n in (0, 1, 2, 5)] == [True, True, False, False]
     assert all(licencia.puede_anadir_fuente(n, lic) for n in (0, 2, 50))
+
+
+def test_edicion_pro_por_marca(tmp_path):
+    assert not licencia.edicion_pro(str(tmp_path))
+    (tmp_path / licencia.MARCA_EDICION_PRO).write_text("")
+    assert licencia.edicion_pro(str(tmp_path))
+
+
+def test_el_repositorio_no_es_la_edicion_pro():
+    # La marca solo la añade ./build.sh --pro dentro del paquete.
+    assert not licencia.edicion_pro()

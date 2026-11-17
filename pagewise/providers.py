@@ -11,7 +11,7 @@ búsqueda semántica o un LLM ("Explicar") con la misma interfaz:
 El exportador (para móvil) y los comandos de pycmd (escritorio) solo
 conocen esta interfaz.
 """
-from .textutil import Matcher, recortar
+from .textutil import Matcher, con_plurales, recortar
 
 
 def agrupar(filas, nombres, matcher, por_fuente, max_caracteres):
@@ -47,7 +47,9 @@ def agrupar(filas, nombres, matcher, por_fuente, max_caracteres):
 
 
 class ProveedorFTS:
-    nombre = "fts"
+    # El nombre entra en la firma del exportador: al cambiarlo (p. ej. al
+    # añadir los plurales) se vuelven a exportar los datos del móvil.
+    nombre = "fts-plurales"
 
     def __init__(self, indice, max_caracteres=360):
         self.indice = indice
@@ -61,7 +63,8 @@ class ProveedorFTS:
         if not variantes:
             return []
         # Pedimos de más: algunos resultados de FTS se descartan al agrupar.
-        filas = self.indice.buscar(variantes, source_ids, limite=2000, por_fuente=por_fuente * 3)
+        # El índice también busca los plurales ("arteria" → "arterias").
+        filas = self.indice.buscar(con_plurales(variantes, 80), source_ids, limite=2000, por_fuente=por_fuente * 3)
         matcher = Matcher([(v, 0) for v in variantes])
         return agrupar(filas, self._nombres(), matcher, por_fuente, self.max_caracteres)
 

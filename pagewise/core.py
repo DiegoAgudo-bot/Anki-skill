@@ -99,7 +99,7 @@ def licencia_actual():
 
 
 def es_pro():
-    return licencia_actual() is not None
+    return licencia.edicion_pro() or licencia_actual() is not None
 
 
 def hay_licencia_guardada():

@@ -76,3 +76,21 @@ def test_comillas_y_operadores_no_rompen(indice):
     indice.buscar(["AND", "OR", "*"])
     indice.buscar_libre('"; DROP TABLE chunks; --')
     assert len(indice.fuentes()) == 2
+
+
+def test_busqueda_libre_encuentra_el_plural(indice):
+    sid = indice.agregar_fuente("Libro", "libro.pdf", "/x/libro.pdf", 1, "abc")
+    indice.agregar_fragmentos(sid, [(1, None, "Las arterias del muslo y los nervios.")])
+    indice.marcar_lista(sid)
+    assert len(indice.buscar_libre("arteria muslo")) == 1
+    assert len(indice.buscar_libre("nervio")) == 1
+
+
+def test_fragmentos_de_un_termino_incluyen_el_plural(indice):
+    from pagewise.providers import ProveedorFTS
+
+    sid = indice.agregar_fuente("Libro", "libro.pdf", "/x/libro.pdf", 1, "def")
+    indice.agregar_fragmentos(sid, [(3, None, "Las venas safenas mayores drenan el miembro inferior.")])
+    indice.marcar_lista(sid)
+    fuentes = ProveedorFTS(indice).fragmentos(["vena safena mayor"])
+    assert fuentes and fuentes[0]["fragmentos"][0]["p"] == 3

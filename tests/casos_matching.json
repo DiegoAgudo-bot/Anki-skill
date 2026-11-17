@@ -1,112 +1,317 @@
 {
   "_comentario": "Casos COMPARTIDOS entre Python (tests/test_textutil.py) y JS (tests/js/matcher.test.js). 'esperado' lista, en orden, el término canónico y el texto ORIGINAL subrayado.",
   "glosario": [
-    {"term": "arteria femoral", "synonyms": ["a. femoral", "femoral artery"]},
-    {"term": "arteria femoral profunda", "synonyms": []},
-    {"term": "femoral", "synonyms": []},
-    {"term": "nervio ciático", "synonyms": ["ciático"]},
-    {"term": "aorta", "synonyms": []},
-    {"term": "año", "synonyms": []},
-    {"term": "músculo cuádriceps", "synonyms": ["cuádriceps femoral"]},
-    {"term": "ATP", "synonyms": []},
-    {"term": "vena cava", "synonyms": []},
-    {"term": "", "synonyms": ["   "]}
+    {
+      "term": "arteria femoral",
+      "synonyms": [
+        "a. femoral",
+        "femoral artery"
+      ]
+    },
+    {
+      "term": "arteria femoral profunda",
+      "synonyms": []
+    },
+    {
+      "term": "femoral",
+      "synonyms": []
+    },
+    {
+      "term": "nervio ciático",
+      "synonyms": [
+        "ciático"
+      ]
+    },
+    {
+      "term": "aorta",
+      "synonyms": []
+    },
+    {
+      "term": "año",
+      "synonyms": []
+    },
+    {
+      "term": "músculo cuádriceps",
+      "synonyms": [
+        "cuádriceps femoral"
+      ]
+    },
+    {
+      "term": "ATP",
+      "synonyms": []
+    },
+    {
+      "term": "vena cava",
+      "synonyms": []
+    },
+    {
+      "term": "",
+      "synonyms": [
+        "   "
+      ]
+    },
+    {
+      "term": "agujero de conjunción",
+      "synonyms": []
+    },
+    {
+      "term": "nariz",
+      "synonyms": []
+    },
+    {
+      "term": "tendón común",
+      "synonyms": []
+    }
   ],
   "casos": [
     {
       "nombre": "básico",
       "texto": "La aorta nace del ventrículo.",
-      "esperado": [{"termino": "aorta", "texto": "aorta"}]
+      "esperado": [
+        {
+          "termino": "aorta",
+          "texto": "aorta"
+        }
+      ]
     },
     {
       "nombre": "mayúsculas y tildes",
       "texto": "NERVIO CIATICO y Nervio Ciático",
       "esperado": [
-        {"termino": "nervio ciático", "texto": "NERVIO CIATICO"},
-        {"termino": "nervio ciático", "texto": "Nervio Ciático"}
+        {
+          "termino": "nervio ciático",
+          "texto": "NERVIO CIATICO"
+        },
+        {
+          "termino": "nervio ciático",
+          "texto": "Nervio Ciático"
+        }
       ]
     },
     {
       "nombre": "la frase más larga gana",
       "texto": "La arteria femoral profunda irriga el muslo.",
-      "esperado": [{"termino": "arteria femoral profunda", "texto": "arteria femoral profunda"}]
+      "esperado": [
+        {
+          "termino": "arteria femoral profunda",
+          "texto": "arteria femoral profunda"
+        }
+      ]
     },
     {
       "nombre": "término contenido en otro",
       "texto": "arteria femoral y nervio femoral",
       "esperado": [
-        {"termino": "arteria femoral", "texto": "arteria femoral"},
-        {"termino": "femoral", "texto": "femoral"}
+        {
+          "termino": "arteria femoral",
+          "texto": "arteria femoral"
+        },
+        {
+          "termino": "femoral",
+          "texto": "femoral"
+        }
       ]
     },
     {
       "nombre": "sinónimos",
       "texto": "Lesión del ciático; ver también a. femoral y femoral artery.",
       "esperado": [
-        {"termino": "nervio ciático", "texto": "ciático"},
-        {"termino": "arteria femoral", "texto": "a. femoral"},
-        {"termino": "arteria femoral", "texto": "femoral artery"}
+        {
+          "termino": "nervio ciático",
+          "texto": "ciático"
+        },
+        {
+          "termino": "arteria femoral",
+          "texto": "a. femoral"
+        },
+        {
+          "termino": "arteria femoral",
+          "texto": "femoral artery"
+        }
       ]
     },
     {
       "nombre": "varios espacios, saltos de línea y nbsp",
       "texto": "arteria  \n femoral y arteria femoral",
       "esperado": [
-        {"termino": "arteria femoral", "texto": "arteria  \n femoral"},
-        {"termino": "arteria femoral", "texto": "arteria femoral"}
+        {
+          "termino": "arteria femoral",
+          "texto": "arteria  \n femoral"
+        },
+        {
+          "termino": "arteria femoral",
+          "texto": "arteria femoral"
+        }
       ]
     },
     {
       "nombre": "límites de palabra",
       "texto": "aortas, aórtico, preaorta, aorta.",
-      "esperado": [{"termino": "aorta", "texto": "aorta"}]
+      "esperado": [
+        {
+          "termino": "aorta",
+          "texto": "aortas"
+        },
+        {
+          "termino": "aorta",
+          "texto": "aorta"
+        }
+      ]
     },
     {
       "nombre": "la ñ no se confunde",
       "texto": "El ano y el año.",
-      "esperado": [{"termino": "año", "texto": "año"}]
+      "esperado": [
+        {
+          "termino": "año",
+          "texto": "año"
+        }
+      ]
     },
     {
       "nombre": "Ñ mayúscula",
       "texto": "AÑO",
-      "esperado": [{"termino": "año", "texto": "AÑO"}]
+      "esperado": [
+        {
+          "termino": "año",
+          "texto": "AÑO"
+        }
+      ]
     },
     {
       "nombre": "siglas y números",
       "texto": "ATP2 no, ATP sí, atp también.",
       "esperado": [
-        {"termino": "ATP", "texto": "ATP"},
-        {"termino": "ATP", "texto": "atp"}
+        {
+          "termino": "ATP",
+          "texto": "ATP"
+        },
+        {
+          "termino": "ATP",
+          "texto": "atp"
+        }
       ]
     },
     {
       "nombre": "audio de Anki protegido",
       "texto": "[sound:aorta.mp3] la aorta",
-      "esperado": [{"termino": "aorta", "texto": "aorta"}]
+      "esperado": [
+        {
+          "termino": "aorta",
+          "texto": "aorta"
+        }
+      ]
     },
     {
       "nombre": "cloze sin renderizar protegido",
       "texto": "{{c1::aorta::vaso}} y la vena cava",
-      "esperado": [{"termino": "vena cava", "texto": "vena cava"}]
+      "esperado": [
+        {
+          "termino": "vena cava",
+          "texto": "vena cava"
+        }
+      ]
     },
     {
       "nombre": "MathJax protegido",
       "texto": "\\(aorta\\) y \\[ATP\\] pero sí aorta",
-      "esperado": [{"termino": "aorta", "texto": "aorta"}]
+      "esperado": [
+        {
+          "termino": "aorta",
+          "texto": "aorta"
+        }
+      ]
     },
     {
       "nombre": "sinónimo con tilde escrito sin tilde",
       "texto": "el cuadriceps femoral se contrae",
-      "esperado": [{"termino": "músculo cuádriceps", "texto": "cuadriceps femoral"}]
+      "esperado": [
+        {
+          "termino": "músculo cuádriceps",
+          "texto": "cuadriceps femoral"
+        }
+      ]
     },
     {
       "nombre": "tildes descompuestas (NFD)",
       "texto": "nervio ciático",
-      "esperado": [{"termino": "nervio ciático", "texto": "nervio ciático"}]
+      "esperado": [
+        {
+          "termino": "nervio ciático",
+          "texto": "nervio ciático"
+        }
+      ]
     },
     {
       "nombre": "sin coincidencias",
       "texto": "Nada que ver aquí.",
+      "esperado": []
+    },
+    {
+      "nombre": "plural de un término de una palabra",
+      "texto": "Las aortas y los años.",
+      "esperado": [
+        {
+          "termino": "aorta",
+          "texto": "aortas"
+        },
+        {
+          "termino": "año",
+          "texto": "años"
+        }
+      ]
+    },
+    {
+      "nombre": "plural de un término de varias palabras",
+      "texto": "Las arterias femorales y los Nervios Ciáticos.",
+      "esperado": [
+        {
+          "termino": "arteria femoral",
+          "texto": "arterias femorales"
+        },
+        {
+          "termino": "nervio ciático",
+          "texto": "Nervios Ciáticos"
+        }
+      ]
+    },
+    {
+      "nombre": "plural que cambia la tilde o la z",
+      "texto": "dos tendones comunes y las narices",
+      "esperado": [
+        {
+          "termino": "tendón común",
+          "texto": "tendones comunes"
+        },
+        {
+          "termino": "nariz",
+          "texto": "narices"
+        }
+      ]
+    },
+    {
+      "nombre": "plural hasta la preposición",
+      "texto": "los agujeros de conjunción",
+      "esperado": [
+        {
+          "termino": "agujero de conjunción",
+          "texto": "agujeros de conjunción"
+        }
+      ]
+    },
+    {
+      "nombre": "plural de un sinónimo",
+      "texto": "dolores ciáticos",
+      "esperado": [
+        {
+          "termino": "nervio ciático",
+          "texto": "ciáticos"
+        }
+      ]
+    },
+    {
+      "nombre": "el plural no rompe los límites de palabra",
+      "texto": "aortitis, anos, venas cavales",
       "esperado": []
     }
   ]

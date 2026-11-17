@@ -15,6 +15,8 @@ def _fecha(d):
 
 def texto_estado():
     """Una línea con el estado actual (también la usa el gestor de fuentes)."""
+    if licencia.edicion_pro():
+        return tr("Pagewise Pro (edición completa): fuentes ilimitadas, sin licencia que activar.")
     lic = core.licencia_actual()
     if lic is None:
         return tr("Versión gratuita: hasta %d fuentes.") % licencia.LIMITE_FUENTES_GRATIS
@@ -46,6 +48,17 @@ class DialogoPro(QDialog):
                             "<li>Botón «Explicar» con tus fuentes como contexto <i>(en desarrollo)</i></li></ul>"))
         incluye.setWordWrap(True)
         capa.addWidget(incluye)
+
+        if licencia.edicion_pro():
+            # Edición Pro empaquetada: no hay licencia que pegar ni quitar.
+            cerrar = QPushButton(tr("Cerrar"))
+            cerrar.clicked.connect(self.reject)
+            fila = QHBoxLayout()
+            fila.addStretch()
+            fila.addWidget(cerrar)
+            capa.addLayout(fila)
+            self.estado.setText(texto_estado())
+            return
 
         capa.addWidget(QLabel(tr("Pega aquí tu licencia:")))
         self.campo = QPlainTextEdit()

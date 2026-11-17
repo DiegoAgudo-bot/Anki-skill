@@ -12,6 +12,10 @@ Reglas de normalización:
     (para no confundir "año" con "ano");
   * cualquier racha de espacios (incluido &nbsp; y saltos de línea) cuenta
     como un único espacio.
+
+Plurales: un término en singular también casa con su plural ("arteria" →
+"arterias", "nervio ciático" → "nervios ciáticos", "nariz" → "narices").
+Ver plurales().
 """
 import re
 import unicodedata
@@ -70,6 +74,80 @@ def clave(texto):
     return normalizar(texto.strip())[0].strip()
 
 
+# Palabras que cortan la concordancia: en "agujero de conjunción" el plural
+# es "agujeros de conjunción", así que solo se pluraliza lo que va antes.
+_SIN_PLURAL = frozenset(
+    "de del la las el los lo un una y e o u ni en a al con por para sin sobre entre tras"
+    " desde hasta segun of the and or in on to for with from by at an as".split()
+)
+_VOCALES = "aeiou"
+# Si salen más combinaciones que esto (términos largos), solo la más probable.
+_MAX_COMBINACIONES = 16
+
+
+def plurales_palabra(p):
+    """Plurales candidatos de una palabra YA normalizada (sin tildes).
+
+    Reglas del español con algún extra del inglés. Generar alguna forma que no
+    existe no hace daño: simplemente no aparecerá en ningún texto.
+    """
+    if len(p) < 3 or p in _SIN_PLURAL or not all(es_palabra(c) for c in p) or p[-1] in "0123456789":
+        return []
+    u = p[-1]
+    if u in "sx":                      # mes → meses; crisis, bíceps, tórax no cambian
+        return [p + "es"]
+    if u == "z":                       # nariz → narices
+        return [p[:-1] + "ces", p + "es"]
+    if u == "y":                       # rey → reyes; artery → arteries; day → days
+        return [p + "s", p + "es", p[:-1] + "ies"]
+    if u in "iu":                      # bisturí → bisturíes / bisturís
+        return [p + "s", p + "es"]
+    if u in _VOCALES:                  # arteria → arterias
+        return [p + "s"]
+    return [p + "es", p + "s"]         # común → comunes; tendon → tendons
+
+
+def plurales(texto):
+    """Formas en plural (normalizadas) de un término; no incluye el singular.
+
+    Se pluralizan a la vez todas las palabras hasta la primera preposición o
+    artículo: "vena safena mayor" → "venas safenas mayores".
+    """
+    palabras = clave(texto).split(" ")
+    if not palabras or not palabras[0]:
+        return []
+    corte = len(palabras)
+    for i, w in enumerate(palabras):
+        if w in _SIN_PLURAL:
+            corte = i
+            break
+    opciones = [plurales_palabra(w) or [w] for w in palabras[:corte]]
+    if not any(plurales_palabra(w) for w in palabras[:corte]):
+        return []
+    total = 1
+    for o in opciones:
+        total *= len(o)
+    if total > _MAX_COMBINACIONES:
+        opciones = [o[:1] for o in opciones]
+    formas = [""]
+    for o in opciones:
+        formas = [(f + " " + x) if f else x for f in formas for x in o]
+    resto = " ".join(palabras[corte:])
+    return [(f + " " + resto) if resto else f for f in formas]
+
+
+def con_plurales(variantes, maximo=None):
+    """Lista de textos con sus plurales añadidos detrás, sin repetir."""
+    vistos = set()
+    salida = []
+    for v in list(variantes) + [x for v in variantes for x in plurales(v)]:
+        k = clave(v)
+        if k and k not in vistos:
+            vistos.add(k)
+            salida.append(v)
+    return salida[:maximo] if maximo else salida
+
+
 class Matcher:
     """Busca términos del glosario en un texto: la frase más larga gana.
 
@@ -79,17 +157,26 @@ class Matcher:
     palabra.
     """
 
-    def __init__(self, variantes):
+    def __init__(self, variantes, con_plurales=True):
         self.raiz = {}
+        variantes = list(variantes)
         for texto, ident in variantes:
-            k = clave(texto)
-            if not k:
-                continue
-            nodo = self.raiz
-            for c in k:
-                nodo = nodo.setdefault(c, {})
-            # Si dos términos comparten forma normalizada, gana el primero.
-            nodo.setdefault("\0", ident)
+            self._insertar(clave(texto), ident)
+        if con_plurales:
+            # Después de los originales: si el plural de un término coincide
+            # con otro término del glosario, gana el que escribió el usuario.
+            for texto, ident in variantes:
+                for forma in plurales(texto):
+                    self._insertar(forma, ident)
+
+    def _insertar(self, k, ident):
+        if not k:
+            return
+        nodo = self.raiz
+        for c in k:
+            nodo = nodo.setdefault(c, {})
+        # Si dos términos comparten forma normalizada, gana el primero.
+        nodo.setdefault("\0", ident)
 
     def buscar(self, texto):
         """Devuelve una lista de (inicio, fin, id) sobre el texto ORIGINAL."""

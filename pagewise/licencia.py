@@ -28,6 +28,16 @@ CLAVE_PUBLICA = bytes.fromhex("9bdd0fd710d81d067169df90397c1a54a23bef9b6dbbe5984
 VERSION = "PW1"
 LIMITE_FUENTES_GRATIS = 2
 
+# Edición Pro empaquetada (./build.sh --pro): lleva este archivo en la raíz del
+# add-on y no necesita licencia. El repositorio no lo incluye.
+MARCA_EDICION_PRO = "EDICION_PRO"
+
+
+def edicion_pro(carpeta=None):
+    """¿Es este add-on la edición Pro (sin límite de fuentes, sin licencia)?"""
+    carpeta = carpeta or os.path.dirname(os.path.abspath(__file__))
+    return os.path.exists(os.path.join(carpeta, MARCA_EDICION_PRO))
+
 
 class LicenciaInvalida(Exception):
     """motivo: 'formato', 'firma' o 'caducada'."""
