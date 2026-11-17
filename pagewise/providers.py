@@ -39,8 +39,12 @@ def agrupar(filas, nombres, matcher, por_fuente, max_caracteres):
         if fila.get("etiqueta"):
             frag["e"] = fila["etiqueta"]
         lista.append(frag)
+    # Se ELIGEN por relevancia (los mejores de cada fuente), pero se MUESTRAN
+    # en el orden del documento: por página. sorted() es estable, así que en
+    # una misma página se mantiene el orden de relevancia.
     return [
-        {"id": sid, "nombre": nombres.get(sid, "?"), "fragmentos": por_fuente_dict[sid]}
+        {"id": sid, "nombre": nombres.get(sid, "?"),
+         "fragmentos": sorted(por_fuente_dict[sid], key=lambda f: f["p"])}
         for sid in orden
         if por_fuente_dict[sid]
     ]
@@ -48,8 +52,9 @@ def agrupar(filas, nombres, matcher, por_fuente, max_caracteres):
 
 class ProveedorFTS:
     # El nombre entra en la firma del exportador: al cambiarlo (p. ej. al
-    # añadir los plurales) se vuelven a exportar los datos del móvil.
-    nombre = "fts-plurales"
+    # añadir los plurales o al ordenar por página) se vuelven a exportar los
+    # datos del móvil.
+    nombre = "fts-plurales-paginas"
 
     def __init__(self, indice, max_caracteres=360):
         self.indice = indice

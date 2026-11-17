@@ -94,3 +94,27 @@ def test_fragmentos_de_un_termino_incluyen_el_plural(indice):
     indice.marcar_lista(sid)
     fuentes = ProveedorFTS(indice).fragmentos(["vena safena mayor"])
     assert fuentes and fuentes[0]["fragmentos"][0]["p"] == 3
+
+
+def test_los_fragmentos_de_cada_fuente_salen_por_orden_de_pagina(indice):
+    from pagewise.providers import ProveedorFTS
+
+    a = indice.agregar_fuente("Libro A", "a.pdf", "/x/a.pdf", 1, "aaa")
+    b = indice.agregar_fuente("Libro B", "b.pdf", "/x/b.pdf", 1, "bbb")
+    # Páginas desordenadas al indexar, y la más relevante (más menciones) es la 90.
+    indice.agregar_fragmentos(a, [(40, None, "El nervio ciático pasa por aquí."),
+                                  (90, None, "Nervio ciático, nervio ciático y más nervio ciático."),
+                                  (7, None, "Primera mención del nervio ciático."),
+                                  (55, None, "Otra vez el nervio ciático.")])
+    indice.agregar_fragmentos(b, [(12, None, "El nervio ciático en el libro B."),
+                                  (3, None, "Nervio ciático al principio del libro B.")])
+    for sid in (a, b):
+        indice.marcar_lista(sid)
+    prov = ProveedorFTS(indice)
+    for fuentes in (prov.fragmentos(["nervio ciático"], por_fuente=10),
+                    prov.buscar_libre("nervio ciático", por_fuente=10)[0]):
+        paginas = {f["nombre"]: [fr["p"] for fr in f["fragmentos"]] for f in fuentes}
+        assert paginas == {"Libro A": [7, 40, 55, 90], "Libro B": [3, 12]}
+    # Si hay que elegir, se eligen los más relevantes y luego se ordenan por página.
+    elegidos = [fr["p"] for fr in prov.fragmentos(["nervio ciático"], [a], por_fuente=2)[0]["fragmentos"]]
+    assert 90 in elegidos and elegidos == sorted(elegidos)

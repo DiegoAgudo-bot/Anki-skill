@@ -30,7 +30,7 @@ Add-on para Anki que subraya los términos de tus tarjetas y, al pasar el ratón
    - Si un término está dentro de otro, gana el más largo («arteria femoral profunda» antes que «arteria femoral»).
    - Un término en singular también se reconoce en plural: «arteria» subraya «arterias», «nervio ciático» subraya «nervios ciáticos» y «agujero de conjunción» subraya «agujeros de conjunción». Lo mismo al buscar en tus fuentes y con **Buscar en fuentes** sobre un texto seleccionado.
 3. Repasa como siempre:
-   - Pasa el ratón por un término subrayado para ver los fragmentos (hasta 3 por fuente).
+   - Pasa el ratón por un término subrayado para ver los fragmentos (hasta 3 por fuente). Se eligen los más relevantes y se muestran en orden de página dentro de cada fuente, igual que en «Más en mis fuentes» y «Buscar en fuentes».
    - Haz clic en un fragmento para abrir el PDF en esa página, con el término **resaltado** en el texto (como al buscarlo con Ctrl+F).
    - **Más en mis fuentes** busca más resultados en el índice completo.
    - **Explicar** (Pro, escritorio): Claude (Anthropic) o ChatGPT (OpenAI), el que elijas, te explica el término a partir de los fragmentos de tus fuentes y cita la página. Necesita tu clave de su API (ver [Explicar](#explicar)).
@@ -211,7 +211,7 @@ node dev/prueba_movil.js
 La prueba de extremo a extremo con un Anki real sin pantalla (necesita `pip install "aqt[qt6]==2.1.66" "reportlab<4.3"` en un Python 3.9):
 
 ```bash
-python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.7.0.ankiaddon
+python dev/e2e_anki.py --plantillas --paquete=build/pagewise-1.7.1.ankiaddon
 ```
 
 Para generar el paquete:

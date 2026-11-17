@@ -11,7 +11,7 @@ simbólico) y un add-on "piloto" que:
 Escribe los resultados en un JSON y cierra Anki.
 
 Uso (necesita aqt instalado, p. ej. pip install "aqt[qt6]==2.1.66"):
-    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.7.0.ankiaddon] [-q]
+    python dev/e2e_anki.py [--plantillas] [--ingles] [--migracion] [--paquete=build/pagewise-1.7.1.ankiaddon] [-q]
         [--pdf-grande=RUTA]   además abre ese PDF (p. ej. de 2 GB) y mide tiempo y memoria
                               (PAGEWISE_E2E_GRANDE_PAGINA y PAGEWISE_E2E_GRANDE_BUSCAR eligen dónde)
 """
